@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.SQLite
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.gui.Menu
@@ -15,6 +16,13 @@ class MainMenu(player: Player) : Menu(player, false) {
         val inventory = Bukkit.createInventory(this, 27, "Ragebaitinator")
 
         addItem(inventory, 10, Material.BOOK, "§bPlayers", listOf("§7Manage players."), false)
+
+        if(SQLite.CommandHistory.hasHistoryAccess(player))
+            addItem(inventory, 12, Material.PAPER, "§dHistory", listOf(
+                "§7View command history. To date, a total of",
+                "§c" + SQLite.CommandHistory.size + "§7 command(s) have been executed."
+            ), false)
+
         addItem(inventory, 16, Material.REDSTONE, "§c§lRagebaitinator", listOf(
             "§7You are running §cRagebaitinator v"+ Main.plugin?.description?.version,
             "§7made by §cInparsian§7!",
@@ -29,6 +37,7 @@ class MainMenu(player: Player) : Menu(player, false) {
         val player = event.whoClicked as Player
         when (event.currentItem?.itemMeta?.displayName) {
             "§bPlayers" -> PlayersMenu(player).open()
+            "§dHistory" -> HistoryMenu(player).open()
         }
     }
 }

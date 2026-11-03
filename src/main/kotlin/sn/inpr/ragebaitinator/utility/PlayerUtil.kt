@@ -22,7 +22,6 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.impl.troll.toggle.Potato
 import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
-import java.util.LinkedList
 
 object PlayerUtil {
     // the maximum double that you can damage a player (i think). any higher will cause a weird glitch
@@ -40,16 +39,6 @@ object PlayerUtil {
                 enabled.add(info.name)
         }
         return enabled
-    }
-
-    fun getDisabledTrolls(player: Player?): MutableList<String> {
-        val disabled: MutableList<String> = mutableListOf()
-        for (cmd in CommandManager.commands.filterIsInstance<BaseToggleTroll>()) {
-            val info: CommandInfo = cmd.info
-            if (!cmd.players.containsKey(player?.uniqueId))
-                disabled.add(info.name)
-        }
-        return disabled
     }
 
     fun getColoredTrollInfo(player: Player?): MutableList<String> {
@@ -85,7 +74,7 @@ object PlayerUtil {
         setVelocity(player, velocity)
     }
 
-    fun getHead(player: OfflinePlayer): ItemStack {
+    fun getHead(name: String): ItemStack {
         val head = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
             // This is not deprecated <1.13
             @Suppress("DEPRECATION")
@@ -95,10 +84,15 @@ object PlayerUtil {
         val meta: SkullMeta = head.itemMeta as SkullMeta
         // IGNORE DEPRECATION WARNING!!! setOwnerPlayer fetches skins sync!!!
         @Suppress("DEPRECATION")
-        meta.owner = player.name
-        meta.setDisplayName("§f${player.name}")
+        meta.owner = name
+        meta.setDisplayName("§f$name")
         head.itemMeta = meta
         return head
+    }
+
+    fun getHead(player: OfflinePlayer): ItemStack {
+        val name = player.name ?: return ItemStack(Material.BARRIER)
+        return getHead(name)
     }
 
     // works even without a source

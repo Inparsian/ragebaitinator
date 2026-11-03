@@ -8,7 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.LinkedList
 
 @CommandInfo(
     name = "help",
@@ -40,10 +39,9 @@ class Help : BaseCommand() {
         val paginated: List<BaseCommand> = acceptableList.chunked(pageSize)[page - 1]
 
         if (paginated.isNotEmpty()) {
-            val items: LinkedList<String> = LinkedList()
-            paginated.forEach {
+            val items = paginated.map {
                 val syntax = it.stringifySyntax()
-                items.add("&7- &c/rb ${it.info.name} $syntax&7: &f${it.info.description}")
+                "&7- &c/rb ${it.info.name} $syntax&7: &f${it.info.description}"
             }
 
             send(sender, "&7Available commands:")

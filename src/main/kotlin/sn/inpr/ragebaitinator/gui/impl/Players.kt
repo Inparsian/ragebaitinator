@@ -23,7 +23,8 @@ private fun playerHeadItem(player: Player, inTheirMenu: Boolean): ItemStack {
     val meta = head.itemMeta!!
     val lore: MutableList<String> = mutableListOf()
     val totalToggleTrolls = CommandManager.totalToggleTrolls()
-    lore.add(String.format("§7Trolls §8(§a%s§8:§c%s§8:§7%s§8)§7:", PlayerUtil.getEnabledTrolls(player).size, totalToggleTrolls - PlayerUtil.getEnabledTrolls(player).size, totalToggleTrolls))
+    val enabledToggleTrolls = PlayerUtil.getEnabledTrolls(player).size
+    lore.add(String.format("§7Trolls §8(§a%s§8:§c%s§8:§7%s§8)§7:", enabledToggleTrolls, totalToggleTrolls - enabledToggleTrolls, totalToggleTrolls))
     lore.addAll(TypeUtil.splitAtLength(PlayerUtil.getColoredTrollInfo(player).joinToString(", "), 60, ""))
     if (!inTheirMenu) lore.addAll(listOf("", "§8Click to manage this player."))
     meta.lore = lore

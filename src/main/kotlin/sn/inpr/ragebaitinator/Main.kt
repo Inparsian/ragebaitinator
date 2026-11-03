@@ -27,6 +27,9 @@ class Main : JavaPlugin() {
         fun runTask(runnable: Runnable)
         = plugin!!.let { Bukkit.getScheduler().runTask(it, runnable) }
 
+        fun runTaskAsync(runnable: Runnable)
+        = plugin!!.let { Bukkit.getScheduler().runTaskAsynchronously(it, runnable) }
+
         fun runTaskIfNotPrimaryThread(runnable: Runnable)
         = if (!Bukkit.isPrimaryThread()) runTask(runnable) else runnable.run()
 
@@ -61,6 +64,11 @@ class Main : JavaPlugin() {
             synchronized(this) {
                 Bukkit.getPluginManager().registerEvents(BukkitEventListener, this)
                 Bukkit.getPluginManager().registerEvents(GuiHandler, this)
+
+                if (SQLite.connect() != null)
+                    info("&aSQLite connection established")
+                else
+                    info("&cFailed to connect to SQLite database")
 
                 getCommand("ragebaitinator")?.setExecutor(CommandManager)
                 CommandManager.registerCommands()
