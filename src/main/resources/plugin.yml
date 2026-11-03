@@ -1,0 +1,16 @@
+name: Ragebaitinator
+version: '${version}-BETA'
+main: sn.inpr.ragebaitinator.Main
+api-version: '26.1'
+load: STARTUP
+authors: [ Inparsian ]
+website: https://inpr.sn
+depend: [packetevents]
+commands:
+  ragebaitinator:
+    description: Hello
+    usage: /<command>
+    permission: ragebaitinator.commands
+    aliases:
+      - rb
+      - troll

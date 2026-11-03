@@ -1,0 +1,70 @@
+package sn.inpr.ragebaitinator.command.impl.troll.toggle
+
+import org.bukkit.Location
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.player.PlayerMoveEvent
+import org.bukkit.event.player.PlayerTeleportEvent
+import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
+import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
+import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
+import java.util.UUID
+
+@CommandInfo(
+    name = "void",
+    description = "Banishes a player into the void.",
+    syntax = [
+        CommandSyntax(CommandSyntax.Type.PLAYER),
+    ],
+    attributes = [
+        CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
+    ],
+    incompatible = [ "cage" ]
+)
+class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, PlayerTeleportSubscriber {
+    private val locations = mutableMapOf<UUID, Location>()
+
+    fun get65536(player: Player): Location {
+        val location = player.location.clone()
+        location.y = -65536.0
+        return location
+    }
+
+    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+        locations[target.uniqueId] = target.location
+        target.teleport(get65536(target))
+        return "&c${target.name} &fhas been banished into the void"
+    }
+
+    override fun deinit(sender: CommandSender, target: Player): String {
+        return "&c${target.name} &fhas been returned from the void"
+    }
+
+    override fun onRemovePlayer(player: Player, reason: String) {
+        player.fallDistance = 0f // prevents an oopsie
+        locations.remove(player.uniqueId)?.let { player.teleport(it) }
+    }
+
+    override fun onEntityDamage(event: EntityDamageEvent) {
+        if (event.entity is Player) {
+            val player = event.entity as Player
+            if (this.players.contains(player.uniqueId) && inVoid(player, -2.0))
+                event.isCancelled = true
+        }
+    }
+
+    override fun onPlayerMove(event: PlayerMoveEvent) {
+        if (this.players.contains(event.player.uniqueId) && !inVoid(event.player, -2.0))
+            event.player.teleport(get65536(event.player))
+    }
+
+    override fun onPlayerTeleport(event: PlayerTeleportEvent) {
+        if (this.players.contains(event.player.uniqueId) && inVoid(event.player, -2.0))
+            event.isCancelled = true
+    }
+}

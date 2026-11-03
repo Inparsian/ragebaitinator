@@ -1,0 +1,26 @@
+package sn.inpr.ragebaitinator.command.impl.troll.once
+
+import org.bukkit.Material
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import sn.inpr.ragebaitinator.command.def.BaseTroll
+import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.CommandSyntax
+
+@CommandInfo(
+    name = "shuffle",
+    description = "Shuffles the player's inventory and hotbar",
+    syntax = [
+        CommandSyntax(CommandSyntax.Type.PLAYER)
+    ]
+)
+class Shuffle : BaseTroll() {
+    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+        val contents = target.inventory.storageContents.filterNotNull().toMutableList()
+        // make sure the size is exactly 36
+        while (contents.size < 36) contents.add(ItemStack(Material.AIR))
+        target.inventory.storageContents = contents.shuffled().toTypedArray()
+        return "&fShuffled &c${target.name}&f's inventory"
+    }
+}
