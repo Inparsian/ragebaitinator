@@ -34,10 +34,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerJoinSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import sn.inpr.ragebaitinator.utility.Reflection
 import java.util.UUID
-import kotlin.collections.containsKey
 
 @CommandInfo(
     name = "potato",
@@ -77,7 +75,7 @@ class Potato : BaseToggleTroll(),
         potatoes[target.uniqueId] = Pair(potato, snapshot)
         target.inventory.clear()
         target.activePotionEffects.forEach { target.removePotionEffect(it.type) }
-        Bukkit.getOnlinePlayers().filter { it != target }.forEach { it.hidePlayer(Main.plugin!!, target) }
+        Bukkit.getOnlinePlayers().filter { it != target }.forEach { it.hidePlayer(Main.instance(), target) }
 
         val camera = WrapperPlayServerCamera(potato.entityId)
         PacketEvents.getAPI().playerManager.sendPacket(target, camera)
@@ -89,11 +87,15 @@ class Potato : BaseToggleTroll(),
             potato.pickupDelay = Int.MAX_VALUE
         }, 0, 2, true)
 
-        return "&c${target.name} &fis now living in a potato battery"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living in a potato battery")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
-        return "&c${target.name} &fis no longer living in a potato battery"
+        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer living in a potato battery")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onRemovePlayer(player: Player, reason: String) {
@@ -101,7 +103,7 @@ class Potato : BaseToggleTroll(),
             val [potato, snapshot] = potatoes.remove(player.uniqueId)!!
             player.teleport(potato.location.setDirection(player.location.direction))
             player.velocity = potato.velocity
-            Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.plugin!!, player) }
+            Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.instance(), player) }
             snapshot.restore()
             potato.remove()
 
@@ -111,7 +113,7 @@ class Potato : BaseToggleTroll(),
     }
 
     override fun onPlayerJoin(event: PlayerJoinEvent) {
-        potatoes.forEach { [player, _] -> Bukkit.getPlayer(player)?.let { event.player.hidePlayer(Main.plugin!!, it) } }
+        potatoes.forEach { [player, _] -> Bukkit.getPlayer(player)?.let { event.player.hidePlayer(Main.instance(), it) } }
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {

@@ -1,0 +1,5 @@
+commands:
+  help:
+    pageSize: 10
+  history:
+    pageSize: 10

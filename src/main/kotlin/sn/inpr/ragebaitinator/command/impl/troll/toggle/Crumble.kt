@@ -70,7 +70,9 @@ class Crumble : BaseToggleTroll() {
             }
         }, 0, 1, true)
 
-        return "&fThe world is now crumbling around &c${target.name}"
+        return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
@@ -83,6 +85,8 @@ class Crumble : BaseToggleTroll() {
                 Bukkit.getOnlinePlayers().forEach { PacketEvents.getAPI().playerManager.sendPacket(it, packet) }
         }
 
-        return "&fThe world is no longer crumbling around &c${target.name}"
+        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

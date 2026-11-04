@@ -2,15 +2,12 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Location
 import org.bukkit.command.CommandSender
-import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.PlayerDeathEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.UUID
 
@@ -49,7 +46,9 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
                 PlayerUtil.teleportRetainVelocity(target, destination)
             }
         }, 0, 1, true)
-        return "&c${target.name} &fis now falling forever"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onRemovePlayer(player: Player, reason: String) {
@@ -57,7 +56,9 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fhas been freed from the falling curse"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been freed from the falling curse")
+            .put("player", target.name)
+            .toString()
 
     // prevent premature fall damage despite our best efforts to prevent it proactively
     override fun onEntityDamage(event: EntityDamageEvent) {

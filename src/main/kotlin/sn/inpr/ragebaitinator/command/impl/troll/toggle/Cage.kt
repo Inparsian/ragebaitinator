@@ -2,13 +2,11 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.Particle
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.event.player.PlayerTeleportEvent
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -17,7 +15,6 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerRespawnSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
 import sn.inpr.ragebaitinator.type.Structure
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import java.util.*
@@ -128,11 +125,15 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         cages[target.uniqueId] = cageLocation
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
-        return "&c${target.name} &fis now in a cage"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis now free"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free")
+            .put("player", target.name)
+            .toString()
 
     fun isOutsideCage(player: Player, to: Location): Boolean {
         val cageLocation = cages[player.uniqueId] ?: return false

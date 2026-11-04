@@ -17,15 +17,19 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
         CommandSyntax(CommandSyntax.Type.PLAYER),
     ],
     attributes = [
-        CommandInfo.Attribute.LOGOUT
+        CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fwill now die next time they take damage"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now die next time they take damage")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fwill no longer die next time they take damage"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer die next time they take damage")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val player = event.entity as? Player ?: return

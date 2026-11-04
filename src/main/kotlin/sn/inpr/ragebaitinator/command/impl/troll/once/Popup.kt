@@ -16,8 +16,8 @@ import org.bukkit.event.inventory.InventoryType
     ]
 )
 class Popup : BaseTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val types = listOf(
+    companion object {
+        val inventoryTypes = listOf(
             InventoryType.CHEST,
             InventoryType.DROPPER,
             InventoryType.HOPPER,
@@ -25,8 +25,12 @@ class Popup : BaseTroll() {
             InventoryType.FURNACE,
             InventoryType.ANVIL,
         )
+    }
 
-        target.openInventory(Bukkit.createInventory(null, types.random()))
-        return "&fOpened a random inventory menu for &c${target.name}"
+    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+        target.openInventory(Bukkit.createInventory(null, inventoryTypes.random()))
+        return placeholdersOr("init", "%prefix% %c2%Opened a random inventory menu for %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

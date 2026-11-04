@@ -31,7 +31,7 @@ class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
     player,
     true,
     1,
-    MathUtil.pages(CommandManager.commands.filterIsInstance<BaseTroll>().size, PAGE_SIZE),
+    MathUtil.pages(CommandManager.trolls.size, PAGE_SIZE),
     PlayerMenu(player, target)
 ) {
     fun addItemCommons(troll: BaseTroll, item: ItemStack, lore: MutableList<String>, params: MutableList<String>) {
@@ -100,7 +100,7 @@ class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
 
     override fun getInventory(): Inventory {
         val items: MutableList<ItemStack> = mutableListOf()
-        val trolls = CommandManager.commands.filterIsInstance<BaseTroll>().chunked(PAGE_SIZE)[page - 1]
+        val trolls = CommandManager.trolls.chunked(PAGE_SIZE)[page - 1]
 
         for (command in trolls) {
             items.add(trollItem(command))

@@ -6,12 +6,10 @@ import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerTeleportEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
 
 @CommandInfo(
     name = "aquaphobia",
@@ -23,7 +21,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
     ]
 )
-class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber, PlayerTeleportSubscriber {
+class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber {
     fun check(player: Player, block: Block) {
         if (this.players.containsKey(player.uniqueId)) {
             if (block.type.toString().contains("WATER")) {
@@ -40,20 +38,20 @@ class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber, PlayerTeleportSubscr
     }
 
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fnow has aquagenic urticaria"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%now has aquagenic urticaria")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fhas been cured of aquagenic urticaria"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of aquagenic urticaria")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         removeTask(player.uniqueId)
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        check(event.player, event.to?.block ?: return)
-    }
-
-    override fun onPlayerTeleport(event: PlayerTeleportEvent) {
         check(event.player, event.to?.block ?: return)
     }
 }

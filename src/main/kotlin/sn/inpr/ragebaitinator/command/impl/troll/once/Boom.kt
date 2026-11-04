@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseTroll
@@ -26,6 +25,8 @@ class Boom : BaseTroll() {
         target.world.createExplosion(target.location, power, power >= 0f)
         target.health = 0.0
 
-        return "&c${target.name} &fhas been blown up!"
+        return placeholdersOr("init","%prefix% %c1%%player% %c2%has now inexplicably exploded")
+            .put("player", target.name)
+            .toString()
     }
 }

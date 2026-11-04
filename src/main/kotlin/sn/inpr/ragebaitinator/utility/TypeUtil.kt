@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.utility
 
-
 object TypeUtil {
     fun splitAtLength(string: String, length: Int, append: String?): MutableList<String> {
         // split between words

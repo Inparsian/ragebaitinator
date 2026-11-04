@@ -22,7 +22,7 @@ private fun playerHeadItem(player: Player, inTheirMenu: Boolean): ItemStack {
     val head = PlayerUtil.getHead(player)
     val meta = head.itemMeta!!
     val lore: MutableList<String> = mutableListOf()
-    val totalToggleTrolls = CommandManager.totalToggleTrolls()
+    val totalToggleTrolls = CommandManager.toggleTrolls.size
     val enabledToggleTrolls = PlayerUtil.getEnabledTrolls(player).size
     lore.add(String.format("§7Trolls §8(§a%s§8:§c%s§8:§7%s§8)§7:", enabledToggleTrolls, totalToggleTrolls - enabledToggleTrolls, totalToggleTrolls))
     lore.addAll(TypeUtil.splitAtLength(PlayerUtil.getColoredTrollInfo(player).joinToString(", "), 60, ""))
@@ -64,7 +64,7 @@ class PlayersMenu(player: Player) : PaginationMenu(
 class PlayerMenu(player: Player, val target: Player) : Menu(player, true) {
     override fun getInventory(): Inventory {
         val inventory = Bukkit.createInventory(this, 27, target.name)
-        val acceptableTrolls = CommandManager.commands.filterIsInstance<BaseTroll>()
+        val acceptableTrolls = CommandManager.trolls
             .filter { player.hasPermission("ragebaitinator.commands.${it.info.name.lowercase()}") }
 
         addItem(inventory, 10, playerHeadItem(target, true))

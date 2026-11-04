@@ -38,11 +38,15 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, Pl
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         locations[target.uniqueId] = target.location
         target.teleport(get65536(target))
-        return "&c${target.name} &fhas been banished into the void"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
-        return "&c${target.name} &fhas been returned from the void"
+        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned from the void")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onRemovePlayer(player: Player, reason: String) {

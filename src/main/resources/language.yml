@@ -1,0 +1,45 @@
+# This is where you'd customize plugin messages.
+#
+# The most simple customizations to make without deep diving into individual command messages:
+# prefix - The prefix to display before plugin messages.
+# primaryColor - The primary color to use for plugin messages. The default is &c
+# secondaryColor - The secondary color to use for plugin messages. The default is &f
+# tertiaryColor - The tertiary color to use for plugin messages. The default is &7
+#
+# To customize individual command messages, you are encouraged to follow this config's color scheme.
+# That is, instead of using raw color codes, use the colors defined in this config with their short placeholders.
+# %c1% represents the primary color, %c2% represents the secondary color, and so on.
+#
+# PAPI placeholders are also supported here.
+#
+# You will have to look at the source code for messages that are undocumented, but here are some of the ones you
+# can change:
+#
+# usage
+# The command usage message sent if not enough arguments are provided.
+# %command% is the command name, %syntax% is the command syntax.
+#
+# mustBeAPlayer
+# The error message when a player-only command is used by a non-player.
+#
+# playerNotFound
+# The error message when a player is not found.
+#
+# immune
+# The error message when the targeted player is immune to a troll.
+# %player% is the targeted player's name, %command% is the command name.
+#
+# conditionsFail
+# The error message when the conditions for a troll are not met.
+# %message% is the error message for the first condition that failed.
+#
+# commands.reload.success
+# Sent when the configs have been reloaded. %time% is the time it took to reload the configs.
+#
+# commands.<troll>.init
+# Sent when a troll command has been successfully executed (or enabled for toggleTroll).
+# This can have multiple variations - for example, /rb bomb also has initArrow, initSnowball, and initEgg.
+#
+# command.<toggleTroll>.deinit
+# Sent when a toggle troll command has been successfully disabled.
+# This can have multiple variations - for example, /rb bomb also has deinitArrow, deinitSnowball, and deinitEgg.

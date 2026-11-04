@@ -17,6 +17,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.teleportRetainVelocity
 class Flip : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         teleportRetainVelocity(target, target.location.clone().apply { yaw += 180.0f })
-        return "&c${target.name} &fhas been flipped"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been flipped")
+            .put("player", target.name)
+            .toString()
     }
 }

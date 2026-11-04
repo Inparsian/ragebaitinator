@@ -72,10 +72,14 @@ class Exorcist : BaseToggleTroll() {
             }
         }, 0, 1, 3, true)
 
-        return "&fEntities around &c${target.name} &fare now spazzing out"
+        return placeholdersOr("init", "%prefix% %c2%Entities around %c1%%player% %c2%are now spazzing out")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
-        return "&fEntities around &c${target.name} &fare no longer spazzing out"
+        return placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out")
+            .put("player", target.name)
+            .toString()
     }
 }

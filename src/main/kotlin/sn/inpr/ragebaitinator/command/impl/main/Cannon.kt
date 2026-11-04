@@ -4,9 +4,11 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.entity.TNTPrimed
+import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 
 @CommandInfo(
@@ -50,7 +52,7 @@ class Cannon : BaseCommand() {
             tnt.yield = power
             tnt.fuseTicks = ticks
         } else {
-            send(sender, "&cYou must be a player to use this command")
+            send(sender, Placeholders(language.mustBeAPlayer))
         }
 
         return true

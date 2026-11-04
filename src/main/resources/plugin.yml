@@ -6,6 +6,7 @@ load: STARTUP
 authors: [ Inparsian ]
 website: https://inpr.sn
 depend: [packetevents]
+softdepend: [PlaceholderAPI]
 commands:
   ragebaitinator:
     description: Hello

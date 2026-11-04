@@ -34,11 +34,16 @@ class Velocity : BaseToggleTroll(), EntityDamageSubscriber, PlayerVelocitySubscr
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val multiplier = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 2.0
         multipliers[target.uniqueId] = multiplier
-        return "&c${target.name} &fnow has built-in &c${multiplier}x &fvelocity hacks"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks")
+            .put("player", target.name)
+            .put("multiplier", multiplier.toString())
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name}&f's velocity is no longer being magnified"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%'s velocity is no longer being magnified")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         multipliers.remove(player.uniqueId)

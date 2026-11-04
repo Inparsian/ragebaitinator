@@ -142,11 +142,15 @@ class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubs
         val jitter = args.getOrNull(3)?.toLongOrNull()?.coerceIn(0L, 100L) ?: 5L
         val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
         sessions[target.uniqueId] = Session(rtt, jitter, inbound, outbound)
-        return "&c${target.name} &fis now on Wi-Fi"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis no longer lagging"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         sessions[player.uniqueId]?.let { session ->

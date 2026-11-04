@@ -21,10 +21,14 @@ import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 )
 class SnowballFight : BaseToggleTroll(), EntityShootBowSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fis now reminiscing about their Christmas childhood"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now reminiscing about their Christmas childhood")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis now able to shoot arrows again"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to shoot arrows again")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return

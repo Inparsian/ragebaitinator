@@ -32,6 +32,8 @@ class Hiss : BaseTroll() {
             0.5f
         )
         PacketEvents.getAPI().playerManager.sendPacket(target, packet)
-        return "&fGave &c${target.name} &fthe scare of their life"
+        return placeholdersOr("init", "%prefix% %c2%Gave %c1%%player% %c2%the scare of their life")
+            .put("player", target.name)
+            .toString()
     }
 }

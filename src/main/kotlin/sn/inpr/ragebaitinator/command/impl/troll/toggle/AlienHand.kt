@@ -55,10 +55,14 @@ class AlienHand : BaseToggleTroll() {
                 Bukkit.getOnlinePlayers().forEach { player -> swing(target, player) }
         }, MathUtil.random(40L, 60L), 120, 160, true)
 
-        return "&c${target.name} &fnow has Alien Hand Syndrome"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has Alien Hand Syndrome")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
-        return "&c${target.name} &fhas been cured of Alien Hand Syndrome"
+        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of Alien Hand Syndrome")
+            .put("player", target.name)
+            .toString()
     }
 }

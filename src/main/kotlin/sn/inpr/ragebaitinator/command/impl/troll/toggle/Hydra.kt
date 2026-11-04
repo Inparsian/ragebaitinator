@@ -22,10 +22,14 @@ import sn.inpr.ragebaitinator.type.EntitySnapshot
 )
 class Hydra : BaseToggleTroll(), EntityDeathSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&fAny mob &c${target.name} &fkills shalt now split into two"
+        = placeholdersOr("init", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt now split into two")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fAny mob &c${target.name} &fkills shalt no longer split into two"
+        = placeholdersOr("deinit", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt no longer split into two")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityDeath(event: EntityDeathEvent) {
         val player = event.entity.killer ?: return

@@ -19,6 +19,8 @@ class Spook : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val packet = WrapperPlayServerChangeGameState(10, 0f)
         PacketEvents.getAPI().playerManager.sendPacket(target, packet)
-        return "&fSpooked &c${target.name}"
+        return placeholdersOr("init", "%prefix% %c2%Spooked %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

@@ -24,10 +24,14 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 )
 class NoRespawn : BaseToggleTroll(), PacketEventReceiveSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fwill now STAY DEAD"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now STAY DEAD")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fcan now respawn"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now respawn")
+            .put("player", target.name)
+            .toString()
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
         if (event.packetType == PacketType.Play.Client.CLIENT_STATUS && players.containsKey(event.user.uuid)) {

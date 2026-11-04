@@ -21,9 +21,13 @@ class Annoy : BaseToggleTroll() {
         addTaskRandomTimer(target, {
             target.playSound(target.location, "entity.villager.ambient", 1f, 1f)
         }, 0, 100, 200, true)
-        return "&c${target.name} &fis now hearing voices in their head"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now hearing voices in their head")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fThe voices of the villagers have left &c${target.name} &falone... for now"
+        = placeholdersOr("deinit", "%prefix% %c2%The voices of the villagers have left %c1%%player% %c2%alone... for now")
+            .put("player", target.name)
+            .toString()
 }

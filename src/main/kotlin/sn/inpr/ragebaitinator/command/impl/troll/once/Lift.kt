@@ -25,6 +25,8 @@ class Lift : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val power = (args.getOrNull(2)?.toDoubleOrNull() ?: 3.0).coerceIn(0.1, 5.0)
         setVelocity(target, target.velocity.add(Vector(0.0, power, 0.0)))
-        return "&fLaunched &c${target.name}"
+        return placeholdersOr("init", "%prefix% %c2%Launched %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

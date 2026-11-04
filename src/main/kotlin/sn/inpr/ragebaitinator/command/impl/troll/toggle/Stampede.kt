@@ -134,7 +134,24 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
             }
         }, 0, 1, true)
 
-        return "&c${target.name} &fjust made some cows really angry"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry")
+            .put("player", target.name)
+            .toString()
+    }
+
+    override fun deinit(sender: CommandSender, target: Player): String =
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows")
+            .put("player", target.name)
+            .toString()
+
+    override fun onRemovePlayer(player: Player, reason: String) {
+        herds.remove(player.uniqueId)?.forEach { it.remove() }
+    }
+
+    override fun onEntityDamage(event: EntityDamageEvent) {
+        val creature = event.entity as? Creature ?: return
+        if (herds.values.any { creature in it })
+            event.isCancelled = true
     }
 
     private fun safePositions(origin: Location, target: Location): List<Location> {
@@ -168,18 +185,5 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         val dx = x - referenceX
         val dz = z - referenceZ
         return dx * dx + dz * dz >= 9.0
-    }
-
-    override fun deinit(sender: CommandSender, target: Player): String =
-        "&c${target.name} &fis no longer being chased by cows"
-
-    override fun onRemovePlayer(player: Player, reason: String) {
-        herds.remove(player.uniqueId)?.forEach { it.remove() }
-    }
-
-    override fun onEntityDamage(event: EntityDamageEvent) {
-        val creature = event.entity as? Creature ?: return
-        if (herds.values.any { creature in it })
-            event.isCancelled = true
     }
 }

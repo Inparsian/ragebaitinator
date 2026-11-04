@@ -24,10 +24,10 @@ class MainMenu(player: Player) : Menu(player, false) {
             ), false)
 
         addItem(inventory, 16, Material.REDSTONE, "§c§lRagebaitinator", listOf(
-            "§7You are running §cRagebaitinator v"+ Main.plugin?.description?.version,
+            "§7You are running §cRagebaitinator v"+ Main.instance().description.version,
             "§7made by §cInparsian§7!",
             "",
-            "§7This plugin has a total of §c" + CommandManager.commands.filterIsInstance<BaseTroll>().size + "§7 trolls!",
+            "§7This plugin has a total of §c" + CommandManager.trolls.size + "§7 trolls!",
         ), false)
 
         return inventory

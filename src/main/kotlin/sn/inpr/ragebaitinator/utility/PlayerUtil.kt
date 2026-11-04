@@ -33,7 +33,7 @@ object PlayerUtil {
 
     fun getEnabledTrolls(player: Player?): MutableList<String> {
         val enabled: MutableList<String> = mutableListOf()
-        for (cmd in CommandManager.commands.filterIsInstance<BaseToggleTroll>()) {
+        for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
             if (cmd.players.containsKey(player?.uniqueId))
                 enabled.add(info.name)
@@ -43,7 +43,7 @@ object PlayerUtil {
 
     fun getColoredTrollInfo(player: Player?): MutableList<String> {
         val trolls: MutableList<String> = mutableListOf()
-        for (cmd in CommandManager.commands.filterIsInstance<BaseToggleTroll>()) {
+        for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
             trolls.add((if (cmd.players.containsKey(player?.uniqueId)) "§a" else "§c") + info.name)
         }

@@ -9,16 +9,18 @@ repositories {
     maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
     maven("https://repo.codemc.io/repository/maven-releases/")
     maven("https://repo.codemc.io/repository/maven-snapshots/")
+    maven("https://repo.extendedclip.com/releases/")
 }
 
 dependencies {
+    // everything we require
     compileOnly("org.spigotmc:spigot-api:26.1.1-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("io.github.classgraph:classgraph:4.8.199")
     compileOnly("com.github.retrooper:packetevents-spigot:2.14.0")
-    testImplementation(kotlin("test-junit5"))
-    testImplementation("org.spigotmc:spigot-api:26.1.1-R0.1-SNAPSHOT")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // integrations
+    compileOnly("me.clip:placeholderapi:2.12.3")
 }
 
 kotlin {
@@ -42,7 +44,6 @@ tasks {
     }
 
     shadowJar {
-        minimize()
         destinationDirectory = file("/home/inparsian/262_test_server/plugins/")
     }
 }

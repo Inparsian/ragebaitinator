@@ -9,7 +9,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "fakedamage",
-    description = "Makes a player think they took damage.",
+    description = "Sends fake damage to a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER),
     ]
@@ -17,6 +17,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 class FakeDamage : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         PlayerUtil.packetDamage(target, 0.0, false)
-        return "&fSent fake damage to &c${target.name}"
+        return placeholdersOr("init", "%prefix% %c2%Sent fake damage to %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

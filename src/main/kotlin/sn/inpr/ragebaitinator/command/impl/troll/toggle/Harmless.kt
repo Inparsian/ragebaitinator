@@ -20,10 +20,14 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 )
 class Harmless : BaseToggleTroll(), EntityDamageByEntitySubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fis now totally harmless :)"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now totally harmless :)")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis no longer harmless"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer harmless")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val player = event.damager as? Player ?: return

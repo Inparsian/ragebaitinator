@@ -90,7 +90,9 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         }
 
         target.teleport(buryLocation.clone().add(0.0, 1.0, 0.0))
-        return "&fBuried &c${target.name} &fALIVE MUAHAHAHAHAAHYAHAHAHA"
+        return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onPlayerQuit(event: PlayerQuitEvent) {

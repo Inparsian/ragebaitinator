@@ -110,11 +110,15 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
             }
         }, 0, 1, true)
 
-        return "&c${target.name} &fhas been sent on a journey to the center of the earth"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been sent on a journey to the center of the earth")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fhas been returned back to the surface"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned back to the surface")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         if (!arrayOf("done", "death").contains(reason)) {

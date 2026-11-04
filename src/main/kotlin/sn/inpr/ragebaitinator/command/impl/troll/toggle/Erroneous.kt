@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.entity.Projectile
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.util.Vector
@@ -26,10 +25,14 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 )
 class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fis now an absolutely terrible shot"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fcan now mysteriously hit their targets... fluke?"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now mysteriously hit their targets... fluke?")
+            .put("player", target.name)
+            .toString()
 
     fun drunkenVelocity(entity: Entity) {
         val multiplier = (entity.velocity.lengthSquared() * 0.1).coerceAtLeast(0.12)

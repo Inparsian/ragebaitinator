@@ -82,10 +82,14 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
     }
 
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String =
-        "&fAnything &c${target.name} &fsays shall now come to fruition"
+        placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String =
-        "&c${target.name} &fno longer manifests words into reality"
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can no longer manifest words into reality")
+            .put("player", target.name)
+            .toString()
 
     override fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         if (!event.isAsynchronous || !players.containsKey(event.player.uniqueId))

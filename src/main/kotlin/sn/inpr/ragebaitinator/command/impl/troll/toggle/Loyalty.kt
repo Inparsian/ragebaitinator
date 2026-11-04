@@ -2,17 +2,14 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
-import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
-import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
-import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.UUID
 
 @CommandInfo(
@@ -52,11 +49,15 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
                 }
             }
         }, 0, 1, true)
-        return "&fAny projectile &c${target.name} &fshoots will now home in on them"
+        return placeholdersOr("init", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will now home in on them")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fAny projectile &c${target.name} &fshoots will no longer home in on them"
+        = placeholdersOr("deinit", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will no longer home in on them")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return

@@ -84,7 +84,9 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         for (block in lava)
             fill(target, block, Material.LAVA)
 
-        return "&c${target.name} &fhas been dropped into a nice and warm hot tub"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been dropped into a nice and warm hot tub")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onPlayerQuit(event: PlayerQuitEvent) {

@@ -42,11 +42,15 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
             runTaskLater(squid::remove, 100)
         }, 0, 2, true)
 
-        return "&c${target.name} &fis now in an area with a 100% chance of squid rain"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in an area with a 100% chance of squid rain")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String =
-        "&c${target.name} &fis no longer in squid rain"
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer in squid rain")
+            .put("player", target.name)
+            .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         // Prevent our squids from receiving damage, UNLESS they were alive for more than

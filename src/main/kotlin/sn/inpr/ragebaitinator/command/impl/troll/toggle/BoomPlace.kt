@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -41,11 +40,17 @@ class BoomPlace : BaseToggleTroll(), BlockPlaceSubscriber {
         if (args.getOrNull(3).toBoolean())
             addFlag(target, "destructive")
 
-        return "&f${if (persistent) "Every" else "The next"} block &c${target.name} &fplaces will now explode"
+        return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%places will now explode")
+            .put("player", target.name)
+            .put("next", if (persistent) "every" else "the next")
+            .put("^next", if (persistent) "Every" else "The next")
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fThe next block &c${target.name} &fplaces will no longer explode"
+        = placeholdersOr("deinit", "%prefix% %c2%The next block %c1%%player% %c2%places will no longer explode")
+            .put("player", target.name)
+            .toString()
 
     override fun onBlockPlace(event: BlockPlaceEvent) {
         if (players.contains(event.player.uniqueId)) {

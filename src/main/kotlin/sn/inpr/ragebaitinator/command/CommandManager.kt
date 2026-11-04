@@ -10,8 +10,10 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.SQLite
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
+import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.LogUtil.info
 import java.util.Locale
@@ -20,6 +22,9 @@ import java.util.stream.Collectors
 object CommandManager : CommandExecutor, TabCompleter {
     val commands: List<BaseCommand>
         field = mutableListOf()
+    val trolls: List<BaseTroll> get() = commands.filterIsInstance<BaseTroll>()
+    val toggleTrolls: List<BaseToggleTroll> get() = commands.filterIsInstance<BaseToggleTroll>()
+    val onceTrolls: List<BaseTroll> get() = trolls.filterNot { it is BaseToggleTroll }
 
     fun registerCommands() {
         commands.clear()
@@ -46,10 +51,6 @@ object CommandManager : CommandExecutor, TabCompleter {
         return if (name != null) commands.firstOrNull { it.info.name.equals(name, ignoreCase = true) } else null
     }
 
-    fun totalToggleTrolls(): Int {
-        return commands.filterIsInstance<BaseToggleTroll>().count()
-    }
-
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty() && commands.any { it.info.name == args.first() }) {
             val first = commands.first { it.info.name == args.first() }
@@ -61,7 +62,7 @@ object CommandManager : CommandExecutor, TabCompleter {
                 else SQLite.CommandHistory.addConsoleCommand(everything)
             }
         } else {
-            send(sender, "&4&lRB » &cCommand not found")
+            send(sender, Placeholders("commandNotFound","%prefix% %c1%Command not found"))
         }
 
         return true

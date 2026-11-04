@@ -19,6 +19,8 @@ class Demo : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val packet = WrapperPlayServerChangeGameState(5, 0f)
         PacketEvents.getAPI().playerManager.sendPacket(target, packet)
-        return "&fSent demo message to &c${target.name}"
+        return placeholdersOr("init", "%prefix% %c2%Sent demo message to %c1%%player%")
+            .put("player", target.name)
+            .toString()
     }
 }

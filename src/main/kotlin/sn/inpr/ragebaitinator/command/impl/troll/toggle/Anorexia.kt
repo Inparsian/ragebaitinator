@@ -20,10 +20,14 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 )
 class Anorexia : BaseToggleTroll(), PlayerItemConsumeSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fhas now completely lost their appetite"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%has now completely lost their appetite")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fcan now eat again"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now eat again")
+            .put("player", target.name)
+            .toString()
 
     override fun onPlayerItemConsume(event: PlayerItemConsumeEvent) {
         if (players.containsKey(event.player.uniqueId))

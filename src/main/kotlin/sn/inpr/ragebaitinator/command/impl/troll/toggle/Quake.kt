@@ -1,7 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import com.github.retrooper.packetevents.PacketEvents
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCamera
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerAbilities
 import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
@@ -48,11 +47,15 @@ class Quake : BaseToggleTroll() {
 
             sendAbilities(target, fovModifier)
         }, 0, 1, true)
-        return "&c${target.name}&f's field of view is now shaking"
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s field of view is now shaking")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name}&f's field of view is now stable"
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s field of view is now stable")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         runTaskLater({ sendAbilities(player, player.walkSpeed / 2f) }, 1)

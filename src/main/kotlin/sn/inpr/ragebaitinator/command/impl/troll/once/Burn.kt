@@ -23,6 +23,8 @@ class Burn : BaseTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val ticks: Int = (args.getOrNull(2)?.toIntOrNull() ?: 100).coerceIn(20, 1200)
         target.fireTicks = ticks
-        return "&c${target.name} &fhas been set on fire for &c$ticks &ftick(s)!"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been set on fire for %c1%$ticks %c2%tick(s)!")
+            .put("player", target.name)
+            .toString()
     }
 }

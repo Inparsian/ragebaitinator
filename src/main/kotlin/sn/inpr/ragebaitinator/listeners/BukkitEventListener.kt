@@ -58,8 +58,7 @@ interface PlayerFishSubscriber { fun onPlayerFish(event: PlayerFishEvent) }
 
 object BukkitEventListener : Listener {
     fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {
-        CommandManager.commands
-            .filterIsInstance<BaseToggleTroll>()
+        CommandManager.toggleTrolls
             .filter { it.info.attributes.contains(attribute) }
             .forEach { it.removePlayer(player, reason) }
     }

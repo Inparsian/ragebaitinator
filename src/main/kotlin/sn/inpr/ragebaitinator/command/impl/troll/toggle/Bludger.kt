@@ -70,11 +70,15 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
             }
         }, 0, 1, true)
 
-        return "&c${target.name} &fis now being chased by a flying fire ball thing"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being chased by a flying fire ball thing")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis no longer being chased by a flying fire ball thing"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         bludgers.remove(player)?.remove()

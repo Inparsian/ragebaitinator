@@ -5,10 +5,12 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitTask
+import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.Main.Companion.runTaskRandomTimer
 import sn.inpr.ragebaitinator.Main.Companion.runTaskTimer
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.UUID
@@ -46,8 +48,15 @@ abstract class BaseCommand {
         }.joinToString(" ")
 
     fun sendUsage(sender: CommandSender) {
-        send(sender, "&4&lRB » &fUsage: &7/rb ${info.name} ${stringifySyntax()}")
+        val placeholders = placeholdersOr("usage", "%prefix% %c2%Usage: %c3%/rb %command% %syntax%")
+            .put("command", info.name)
+            .put("syntax", stringifySyntax())
+        send(sender, placeholders)
     }
+
+    fun languageOr(key: String, default: String) = language.getString("commands.${info.name}.$key") ?: default
+
+    fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
 
     fun targetPlayers(sender: CommandSender, input: String): List<Player> = PlayerUtil.targetPlayers(input, sender)
 }
@@ -69,22 +78,27 @@ abstract class BaseTroll : BaseCommand() {
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
-                    send(sender, "&4&lRB » &cPlayer is immune to ${this.info.name}!")
+                    val placeholders = placeholdersOr("immune", "%prefix% %c1%%player% is immune to %command%!")
+                        .put("player", target.name)
+                        .put("command", this.info.name)
+                    send(sender, target, placeholders)
                     return true
                 }
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull()
                 if (firstHitCondition?.predicate == true) {
-                    send(sender, "&4&lRB » &c${firstHitCondition.humanReadable}")
+                    val placeholders = placeholdersOr("conditionsFail", "%prefix% %c1%%message%")
+                        .put("message", firstHitCondition.humanReadable)
+                    send(sender, target, placeholders)
                     return true
                 }
 
                 val message = init(sender, target, args)
                 if (message != null)
-                    send(sender, "&4&lRB » $message")
+                    send(sender, target, message)
             }
         } else {
-            send(sender, "&4&lRB » Player not found")
+            send(sender, Placeholders(language.playerNotFound))
         }
 
         return true
@@ -110,14 +124,19 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
-                    send(sender, "&4&lRB » &cPlayer is immune to ${this.info.name}!")
+                    val placeholders = placeholdersOr("immune", "%prefix% %c1%%player% is immune to %command%!")
+                        .put("player", target.name)
+                        .put("command", this.info.name)
+                    send(sender, target, placeholders)
                     removePlayer(target, "Player is immune")
                     return true
                 }
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull()
                 if (firstHitCondition?.predicate == true) {
-                    send(sender, "&4&lRB » &c${firstHitCondition.humanReadable}")
+                    val placeholders = placeholdersOr("conditionsFail", "%prefix% %c1%%message%")
+                        .put("message", firstHitCondition.humanReadable)
+                    send(sender, target, placeholders)
                     return true
                 }
 
@@ -135,10 +154,10 @@ abstract class BaseToggleTroll : BaseTroll() {
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had) removePlayer(target, "")
                 if (message != null)
-                    send(sender, "&4&lRB » $message")
+                    send(sender, target, message)
             }
         } else {
-            send(sender, "&4&lRB » &cPlayer not found")
+            send(sender, Placeholders(language.playerNotFound))
         }
 
         return true

@@ -5,7 +5,6 @@ import org.bukkit.Particle
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -119,11 +118,15 @@ class Tornado : BaseToggleTroll() {
 
         addTaskTimer(target, { twisters[target.uniqueId]?.tick() }, 0, 1, true)
 
-        return "&c${target.name} &fis now in Texas"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fThe tornado chasing &c${target.name} &fhas dissipated"
+        = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated")
+            .put("player", target.name)
+            .toString()
 
     override fun onRemovePlayer(player: Player, reason: String) {
         twisters.remove(player.uniqueId)

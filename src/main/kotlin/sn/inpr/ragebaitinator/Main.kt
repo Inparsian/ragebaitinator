@@ -6,12 +6,14 @@ import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketListenerPriority
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
-import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
+import org.intellij.lang.annotations.Language
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.gui.Menu
+import sn.inpr.ragebaitinator.integrations.PAPI
+import sn.inpr.ragebaitinator.integrations.PAPIExpansion
 import sn.inpr.ragebaitinator.listeners.BukkitEventListener
 import sn.inpr.ragebaitinator.listeners.PacketListener
 import sn.inpr.ragebaitinator.type.RandomTimer
@@ -20,37 +22,38 @@ import sn.inpr.ragebaitinator.utility.TimeUtil
 
 class Main : JavaPlugin() {
     companion object {
-        var plugin: Plugin? = null
+        var configuration = Config()
+        var language: LanguageConfig = LanguageConfig()
 
-        fun makeKey(key: String) = NamespacedKey(plugin!!, key)
+        fun instance() = getPlugin(Main::class.java)
+
+        fun makeKey(key: String) = NamespacedKey(instance(), key)
 
         fun runTask(runnable: Runnable)
-        = plugin!!.let { Bukkit.getScheduler().runTask(it, runnable) }
+        = instance().let { Bukkit.getScheduler().runTask(it, runnable) }
 
         fun runTaskAsync(runnable: Runnable)
-        = plugin!!.let { Bukkit.getScheduler().runTaskAsynchronously(it, runnable) }
+        = instance().let { Bukkit.getScheduler().runTaskAsynchronously(it, runnable) }
 
         fun runTaskIfNotPrimaryThread(runnable: Runnable)
         = if (!Bukkit.isPrimaryThread()) runTask(runnable) else runnable.run()
 
         fun runTaskLater(runnable: Runnable, delay: Long)
-        = plugin!!.let { Bukkit.getScheduler().runTaskLater(it, runnable, delay) }
-
-        fun runTaskLaterAsync(runnable: Runnable, delay: Long)
-        = plugin!!.let { Bukkit.getScheduler().runTaskLaterAsynchronously(it, runnable, delay) }
+        = instance().let { Bukkit.getScheduler().runTaskLater(it, runnable, delay) }
 
         fun runTaskTimer(runnable: Runnable, delay: Long, period: Long)
-        = plugin!!.let { Bukkit.getScheduler().runTaskTimer(it, runnable, delay, period) }
+        = instance().let { Bukkit.getScheduler().runTaskTimer(it, runnable, delay, period) }
 
         fun runTaskTimerAsync(runnable: Runnable, delay: Long, period: Long)
-        = plugin!!.let { Bukkit.getScheduler().runTaskTimerAsynchronously(it, runnable, delay, period) }
+        = instance().let { Bukkit.getScheduler().runTaskTimerAsynchronously(it, runnable, delay, period) }
 
         fun runTaskRandomTimer(runnable: Runnable, delay: Long, minTicks: Long, maxTicks: Long)
-        = RandomTimer(plugin!!, runnable, minTicks, maxTicks, delay)
+        = RandomTimer(instance(), runnable, minTicks, maxTicks, delay)
     }
 
     override fun onLoad() {
-        plugin = this
+        configuration = Config("config.yml")
+        language = LanguageConfig("language.yml")
         val events = PacketEvents.getAPI().eventManager
         events.registerListener(PacketListener(), PacketListenerPriority.HIGH)
     }
@@ -69,6 +72,11 @@ class Main : JavaPlugin() {
                     info("&aSQLite connection established")
                 else
                     info("&cFailed to connect to SQLite database")
+
+                if(PAPI.present) {
+                    PAPIExpansion().register()
+                    info("&aPlaceholderAPI integration complete")
+                }
 
                 getCommand("ragebaitinator")?.setExecutor(CommandManager)
                 CommandManager.registerCommands()

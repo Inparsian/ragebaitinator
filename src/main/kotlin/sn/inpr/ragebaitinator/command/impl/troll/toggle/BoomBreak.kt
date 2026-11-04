@@ -40,11 +40,17 @@ class BoomBreak : BaseToggleTroll(), BlockBreakSubscriber {
         if (args.getOrNull(3).toBoolean())
             addFlag(target, "destructive")
 
-        return "&f${if (persistent) "Every" else "The next"} block &c${target.name} &fbreaks will now explode"
+        return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%breaks will now explode")
+            .put("player", target.name)
+            .put("next", if (persistent) "every" else "the next")
+            .put("^next", if (persistent) "Every" else "The next")
+            .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&fThe next block &c${target.name} &fbreaks will no longer explode"
+        = placeholdersOr("deinit", "%prefix% %c2%The next block %c1%%player% %c2%breaks will no longer explode")
+            .put("player", target.name)
+            .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {
         if (players.contains(event.player.uniqueId)) {

@@ -7,12 +7,9 @@ import org.bukkit.entity.Fireball
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.entity.Snowball
-import org.bukkit.event.player.PlayerItemConsumeEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.UUID
 import kotlin.jvm.java
@@ -66,20 +63,22 @@ class Bomb : BaseToggleTroll() {
         }, 0, 1, true)
 
         return when(type) {
-            Arrow::class.java -> "&c${target.name} &fis now a pincushion"
-            Snowball::class.java -> "&c${target.name} &fis now in a snow storm"
-            Egg::class.java -> "&c${target.name} &fis now HowToBasic"
-            else -> "&c${target.name} &fis now being carpet bombed" //cover fireball & whatever else
+            Arrow::class.java -> placeholdersOr("initArrow", "%prefix% %c1%%player% %c2%is now a pincushion").put("player", target.name).toString()
+            Snowball::class.java -> placeholdersOr("initSnowball", "%prefix% %c1%%player% %c2%is now in a snow storm").put("player", target.name).toString()
+            Egg::class.java -> placeholdersOr("initEgg", "%prefix% %c1%%player% %c2%is now HowToBasic").put("player", target.name).toString()
+            //cover fireball & whatever else
+            else -> placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being carpet bombed").put("player", target.name).toString()
         }
     }
 
     override fun deinit(sender: CommandSender, target: Player): String {
-        val type = carpetBombOperations.remove(target.uniqueId) ?: return "&c${target.name} &fis no longer being carpet bombed"
+        val fallback = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being carpet bombed").put("player", target.name).toString()
+        val type = carpetBombOperations.remove(target.uniqueId) ?: return fallback
         return when(type) {
-            Arrow::class.java -> "&c${target.name} &fis no longer a pincushion"
-            Snowball::class.java -> "&c${target.name} &fis no longer in a snow storm"
-            Egg::class.java -> "&c${target.name} &fis in fact not HowToBasic"
-            else -> "&c${target.name} &fis no longer being carpet bombed"
+            Arrow::class.java -> placeholdersOr("deinitArrow", "%prefix% %c1%%player% %c2%is no longer a pincushion").put("player", target.name).toString()
+            Snowball::class.java -> placeholdersOr("deinitSnowball", "%prefix% %c1%%player% %c2%is no longer in a snow storm").put("player", target.name).toString()
+            Egg::class.java -> placeholdersOr("deinitEgg", "%prefix% %c1%%player% %c2%is in fact not HowToBasic").put("player", target.name).toString()
+            else -> fallback
         }
     }
 

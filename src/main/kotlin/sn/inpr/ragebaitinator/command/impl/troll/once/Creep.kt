@@ -54,7 +54,9 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
             creeper.maxFuseTicks = 20
             creeper.ignite()
         }
-        return "&c${target.name} &fis now playing with explosives"
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now playing with explosives")
+            .put("player", target.name)
+            .toString()
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {

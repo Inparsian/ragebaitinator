@@ -21,10 +21,14 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 )
 class BadAnkles : BaseToggleTroll(), PlayerMoveSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = "&c${target.name} &fis now on Life Alert"
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Life Alert")
+            .put("player", target.name)
+            .toString()
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = "&c${target.name} &fis no longer on Life Alert"
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer on Life Alert")
+            .put("player", target.name)
+            .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
         if (players.containsKey(event.player.uniqueId)) {
