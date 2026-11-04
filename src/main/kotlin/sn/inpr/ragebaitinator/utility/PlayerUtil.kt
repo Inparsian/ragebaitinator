@@ -98,7 +98,6 @@ object PlayerUtil {
     // works even without a source
     fun targetPlayers(input: String, source: Permissible? = null): List<Player> {
         val online = Bukkit.getOnlinePlayers()
-
         return input.split(",").flatMap { token ->
             when {
                 // all players (excl. sender)

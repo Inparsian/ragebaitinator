@@ -5,11 +5,11 @@ import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import sn.inpr.ragebaitinator.command.CommandManager
 
-interface PacketEventSendSubscriber {
+fun interface PacketEventSendSubscriber {
     fun onPacketSend(event: PacketSendEvent)
 }
 
-interface PacketEventReceiveSubscriber {
+fun interface PacketEventReceiveSubscriber {
     fun onPacketReceive(event: PacketReceiveEvent)
 }
 

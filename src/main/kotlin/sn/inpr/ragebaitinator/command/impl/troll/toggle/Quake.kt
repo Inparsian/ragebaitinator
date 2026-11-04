@@ -38,13 +38,8 @@ class Quake : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         addTaskTimer(target, {
             val rand = MathUtil.random(0.8f, 1.0f)
-            val fovModifier = if (MathUtil.randomBool())
-                0f
-            else if (MathUtil.randomBool())
-                -rand
-            else
-                rand
-
+            val signed = if (MathUtil.randomBool()) -rand else rand
+            val fovModifier = if (MathUtil.randomBool()) 0f else signed
             sendAbilities(target, fovModifier)
         }, 0, 1, true)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s field of view is now shaking")

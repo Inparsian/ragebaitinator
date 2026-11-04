@@ -32,29 +32,29 @@ import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 
-interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
-interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
-interface AsyncPlayerChatSubscriber { fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) }
-interface PlayerTeleportSubscriber { fun onPlayerTeleport(event: PlayerTeleportEvent) }
-interface PlayerMoveSubscriber { fun onPlayerMove(event: PlayerMoveEvent) }
-interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVelocityEvent) }
-interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
-interface BlockBreakSubscriber { fun onBlockBreak(event: BlockBreakEvent) }
-interface BlockPlaceSubscriber { fun onBlockPlace(event: BlockPlaceEvent) }
-interface EntityDamageByEntitySubscriber { fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) }
-interface EntityDamageSubscriber { fun onEntityDamage(event: EntityDamageEvent) }
-interface PlayerDeathSubscriber { fun onPlayerDeath(event: PlayerDeathEvent) }
-interface EntityDeathSubscriber { fun onEntityDeath(event: EntityDeathEvent) }
-interface PlayerRespawnSubscriber { fun onPlayerRespawn(event: PlayerRespawnEvent) }
-interface EntityShootBowSubscriber { fun onEntityShootBow(event: EntityShootBowEvent) }
-interface EntityPickupItemSubscriber { fun onEntityPickupItem(event: EntityPickupItemEvent) }
-interface ProjectileLaunchSubscriber { fun onProjectileLaunch(event: ProjectileLaunchEvent) }
-interface ProjectileHitSubscriber { fun onProjectileHit(event: ProjectileHitEvent) }
-interface EntityExplodeSubscriber { fun onEntityExplode(event: EntityExplodeEvent) }
-interface PlayerItemConsumeSubscriber { fun onPlayerItemConsume(event: PlayerItemConsumeEvent) }
-interface EntityToggleGlideSubscriber { fun onEntityToggleGlide(event: EntityToggleGlideEvent) }
-interface PlayerBedEnterSubscriber { fun onPlayerBedEnter(event: PlayerBedEnterEvent) }
-interface PlayerFishSubscriber { fun onPlayerFish(event: PlayerFishEvent) }
+fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
+fun interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
+fun interface AsyncPlayerChatSubscriber { fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) }
+fun interface PlayerTeleportSubscriber { fun onPlayerTeleport(event: PlayerTeleportEvent) }
+fun interface PlayerMoveSubscriber { fun onPlayerMove(event: PlayerMoveEvent) }
+fun interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVelocityEvent) }
+fun interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
+fun interface BlockBreakSubscriber { fun onBlockBreak(event: BlockBreakEvent) }
+fun interface BlockPlaceSubscriber { fun onBlockPlace(event: BlockPlaceEvent) }
+fun interface EntityDamageByEntitySubscriber { fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) }
+fun interface EntityDamageSubscriber { fun onEntityDamage(event: EntityDamageEvent) }
+fun interface PlayerDeathSubscriber { fun onPlayerDeath(event: PlayerDeathEvent) }
+fun interface EntityDeathSubscriber { fun onEntityDeath(event: EntityDeathEvent) }
+fun interface PlayerRespawnSubscriber { fun onPlayerRespawn(event: PlayerRespawnEvent) }
+fun interface EntityShootBowSubscriber { fun onEntityShootBow(event: EntityShootBowEvent) }
+fun interface EntityPickupItemSubscriber { fun onEntityPickupItem(event: EntityPickupItemEvent) }
+fun interface ProjectileLaunchSubscriber { fun onProjectileLaunch(event: ProjectileLaunchEvent) }
+fun interface ProjectileHitSubscriber { fun onProjectileHit(event: ProjectileHitEvent) }
+fun interface EntityExplodeSubscriber { fun onEntityExplode(event: EntityExplodeEvent) }
+fun interface PlayerItemConsumeSubscriber { fun onPlayerItemConsume(event: PlayerItemConsumeEvent) }
+fun interface EntityToggleGlideSubscriber { fun onEntityToggleGlide(event: EntityToggleGlideEvent) }
+fun interface PlayerBedEnterSubscriber { fun onPlayerBedEnter(event: PlayerBedEnterEvent) }
+fun interface PlayerFishSubscriber { fun onPlayerFish(event: PlayerFishEvent) }
 
 object BukkitEventListener : Listener {
     fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {

@@ -49,9 +49,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
         bludgers[target] = bludger
 
         addTaskTimer(target, {
-            if (!bludgers.containsKey(target)) {
-                removeTask(target.uniqueId)
-            } else {
+            if (bludgers.containsKey(target)) {
                 // the bludger shalt not have a foot fetish
                 val plusOne = target.location.clone().add(0.0, 1.0, 0.0)
                 val targetBludger = bludgers[target]!!
@@ -67,6 +65,8 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
                 // and never actually hit???
                 if (bludger.location.distance(plusOne) <= 0.3)
                     kaboom(target, bludger)
+            } else {
+                removeTask(target.uniqueId)
             }
         }, 0, 1, true)
 

@@ -23,19 +23,19 @@ object Reflection {
                 return materialCache[name]
 
             val clazz = getOBClass("Material")
-            if (clazz != null) {
+            return if (clazz != null) {
                 val material = clazz.getField(name).get(Material::class.java) as? Material?
                     ?: return null
-
                 materialCache[name] = material
-
-                return material
+                material
             } else {
-                return null
+                null
             }
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        } catch (_: NoSuchFieldException) {}
+        } catch (exception: IllegalAccessException) {
+            exception.printStackTrace()
+        } catch (exception: NoSuchFieldException) {
+            exception.printStackTrace()
+        }
 
         // remember that this material doesn't exist/there was an error
         materialCache[name] = null

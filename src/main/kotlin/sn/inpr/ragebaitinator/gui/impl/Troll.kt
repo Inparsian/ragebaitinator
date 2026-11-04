@@ -24,7 +24,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.Reflection
 import sn.inpr.ragebaitinator.utility.TypeUtil
 
-
 private const val PAGE_SIZE = 36
 
 class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
@@ -34,13 +33,13 @@ class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
     MathUtil.pages(CommandManager.trolls.size, PAGE_SIZE),
     PlayerMenu(player, target)
 ) {
-    fun addItemCommons(troll: BaseTroll, item: ItemStack, lore: MutableList<String>, params: MutableList<String>) {
+    fun addItemCommons(troll: BaseTroll, item: ItemStack, lore: MutableList<String>, params: List<String>) {
         val word = if (troll is BaseToggleTroll) "toggle" else "execute"
         lore.addAll(listOf("", "§7Conditions:"))
 
         val conditions = troll.getConditions(target)
         if (conditions != null) {
-            for ((humanReadable, _, predicate) in conditions.list) {
+            for ([humanReadable, _, predicate] in conditions.list) {
                 lore.add("§8- §${if (predicate) "c" else "a"}$humanReadable")
                 if (predicate) {
                     item.type = Material.BARRIER
@@ -172,7 +171,7 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player) : Menu
         lore.addAll(listOf("", "§7Conditions:"))
         val conditions = troll.getConditions(target)
         if (conditions != null) {
-            for ((humanReadable, _, predicate) in conditions.list) {
+            for ([humanReadable, _, predicate] in conditions.list) {
                 lore.add("§8- §${if (predicate) "c" else "a"}$humanReadable")
                 if (predicate) {
                     item.type = Material.BARRIER
