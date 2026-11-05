@@ -9,7 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 
 @CommandInfo(
     name = "starve",
-    description = "Makes a player unable to eat (also makes gapples ineffective).",
+    description = "Starves a player. Yeah.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
