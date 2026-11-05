@@ -4,7 +4,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
-import org.bukkit.block.BlockState
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -13,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -25,7 +25,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
-    val blockStates: Map<Player, MutableList<BlockState>> field = mutableMapOf()
+    private fun rollbackOwner(player: Player) = "bury:${player.uniqueId}"
 
     private fun is3x3(location: Location): Boolean {
         val block = location.block.location
@@ -52,15 +52,6 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
                 .notInVoid(target)
                 .put("This player must not already be buried.", "alreadyBuried", alreadyBuried(target))
 
-    fun fill(target: Player, location: Location) {
-        val block = location.block
-        if (!block.type.isSolid) {
-            if (blockStates[target]!!.none { it.block.location == block.location })
-                blockStates[target]!!.add(block.state)
-            block.type = Material.STONE
-        }
-    }
-
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val location = target.location.clone()
         var buryLocation: Location? = null
@@ -77,17 +68,18 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
 
         if (buryLocation == null) {
             val min = LocationUtil.downHeightLimit + 4
-            if (target.location.y >= min)
-                buryLocation = location.clone().add(0.0, -4.0, 0.0)
+            buryLocation = if (target.location.y >= min)
+                location.clone().add(0.0, -4.0, 0.0)
             else
-                buryLocation = location.clone().toVector().setY(min).toLocation(location.world!!)
+                location.clone().toVector().setY(min).toLocation(location.world!!)
         }
 
-        blockStates.putIfAbsent(target, mutableListOf())
+        val fill = mutableListOf<Block>()
         for (y in 0..3) {
-            for (x in -1..1) fill(target, buryLocation.clone().add(x.toDouble(), y.toDouble(), 0.0))
-            for (z in -1..1) fill(target, buryLocation.clone().add(0.0, y.toDouble(), z.toDouble()))
+            for (x in -1..1) fill.add(buryLocation.clone().add(x.toDouble(), y.toDouble(), 0.0).block)
+            for (z in -1..1) fill.add(buryLocation.clone().add(0.0, y.toDouble(), z.toDouble()).block)
         }
+        Blocks.place(rollbackOwner(target), fill.filter { !it.type.isSolid }.map { it to Material.STONE })
 
         target.teleport(buryLocation.clone().add(0.0, 1.0, 0.0))
         return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA")
@@ -95,16 +87,6 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             .toString()
     }
 
-    override fun onPlayerQuit(event: PlayerQuitEvent) {
-        blockStates.remove(event.player)?.forEach { it.update(true, false) }
-    }
-
-    override fun onPlayerDeath(event: PlayerDeathEvent) {
-        blockStates.remove(event.entity)?.forEach { it.update(true, false) }
-    }
-
-    override fun onDisable() {
-        blockStates.values.forEach { snapshots -> snapshots.forEach { it.update(true, false) } }
-        blockStates.clear()
-    }
+    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))
+    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity))
 }

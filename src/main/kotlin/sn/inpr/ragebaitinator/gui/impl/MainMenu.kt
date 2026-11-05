@@ -6,9 +6,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import sn.inpr.ragebaitinator.Main
-import sn.inpr.ragebaitinator.SQLite
 import sn.inpr.ragebaitinator.command.CommandManager
-import sn.inpr.ragebaitinator.command.def.BaseTroll
+import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.gui.Menu
 
 class MainMenu(player: Player) : Menu(player, false) {
@@ -17,10 +16,10 @@ class MainMenu(player: Player) : Menu(player, false) {
 
         addItem(inventory, 10, Material.BOOK, "§bPlayers", listOf("§7Manage players."), false)
 
-        if(SQLite.CommandHistory.hasHistoryAccess(player))
+        if(CommandHistory.hasHistoryAccess(player))
             addItem(inventory, 12, Material.PAPER, "§dHistory", listOf(
                 "§7View command history. To date, a total of",
-                "§c" + SQLite.CommandHistory.size + "§7 command(s) have been executed."
+                "§c" + CommandHistory.size + "§7 command(s) have been executed."
             ), false)
 
         addItem(inventory, 16, Material.REDSTONE, "§c§lRagebaitinator", listOf(

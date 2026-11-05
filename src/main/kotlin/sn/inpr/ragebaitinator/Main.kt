@@ -9,6 +9,8 @@ import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
+import sn.inpr.ragebaitinator.database.Blocks
+import sn.inpr.ragebaitinator.database.SQLite
 import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.gui.Menu
 import sn.inpr.ragebaitinator.integrations.PAPI
@@ -91,6 +93,8 @@ class Main : JavaPlugin() {
                 command.clearPlayers()
             command.onDisable()
         }
+
+        Blocks.shutdown()
 
         // close all menus
         for (player in Bukkit.getOnlinePlayers()) {

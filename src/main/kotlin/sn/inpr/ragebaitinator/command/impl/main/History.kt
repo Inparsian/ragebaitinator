@@ -4,10 +4,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.configuration
 import sn.inpr.ragebaitinator.Main.Companion.runTaskAsync
-import sn.inpr.ragebaitinator.SQLite
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -42,16 +42,16 @@ class History : BaseCommand() {
         runTaskAsync {
             val history = if (args.size > 2) {
                 if (args[2] == "!!") {
-                    SQLite.CommandHistory.getConsoleHistory()
+                    CommandHistory.getConsoleHistory()
                 } else {
                     // always prioritize exact if it is in the database
-                    SQLite.CommandHistory.getHistory(args[2]).ifEmpty {
+                    CommandHistory.getHistory(args[2]).ifEmpty {
                         val targets = targetPlayers(sender, args[2])
-                        targets.flatMap { SQLite.CommandHistory.getHistory(it.name) }
+                        targets.flatMap { CommandHistory.getHistory(it.name) }
                     }
                 }
             } else {
-                SQLite.CommandHistory.getAllHistory()
+                CommandHistory.getAllHistory()
             }
 
             val pages = MathUtil.pages(history.size, pageSize)

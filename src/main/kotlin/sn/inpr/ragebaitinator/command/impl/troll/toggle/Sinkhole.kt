@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.block.BlockState
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -13,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
@@ -30,9 +30,13 @@ import kotlin.math.absoluteValue
     ]
 )
 class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
-    data class SinkholeState(var startLocation: Location, var pastPlayerLocation: Location)
+    // unique per sinkhole, so a delayed release can't touch the blocks of a later sinkhole on the same player
+    data class SinkholeState(
+        var startLocation: Location,
+        var pastPlayerLocation: Location,
+        val rollbackOwner: String = "sinkhole:${UUID.randomUUID()}"
+    )
 
-    private val blocks: MutableMap<UUID, Queue<BlockState>> = mutableMapOf()
     private val sinkholes: MutableMap<UUID, SinkholeState> = mutableMapOf()
 
     fun floorBelowPlayer(player: Player): Boolean {
@@ -60,19 +64,13 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
 
     fun sink(cylinder: Set<Vector>, player: Player) {
         player.isFlying = false
-        for (vector in cylinder) {
-            val location: Location = vector.toLocation(player.world)
-            if (location.block.type.isSolid()) {
-                blocks.putIfAbsent(player.uniqueId, LinkedList())
-                blocks[player.uniqueId]?.add(location.block.state)
-                location.block.type = Material.AIR
+        val owner = sinkholes[player.uniqueId]?.rollbackOwner ?: return
+        val blocks = cylinder.map { it.toLocation(player.world).block }.filter { it.type.isSolid }
+        if (blocks.isEmpty())
+            return
 
-                runTaskLater({
-                    if (blocks.containsKey(player.uniqueId))
-                        blocks[player.uniqueId]?.poll()?.update(true, false)
-                }, 60L)
-            }
-        }
+        Blocks.place(owner, blocks.map { it to Material.AIR })
+        runTaskLater({ Blocks.release(owner, blocks) }, 60L)
     }
 
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
@@ -126,13 +124,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
             player.teleport(sinkholes[player.uniqueId]?.startLocation ?: player.location)
         }
 
-        sinkholes.remove(player.uniqueId)
-        blocks.remove(player.uniqueId)?.forEach { it.update(true, false) }
-    }
-
-    override fun onDisable() {
-        blocks.values.forEach { it.forEach { block -> block.update(true, false) } }
-        blocks.clear()
+        sinkholes.remove(player.uniqueId)?.let { Blocks.release(it.rollbackOwner) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {

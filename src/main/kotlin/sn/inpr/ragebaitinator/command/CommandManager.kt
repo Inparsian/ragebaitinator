@@ -7,16 +7,12 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
-import sn.inpr.ragebaitinator.SQLite
-import sn.inpr.ragebaitinator.command.def.BaseCommand
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.BaseTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.*
+import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.LogUtil.info
-import java.util.Locale
+import java.util.*
 import java.util.stream.Collectors
 
 object CommandManager : CommandExecutor, TabCompleter {
@@ -59,8 +55,8 @@ object CommandManager : CommandExecutor, TabCompleter {
                 first.sendUsage(sender)
             else {
                 val everything = "${command.label} ${args.joinToString(" ")}"
-                if (sender is Player) SQLite.CommandHistory.addCommand(sender.name, everything)
-                else SQLite.CommandHistory.addConsoleCommand(everything)
+                if (sender is Player) CommandHistory.addCommand(sender.name, everything)
+                else CommandHistory.addConsoleCommand(everything)
             }
         } else {
             send(sender, Placeholders("commandNotFound","%prefix% &cCommand not found"))

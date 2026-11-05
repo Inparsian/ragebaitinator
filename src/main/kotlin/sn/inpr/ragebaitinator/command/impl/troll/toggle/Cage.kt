@@ -75,6 +75,8 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
     private val maxY = LocationUtil.upHeightLimit - (cage.height + 1)
     private val cages = mutableMapOf<UUID, Location>()
 
+    private fun rollbackOwner(uuid: UUID) = "cage:$uuid"
+
     fun getViableLocation(player: Player): Location? {
         val blockified = LocationUtil.blockify(player.location, true)
         if (blockified.y >= maxY) {
@@ -121,7 +123,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             getViableLocation(target) ?: return "&cThe cage would hit something!"
         }
 
-        cage.build(cageLocation)
+        cage.build(rollbackOwner(target.uniqueId), cageLocation)
         cages[target.uniqueId] = cageLocation
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
@@ -162,8 +164,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
     }
 
     override fun onRemovePlayer(player: Player, reason: String) {
-        val cageLocation = cages.remove(player.uniqueId)
-        if (cageLocation != null)
-            cage.rollback(cageLocation)
+        if (cages.remove(player.uniqueId) != null)
+            cage.rollback(rollbackOwner(player.uniqueId))
     }
 }
