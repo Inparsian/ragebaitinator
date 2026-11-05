@@ -142,23 +142,19 @@ class Potato : BaseToggleTroll(),
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (event !is PlayerTeleportEvent && potatoes.containsKey(event.player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(event !is PlayerTeleportEvent && potatoes.containsKey(event.player.uniqueId))
     }
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (potatoes.containsKey(event.player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(potatoes.containsKey(event.player.uniqueId))
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        if (event.entity is Player && potatoes.containsKey(event.entity.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(event.entity is Player && potatoes.containsKey(event.entity.uniqueId))
     }
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {
-        if (potatoes.any { it.value.first == event.item } || event.entity is Player && potatoes.containsKey(event.entity.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(potatoes.any { it.value.first == event.item } || event.entity is Player && potatoes.containsKey(event.entity.uniqueId))
     }
 
     // cancel some actions at the packet level that potatoes would not be able to do

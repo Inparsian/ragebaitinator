@@ -55,12 +55,11 @@ class BoomPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {
         val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        event.cancelIfAndThen(hasPlayer(player)) {
             runTaskLater({
                 if (hasFlag(player, "destructive"))
                     event.item.world.createExplosion(event.item.location, 5f, true)
                 else {
-                    event.isCancelled = true
                     LocationUtil.createSafeExplosion(event.item.location, 5f)
                 }
 

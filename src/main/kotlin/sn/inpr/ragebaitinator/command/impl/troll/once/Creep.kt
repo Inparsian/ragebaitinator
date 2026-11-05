@@ -59,15 +59,11 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
             .toString()
     }
 
-    override fun onEntityDamage(event: EntityDamageEvent) {
-        // make em invincible
-        if (getMark(event.entity) != null)
-            event.isCancelled = true
-    }
+    // make em invincible
+    override fun onEntityDamage(event: EntityDamageEvent) = event.cancelIf(getMark(event.entity) != null)
 
     override fun onEntityExplode(event: EntityExplodeEvent) {
-        if (getMark(event.entity) == true) {
-            event.isCancelled = true
+        event.cancelIfAndThen(getMark(event.entity) == true) {
             LocationUtil.createSafeExplosion(event.entity.location, 2f)
             event.entity.remove()
         }

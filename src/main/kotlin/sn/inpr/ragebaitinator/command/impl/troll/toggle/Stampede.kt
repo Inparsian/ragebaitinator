@@ -15,8 +15,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import java.lang.reflect.Method
-import java.util.UUID
-import kotlin.jvm.java
+import java.util.*
 
 private const val PURSUIT_SPEED_MULTIPLIER = 2.4
 
@@ -153,8 +152,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val creature = event.entity as? Creature ?: return
-        if (herds.values.any { creature in it })
-            event.isCancelled = true
+        event.cancelIf(herds.values.any { creature in it })
     }
 
     private fun safePositions(origin: Location, target: Location): List<Location> {

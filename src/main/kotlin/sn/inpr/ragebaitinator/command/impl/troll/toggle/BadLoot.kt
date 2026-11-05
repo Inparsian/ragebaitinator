@@ -33,7 +33,7 @@ class BadLoot : BaseToggleTroll(), PlayerFishSubscriber {
             .toString()
 
     override fun onPlayerFish(event: PlayerFishEvent) {
-        if (players.containsKey(event.player.uniqueId) && event.state == PlayerFishEvent.State.CAUGHT_FISH) {
+        if (hasPlayer(event.player) && event.state == PlayerFishEvent.State.CAUGHT_FISH) {
             val caught = event.caught ?: return
             caught.remove()
 

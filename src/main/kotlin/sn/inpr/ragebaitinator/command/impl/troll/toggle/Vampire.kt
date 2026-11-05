@@ -20,7 +20,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 )
 class Vampire : BaseToggleTroll(), PlayerMoveSubscriber {
     fun vampireTick(player: Player) {
-        if (players.containsKey(player.uniqueId) && player.location.block.lightFromSky >= 12)
+        if (hasPlayer(player) && player.location.block.lightFromSky >= 12)
             player.fireTicks = player.fireTicks.coerceAtLeast(100)
     }
 

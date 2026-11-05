@@ -4,6 +4,8 @@ import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.event.Cancellable
+import org.bukkit.event.Event
 import org.bukkit.scheduler.BukkitTask
 import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
@@ -13,10 +15,22 @@ import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.PlayerUtil
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class BaseCommand {
+    fun Event.cancelIf(predicate: Boolean) {
+        if (this is Cancellable && predicate)
+            isCancelled = true
+    }
+
+    fun Event.cancelIfAndThen(predicate: Boolean, runnable: Runnable) {
+        if (this is Cancellable && predicate) {
+            isCancelled = true
+            runnable.run()
+        }
+    }
+
     abstract fun process(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean
     open fun onDisable() {}
     open fun onInstantiate() {}
@@ -158,7 +172,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                         instance.removePlayer(target, "incompatible")
                 }
 
-                val had = this.players.containsKey(target.uniqueId)
+                val had = this.hasPlayer(target)
                 if (!had) players[target.uniqueId] = mutableSetOf()
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had) removePlayer(target, "")
@@ -171,6 +185,9 @@ abstract class BaseToggleTroll : BaseTroll() {
 
         return true
     }
+
+    fun hasPlayer(uuid: UUID): Boolean = players.containsKey(uuid)
+    fun hasPlayer(player: Player): Boolean = hasPlayer(player.uniqueId)
 
     fun addFlag(uuid: UUID, flag: String) = players[uuid]?.add(flag)
     fun addFlag(player: Player, flag: String) = addFlag(player.uniqueId, flag)
@@ -207,7 +224,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTask(uuid: UUID, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.containsKey(uuid))
+        if (!ignorePlayerCheck && !hasPlayer(uuid))
             return null
         removeTask(uuid)
         val t = runTaskLater(runnable, delay)
@@ -220,7 +237,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTaskTimer(player: Player, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
+        if (!ignorePlayerCheck && !hasPlayer(player.uniqueId))
             return null
         removeTask(player.uniqueId)
         val t = runTaskTimer(runnable, delay, period)
@@ -229,7 +246,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTaskRandomTimer(player: Player, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
+        if (!ignorePlayerCheck && !hasPlayer(player.uniqueId))
             return null
         removeTask(player.uniqueId)
         val t = runTaskRandomTimer(runnable, delay, minPeriod, maxPeriod)

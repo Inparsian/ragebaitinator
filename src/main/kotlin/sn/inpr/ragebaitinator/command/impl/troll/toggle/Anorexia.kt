@@ -29,8 +29,5 @@ class Anorexia : BaseToggleTroll(), PlayerItemConsumeSubscriber {
             .put("player", target.name)
             .toString()
 
-    override fun onPlayerItemConsume(event: PlayerItemConsumeEvent) {
-        if (players.containsKey(event.player.uniqueId))
-            event.isCancelled = true
-    }
+    override fun onPlayerItemConsume(event: PlayerItemConsumeEvent) = event.cancelIf(hasPlayer(event.player))
 }

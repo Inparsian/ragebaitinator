@@ -13,7 +13,7 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
-import java.util.UUID
+import java.util.*
 
 @CommandInfo(
     name = "void",
@@ -55,20 +55,16 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, Pl
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        if (event.entity is Player) {
-            val player = event.entity as Player
-            if (this.players.containsKey(player.uniqueId) && inVoid(player, -2.0))
-                event.isCancelled = true
-        }
+        val player = event.entity as? Player ?: return
+        event.cancelIf(hasPlayer(player) && inVoid(player, -2.0))
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (this.players.containsKey(event.player.uniqueId) && !inVoid(event.player, -2.0))
+        if (hasPlayer(event.player) && !inVoid(event.player, -2.0))
             event.player.teleport(get65536(event.player))
     }
 
     override fun onPlayerTeleport(event: PlayerTeleportEvent) {
-        if (this.players.containsKey(event.player.uniqueId) && inVoid(event.player, -2.0))
-            event.isCancelled = true
+        event.cancelIf(hasPlayer(event.player) && inVoid(event.player, -2.0))
     }
 }

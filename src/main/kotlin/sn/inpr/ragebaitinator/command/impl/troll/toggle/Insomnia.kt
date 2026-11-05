@@ -32,9 +32,7 @@ class Insomnia : BaseToggleTroll(), PlayerBedEnterSubscriber {
             .toString()
 
     override fun onPlayerBedEnter(event: PlayerBedEnterEvent) {
-        if (players.containsKey(event.player.uniqueId)) {
-            event.isCancelled = true
-
+        event.cancelIfAndThen(hasPlayer(event.player)) {
             val text = placeholdersOr("message", "No matter how hard you try, you can't seem to rest")
                 .put("player", event.player.name)
                 .toString()

@@ -48,7 +48,7 @@ class Grue : BaseToggleTroll(), PlayerMoveSubscriber {
             .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (!players.containsKey(event.player.uniqueId)) return
+        if (!hasPlayer(event.player)) return
         if (event.player.location.block.lightLevel <= 2)
             mark(event.player)
         else

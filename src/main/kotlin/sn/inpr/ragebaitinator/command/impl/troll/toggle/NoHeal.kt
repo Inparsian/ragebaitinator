@@ -30,8 +30,6 @@ class NoHeal : BaseToggleTroll(), EntityRegainHealthSubscriber {
             .toString()
 
     override fun onEntityRegainHealth(event: EntityRegainHealthEvent) {
-        val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(hasPlayer(event.entity as? Player ?: return))
     }
 }

@@ -52,10 +52,9 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
             .put("player", target.name)
             .toString()
 
+    // Prevent our squids from receiving damage, UNLESS they were alive for more than
+    // 100 ticks, in which case this is an anomaly caused by a server restart
     override fun onEntityDamage(event: EntityDamageEvent) {
-        // Prevent our squids from receiving damage, UNLESS they were alive for more than
-        // 100 ticks, in which case this is an anomaly caused by a server restart
-        if (isMarked(event.entity) && event.entity.ticksLived < 100)
-            event.isCancelled = true
+        event.cancelIf(isMarked(event.entity) && event.entity.ticksLived < 100)
     }
 }

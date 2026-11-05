@@ -31,10 +31,7 @@ class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
-            removePlayer(player)
+        if (removePlayer(event.entity as? Player ?: return))
             event.damage = PlayerUtil.MAX_POSSIBLE_DAMAGE
-        }
     }
 }

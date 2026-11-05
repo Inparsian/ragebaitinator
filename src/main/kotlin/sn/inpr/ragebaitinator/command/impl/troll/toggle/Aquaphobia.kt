@@ -23,7 +23,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 )
 class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber {
     fun check(player: Player, block: Block) {
-        if (this.players.containsKey(player.uniqueId)) {
+        if (hasPlayer(player)) {
             if (block.type.toString().contains("WATER")) {
                 if (!tasks.containsKey(player.uniqueId)) {
                     addTaskTimer(player, {

@@ -54,11 +54,10 @@ class BoomFirework : BaseToggleTroll(), PlayerInteractSubscriber {
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (players.containsKey(event.player.uniqueId) && isFireworkBoost(event)) {
+        event.cancelIfAndThen(hasPlayer(event.player) && isFireworkBoost(event)) {
             if (hasFlag(event.player, "destructive"))
                 event.player.world.createExplosion(event.player.location, 5f, true)
             else {
-                event.isCancelled = true
                 LocationUtil.createSafeExplosion(event.player.location, 5f)
             }
 

@@ -31,8 +31,7 @@ class Harmless : BaseToggleTroll(), EntityDamageByEntitySubscriber {
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
-        val player = event.damager as? Player ?: return
-        if (players.containsKey(player.uniqueId))
+        if (hasPlayer(event.damager as? Player ?: return))
             event.setDamage(0.0)
     }
 }

@@ -2,12 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import net.md_5.bungee.api.ChatColor
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Creature
-import org.bukkit.entity.EntityType
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Monster
-import org.bukkit.entity.Player
-import org.bukkit.entity.Rabbit
+import org.bukkit.entity.*
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -92,7 +87,7 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
             .toString()
 
     override fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
-        if (!event.isAsynchronous || !players.containsKey(event.player.uniqueId))
+        if (!event.isAsynchronous || !hasPlayer(event.player))
             return
         val message = ChatColor.stripColor(event.message).lowercase()
         runTask({

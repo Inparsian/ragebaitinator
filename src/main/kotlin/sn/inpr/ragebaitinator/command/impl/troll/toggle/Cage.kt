@@ -143,8 +143,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (isOutsideCage(event.player, event.to ?: return))
-            event.isCancelled = true
+        event.cancelIf(isOutsideCage(event.player, event.to ?: return))
     }
 
     override fun onPlayerRespawn(event: PlayerRespawnEvent) {
@@ -157,8 +156,10 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         for (cageLocation in cages.values) {
             for (vector in cage.vectors) {
                 val dist = cageLocation.block.location.add(vector).distance(event.block.location)
-                if (dist < 1.0)
+                if (dist < 1.0) {
                     event.isCancelled = true
+                    break
+                }
             }
         }
     }

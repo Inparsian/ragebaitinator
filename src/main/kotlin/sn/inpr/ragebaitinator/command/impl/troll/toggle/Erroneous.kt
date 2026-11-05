@@ -43,14 +43,12 @@ class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchS
     }
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
-        val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId))
+        if (hasPlayer(event.entity as? Player ?: return))
             drunkenVelocity(event.projectile)
     }
 
     override fun onProjectileLaunch(event: ProjectileLaunchEvent) {
-        val player = event.entity.shooter as? Player ?: return
-        if (players.containsKey(player.uniqueId))
+        if (hasPlayer(event.entity.shooter as? Player ?: return))
             drunkenVelocity(event.entity)
     }
 }

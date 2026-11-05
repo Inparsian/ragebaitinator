@@ -36,7 +36,7 @@ class Thorns : BaseToggleTroll(), EntityDamageByEntitySubscriber {
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val player = event.damager as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        if (hasPlayer(player)) {
             val damage = event.damage
             event.setDamage(0.0)
             val cause = EntityDamageEvent.DamageCause.THORNS

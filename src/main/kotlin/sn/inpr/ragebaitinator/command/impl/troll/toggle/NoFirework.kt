@@ -31,7 +31,6 @@ class NoFirework : BaseToggleTroll(), PlayerInteractSubscriber {
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (players.containsKey(event.player.uniqueId) && isFireworkBoost(event))
-            event.isCancelled = true
+        event.cancelIf(hasPlayer(event.player) && isFireworkBoost(event))
     }
 }

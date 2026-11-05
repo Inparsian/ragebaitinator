@@ -31,7 +31,7 @@ class BadAnkles : BaseToggleTroll(), PlayerMoveSubscriber {
             .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (players.containsKey(event.player.uniqueId)) {
+        if (hasPlayer(event.player)) {
             // jump boost will raise the minimum fall distance to take fall damage
             val jumpAmplifier = event.player.getPotionEffect(PotionEffectType.JUMP_BOOST)?.amplifier?.plus(1f) ?: 0f
             val minFallDistance = 4f + jumpAmplifier

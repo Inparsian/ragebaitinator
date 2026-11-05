@@ -53,7 +53,7 @@ class BoomBreak : BaseToggleTroll(), BlockBreakSubscriber {
             .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {
-        if (players.containsKey(event.player.uniqueId)) {
+        if (hasPlayer(event.player)) {
             if (hasFlag(event.player, "destructive"))
                 event.block.world.createExplosion(event.block.location, 5f, true)
             else

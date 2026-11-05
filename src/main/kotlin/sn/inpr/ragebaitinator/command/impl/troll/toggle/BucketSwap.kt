@@ -31,8 +31,7 @@ class BucketSwap : BaseToggleTroll(), PlayerBucketEmptySubscriber {
             .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {
-        if (players.containsKey(event.player.uniqueId)) {
-            event.isCancelled = true
+        event.cancelIfAndThen(hasPlayer(event.player)) {
             val liquid = event.blockClicked.getRelative(event.blockFace)
             if (event.bucket == Material.WATER_BUCKET) liquid.type = Material.LAVA
             else if (event.bucket == Material.LAVA_BUCKET) liquid.type = Material.WATER

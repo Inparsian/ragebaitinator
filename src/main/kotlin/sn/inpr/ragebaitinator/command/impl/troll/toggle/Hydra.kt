@@ -32,8 +32,7 @@ class Hydra : BaseToggleTroll(), EntityDeathSubscriber {
             .toString()
 
     override fun onEntityDeath(event: EntityDeathEvent) {
-        val player = event.entity.killer ?: return
-        if (players.containsKey(player.uniqueId)) {
+        if (hasPlayer(event.entity.killer ?: return)) {
             val snapshot = EntitySnapshot(event.entity)
             val location = event.entity.location
             val type = event.entityType

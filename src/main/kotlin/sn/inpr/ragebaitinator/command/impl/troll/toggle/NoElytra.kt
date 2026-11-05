@@ -32,8 +32,6 @@ class NoElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
             .toString()
 
     override fun onEntityToggleGlide(event: EntityToggleGlideEvent) {
-        val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(hasPlayer(event.entity as? Player ?: return))
     }
 }

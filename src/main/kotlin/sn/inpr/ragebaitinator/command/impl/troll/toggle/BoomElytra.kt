@@ -54,11 +54,10 @@ class BoomElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
 
     override fun onEntityToggleGlide(event: EntityToggleGlideEvent) {
         val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        event.cancelIfAndThen(hasPlayer(player)) {
             if (hasFlag(player, "destructive"))
                 player.world.createExplosion(player.location, 5f, true)
             else {
-                event.isCancelled = true
                 LocationUtil.createSafeExplosion(player.location, 5f)
             }
 

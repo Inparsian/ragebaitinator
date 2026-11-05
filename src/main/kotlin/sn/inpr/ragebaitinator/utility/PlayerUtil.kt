@@ -32,21 +32,21 @@ object PlayerUtil {
     fun inVoid(player: Player, offset: Double): Boolean = player.location.y <= downHeightLimit + offset
     fun inVoid(player: Player): Boolean = player.location.y <= downHeightLimit
 
-    fun getEnabledTrolls(player: Player?): MutableList<String> {
+    fun getEnabledTrolls(player: Player): MutableList<String> {
         val enabled: MutableList<String> = mutableListOf()
         for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
-            if (cmd.players.containsKey(player?.uniqueId))
+            if (cmd.hasPlayer(player))
                 enabled.add(info.name)
         }
         return enabled
     }
 
-    fun getColoredTrollInfo(player: Player?): MutableList<String> {
+    fun getColoredTrollInfo(player: Player): MutableList<String> {
         val trolls: MutableList<String> = mutableListOf()
         for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
-            trolls.add((if (cmd.players.containsKey(player?.uniqueId)) "§a" else "§c") + info.name)
+            trolls.add((if (cmd.hasPlayer(player)) "§a" else "§c") + info.name)
         }
         return trolls
     }

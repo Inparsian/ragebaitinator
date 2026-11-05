@@ -128,8 +128,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        val player = event.entity as? Player ?: return
-        if (event.cause == EntityDamageEvent.DamageCause.FALL && sinkholes.containsKey(player.uniqueId))
-            event.isCancelled = true
+        val uuid = (event.entity as? Player ?: return).uniqueId
+        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && sinkholes.containsKey(uuid))
     }
 }

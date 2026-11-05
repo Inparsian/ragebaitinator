@@ -55,7 +55,7 @@ class BoomContainer : BaseToggleTroll(), PlayerInteractSubscriber {
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        if (event.action == Action.RIGHT_CLICK_BLOCK && players.containsKey(event.player.uniqueId)) {
+        if (event.action == Action.RIGHT_CLICK_BLOCK && hasPlayer(event.player)) {
             val block = event.clickedBlock ?: return
             if (block.state is Container) {
                 if (hasFlag(event.player, "destructive"))

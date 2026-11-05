@@ -75,7 +75,7 @@ class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
         }
 
         if (troll is BaseToggleTroll) {
-            val enabled = troll.players.containsKey(player.uniqueId)
+            val enabled = troll.hasPlayer(player)
             if (enabled) ItemUtil.makeGlow(meta)
 
             meta.setDisplayName((if (enabled) "§a" else "§c") + troll.info.name)
@@ -161,7 +161,7 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player) : Menu
         val lore = mutableListOf<String>()
 
         if (troll is BaseToggleTroll) {
-            val enabled = troll.players.containsKey(player.uniqueId)
+            val enabled = troll.hasPlayer(player)
             if (enabled) ItemUtil.makeGlow(meta)
             meta.setDisplayName((if (enabled) "§a" else "§c") + troll.info.name)
         } else {

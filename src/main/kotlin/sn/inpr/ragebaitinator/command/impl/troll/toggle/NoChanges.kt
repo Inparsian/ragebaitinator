@@ -57,12 +57,10 @@ class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber 
             .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {
-        if (hasFlag(event.player.uniqueId, "mine"))
-            event.isCancelled = true
+        event.cancelIf(hasFlag(event.player.uniqueId, "mine"))
     }
-
+    
     override fun onBlockPlace(event: BlockPlaceEvent) {
-        if (hasFlag(event.player.uniqueId, "place"))
-            event.isCancelled = true
+        event.cancelIf(hasFlag(event.player.uniqueId, "place"))
     }
 }

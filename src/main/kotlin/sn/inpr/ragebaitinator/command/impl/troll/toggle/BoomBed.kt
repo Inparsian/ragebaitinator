@@ -58,13 +58,10 @@ class BoomBed : BaseToggleTroll(), PlayerBedEnterSubscriber {
         if (event.player.world.environment != World.Environment.NORMAL)
             return
 
-        if (players.containsKey(event.player.uniqueId)) {
-            event.isCancelled = true
-
+        event.cancelIfAndThen(hasPlayer(event.player)) {
             if (hasFlag(event.player, "destructive"))
                 event.bed.world.createExplosion(event.bed.location, 5f, true)
             else {
-                event.isCancelled = true
                 LocationUtil.createSafeExplosion(event.bed.location, 5f)
             }
 

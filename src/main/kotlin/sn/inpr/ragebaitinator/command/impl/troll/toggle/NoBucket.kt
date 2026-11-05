@@ -57,12 +57,10 @@ class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFil
             .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {
-        if (hasFlag(event.player.uniqueId, "empty"))
-            event.isCancelled = true
+        event.cancelIf(hasFlag(event.player.uniqueId, "empty"))
     }
 
     override fun onPlayerBucketFill(event: PlayerBucketFillEvent) {
-        if (hasFlag(event.player.uniqueId, "fill"))
-            event.isCancelled = true
+        event.cancelIf(hasFlag(event.player.uniqueId, "fill"))
     }
 }

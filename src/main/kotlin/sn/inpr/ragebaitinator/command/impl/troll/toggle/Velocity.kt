@@ -10,7 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
-import java.util.UUID
+import java.util.*
 
 @CommandInfo(
     name = "velocity",
@@ -56,7 +56,7 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
     }
 
     override fun onPacketSend(event: PacketSendEvent) {
-        if (event.user.uuid != null && players.containsKey(event.user.uuid)) {
+        if (event.user.uuid != null && hasPlayer(event.user.uuid)) {
             when (event.packetType) {
                 // velocity is usually dealt after damage
                 PacketType.Play.Server.DAMAGE_EVENT -> markDamaged(event.user.uuid)

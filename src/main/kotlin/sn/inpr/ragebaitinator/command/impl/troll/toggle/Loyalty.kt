@@ -10,7 +10,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
-import java.util.UUID
+import java.util.*
 
 @CommandInfo(
     name = "loyalty",
@@ -61,14 +61,13 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        if (hasPlayer(player))
             homing[player.uniqueId]?.add(event.projectile)
-        }
     }
 
     override fun onProjectileLaunch(event: ProjectileLaunchEvent) {
         val player = event.entity.shooter as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        if (hasPlayer(player)) {
             homing[player.uniqueId]?.add(event.entity)
 
             val velocity = event.entity.velocity

@@ -5,12 +5,10 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClientStatus
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerItemConsumeEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 
 @CommandInfo(
     name = "norespawn",
@@ -34,7 +32,7 @@ class NoRespawn : BaseToggleTroll(), PacketEventReceiveSubscriber {
             .toString()
 
     override fun onPacketReceive(event: PacketReceiveEvent) {
-        if (event.packetType == PacketType.Play.Client.CLIENT_STATUS && players.containsKey(event.user.uuid)) {
+        if (event.packetType == PacketType.Play.Client.CLIENT_STATUS && hasPlayer(event.user.uuid)) {
             val wrapper = WrapperPlayClientClientStatus(event)
             if (wrapper.action == WrapperPlayClientClientStatus.Action.PERFORM_RESPAWN)
                 event.isCancelled = true

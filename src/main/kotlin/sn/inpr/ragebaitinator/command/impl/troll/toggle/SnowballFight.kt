@@ -32,7 +32,7 @@ class SnowballFight : BaseToggleTroll(), EntityShootBowSubscriber {
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId)) {
+        if (hasPlayer(player)) {
             val velocity = event.projectile.velocity
             event.projectile.remove()
             val snowball = player.launchProjectile(Snowball::class.java)

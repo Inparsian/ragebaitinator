@@ -30,8 +30,6 @@ class NoPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
             .toString()
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {
-        val player = event.entity as? Player ?: return
-        if (players.containsKey(player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(hasPlayer(event.entity as? Player ?: return))
     }
 }

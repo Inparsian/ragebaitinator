@@ -9,7 +9,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.utility.PlayerUtil
-import java.util.UUID
+import java.util.*
 
 @CommandInfo(
     name = "fall",
@@ -62,8 +62,6 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
 
     // prevent premature fall damage despite our best efforts to prevent it proactively
     override fun onEntityDamage(event: EntityDamageEvent) {
-        val player = event.entity as? Player ?: return
-        if (event.cause == EntityDamageEvent.DamageCause.FALL && players.containsKey(player.uniqueId))
-            event.isCancelled = true
+        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && hasPlayer(event.entity as? Player ?: return))
     }
 }

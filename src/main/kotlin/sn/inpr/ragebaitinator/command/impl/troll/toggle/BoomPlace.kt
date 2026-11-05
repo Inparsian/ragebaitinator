@@ -53,11 +53,10 @@ class BoomPlace : BaseToggleTroll(), BlockPlaceSubscriber {
             .toString()
 
     override fun onBlockPlace(event: BlockPlaceEvent) {
-        if (players.containsKey(event.player.uniqueId)) {
+        event.cancelIfAndThen(hasPlayer(event.player)) {
             if (hasFlag(event.player, "destructive"))
                 event.block.world.createExplosion(event.block.location, 5f, true)
             else {
-                event.isCancelled = true
                 LocationUtil.createSafeExplosion(event.block.location, 5f)
             }
 

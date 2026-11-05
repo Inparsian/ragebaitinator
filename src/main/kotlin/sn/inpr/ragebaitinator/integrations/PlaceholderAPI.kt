@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.integrations
 import me.clip.placeholderapi.PlaceholderAPI
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
-import org.bukkit.ChatColor
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main
@@ -38,11 +37,11 @@ class PAPIExpansion : PlaceholderExpansion() {
         return when (params) {
             "active" -> {
                 if (player?.player == null) return null
-                val active = PlayerUtil.getEnabledTrolls(player.player)
+                val active = PlayerUtil.getEnabledTrolls(player.player ?: return "err")
                 if (active.isEmpty()) "None" else active.joinToString(", ")
             }
-            "enabledcount" -> PlayerUtil.getEnabledTrolls(player?.player).size.toString()
-            "disabledcount" -> (CommandManager.toggleTrolls.size - PlayerUtil.getEnabledTrolls(player?.player).size).toString()
+            "enabledcount" -> PlayerUtil.getEnabledTrolls(player?.player ?: return "err").size.toString()
+            "disabledcount" -> (CommandManager.toggleTrolls.size - PlayerUtil.getEnabledTrolls(player?.player ?: return "err").size).toString()
             "totalcount" -> CommandManager.trolls.size.toString()
             "totaltogglecount" -> CommandManager.toggleTrolls.size.toString()
             "totaloncecount" -> CommandManager.onceTrolls.size.toString()
@@ -50,7 +49,7 @@ class PAPIExpansion : PlaceholderExpansion() {
                 if (player?.player == null) return null
                 val toggleTroll = CommandManager.toggleTrolls.find { it.info.name == params }
                 if (toggleTroll != null)
-                    if (toggleTroll.players.containsKey(player.uniqueId)) "true" else "false"
+                    if (toggleTroll.hasPlayer(player.player ?: return "err")) "true" else "false"
                 else null
             }
         }
