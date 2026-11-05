@@ -2,41 +2,33 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
+import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.manager.server.ServerVersion
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCamera
+import com.github.retrooper.packetevents.protocol.player.GameMode
+import com.github.retrooper.packetevents.protocol.player.UserProfile
+import com.github.retrooper.packetevents.wrapper.play.server.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.entity.Item
-import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
-import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
-import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
-import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerJoinSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
-import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
+import sn.inpr.ragebaitinator.listeners.*
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.Reflection
-import java.util.UUID
+import java.util.*
+import kotlin.math.absoluteValue
 
 @CommandInfo(
     name = "potato",
@@ -49,21 +41,41 @@ import java.util.UUID
     ]
 )
 class Potato : BaseToggleTroll(),
-    PlayerJoinSubscriber,
     PlayerMoveSubscriber,
     PlayerInteractSubscriber,
-    EntityDamageByEntitySubscriber,
     EntityDamageSubscriber,
     EntityPickupItemSubscriber,
-    ProjectileLaunchSubscriber,
-    PacketEventReceiveSubscriber
+    PacketEventReceiveSubscriber,
+    PacketEventSendSubscriber
 {
+    companion object {
+        val potatoMaterial = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
+            Reflection.getMaterial("POTATO_ITEM") ?: Material.POTATO
+        else
+            Material.POTATO
+    }
+
     val potatoes: Map<UUID, Pair<Item, PlayerSnapshot>> field = mutableMapOf()
 
-    val potatoMaterial = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
-        Reflection.getMaterial("POTATO_ITEM") ?: Material.POTATO
-    else
-        Material.POTATO
+    private fun sendFakeGameMode(player: Player, mode: GameMode) {
+        val api = PacketEvents.getAPI()
+        val latency = api.playerManager.getPing(player)
+        val user = api.playerManager.getUser(player) ?: return
+        val profile = UserProfile(player.uniqueId, player.name)
+        val info = if (api.serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_19_3))
+            WrapperPlayServerPlayerInfoUpdate(
+                WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
+                WrapperPlayServerPlayerInfoUpdate.PlayerInfo(profile, true, latency, mode, null, null)
+            )
+        else
+            WrapperPlayServerPlayerInfo(
+                WrapperPlayServerPlayerInfo.Action.UPDATE_GAME_MODE,
+                WrapperPlayServerPlayerInfo.PlayerData(null, profile, mode, latency)
+            )
+        user.sendPacketSilently(info)
+        user.sendPacketSilently(WrapperPlayServerChangeGameState(
+            WrapperPlayServerChangeGameState.Reason.CHANGE_GAME_MODE, mode.id.toFloat()))
+    }
 
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val potato = target.world.dropItemNaturally(target.location, ItemStack(potatoMaterial))
@@ -76,24 +88,26 @@ class Potato : BaseToggleTroll(),
         potatoes[target.uniqueId] = Pair(potato, snapshot)
         target.inventory.clear()
         target.activePotionEffects.forEach { target.removePotionEffect(it.type) }
-        Bukkit.getOnlinePlayers().filter { it != target }.forEach { it.hidePlayer(Main.instance(), target) }
+        target.allowFlight = true
 
+        // destroy this player entity for others
+        val destroy = WrapperPlayServerDestroyEntities(target.entityId)
+        Bukkit.getOnlinePlayers().filter { it != target }
+            .forEach { PacketEvents.getAPI().playerManager.sendPacket(it, destroy) }
+
+        // prevent interactions (and self-interaction kicks) by setting spectator mode client-side
+        sendFakeGameMode(target, GameMode.SPECTATOR)
         val camera = WrapperPlayServerCamera(potato.entityId)
         PacketEvents.getAPI().playerManager.sendPacket(target, camera)
 
         addTaskTimer(target, {
-            // tp the player so the item does not unload on their end
+            // sync the player's location with the potato's location to prevent unloading
             val playerChunk = LocationUtil.chunkify(target.location).setY(0)
             val potatoChunk = LocationUtil.chunkify(potato.location).setY(0)
+            val yDistance = (target.location.y - potato.location.y).absoluteValue
             val chunkDistance = playerChunk.distance(potatoChunk)
-            if (chunkDistance > 0 || target.location.y < LocationUtil.MAX_PLAYER_ALTITUDE - 1000) {
-                val teleportLocation = potato.location.clone()
-                teleportLocation.y = LocationUtil.MAX_PLAYER_ALTITUDE
-                target.teleport(teleportLocation)
-            }
-            if (!target.activePotionEffects.any { it.type == PotionEffectType.INVISIBILITY }) {
-                target.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 1728000, 0, false, false))
-            }
+            if (chunkDistance > 0 || yDistance > 2)
+                target.teleport(potato.location)
             potato.pickupDelay = Int.MAX_VALUE
         }, 0, 2, true)
 
@@ -114,17 +128,17 @@ class Potato : BaseToggleTroll(),
             snapshot.restore()
             potato.remove()
             if (player.isOnline) {
+                sendFakeGameMode(player, GameMode.valueOf(player.gameMode.name))
                 player.teleport(potato.location.setDirection(player.location.direction))
                 player.velocity = potato.velocity
-                Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.instance(), player) }
                 val camera = WrapperPlayServerCamera(player.entityId)
                 PacketEvents.getAPI().playerManager.sendPacket(player, camera)
+                Bukkit.getOnlinePlayers().filter { it != player }.forEach {
+                    it.hidePlayer(Main.instance(), player)
+                    it.showPlayer(Main.instance(), player)
+                }
             }
         }
-    }
-
-    override fun onPlayerJoin(event: PlayerJoinEvent) {
-        potatoes.forEach { [player, _] -> Bukkit.getPlayer(player)?.let { event.player.hidePlayer(Main.instance(), it) } }
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
@@ -134,11 +148,6 @@ class Potato : BaseToggleTroll(),
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
         if (potatoes.containsKey(event.player.uniqueId))
-            event.isCancelled = true
-    }
-
-    override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
-        if (event.damager is Player && potatoes.containsKey(event.damager.uniqueId))
             event.isCancelled = true
     }
 
@@ -152,16 +161,10 @@ class Potato : BaseToggleTroll(),
             event.isCancelled = true
     }
 
-    override fun onProjectileLaunch(event: ProjectileLaunchEvent) {
-        val player = event.entity.shooter as? Player ?: return
-        if (potatoes.containsKey(player.uniqueId))
-            event.isCancelled = true
-    }
-
-    // cancel some actions at the packet level that potatoes would not be able
-    // to do
+    // cancel some actions at the packet level that potatoes would not be able to do
     override fun onPacketReceive(event: PacketReceiveEvent) {
-        if (potatoes.containsKey(event.getPlayer())) {
+        val uuid = event.user.uuid ?: return
+        if (potatoes.containsKey(uuid))
             when(event.packetType) {
                 PacketType.Play.Client.INTERACT_ENTITY,
                 PacketType.Play.Client.ATTACK,
@@ -176,8 +179,45 @@ class Potato : BaseToggleTroll(),
                 PacketType.Play.Client.UPDATE_STRUCTURE_BLOCK,
                 PacketType.Play.Client.UPDATE_COMMAND_BLOCK,
                 PacketType.Play.Client.UPDATE_COMMAND_BLOCK_MINECART,
+                PacketType.Play.Client.SPECTATE,
+                PacketType.Play.Client.SPECTATE_ENTITY,
                 PacketType.Play.Client.ENTITY_ACTION -> event.isCancelled = true
             }
+    }
+
+    override fun onPacketSend(event: PacketSendEvent) {
+        val uuid = event.user.uuid ?: return
+        if (event.packetType == PacketType.Play.Server.SPAWN_PLAYER) { // <=1.20.1
+            val id = WrapperPlayServerSpawnPlayer(event).entityId
+            if (potatoes.keys.any { Bukkit.getPlayer(it)?.entityId == id }) event.isCancelled = true
+        } else if (event.packetType == PacketType.Play.Server.SPAWN_ENTITY) { // >=1.20.2
+            val id = WrapperPlayServerSpawnEntity(event).entityId
+            if (potatoes.keys.any { Bukkit.getPlayer(it)?.entityId == id }) event.isCancelled = true
         }
+
+        if (potatoes.containsKey(uuid))
+            when (event.packetType) {
+                // the client must never learn it can now fly if they were not able to before
+                PacketType.Play.Server.PLAYER_ABILITIES -> event.isCancelled = true
+                // also cancel game mode changes
+                PacketType.Play.Server.CHANGE_GAME_STATE -> {
+                    val wrapper = WrapperPlayServerChangeGameState(event)
+                    if (wrapper.reason == WrapperPlayServerChangeGameState.Reason.CHANGE_GAME_MODE)
+                        event.isCancelled = true
+                }
+                PacketType.Play.Server.PLAYER_INFO_UPDATE -> {
+                    val wrapper = WrapperPlayServerPlayerInfoUpdate(event)
+                    if (WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE in wrapper.actions)
+                        wrapper.entries.filter { it.gameProfile?.uuid == uuid }.forEach { it.gameMode = GameMode.SPECTATOR }
+                }
+                PacketType.Play.Server.PLAYER_INFO -> { // legacy, before 1.19.3
+                    val wrapper = WrapperPlayServerPlayerInfo(event)
+                    wrapper.playerDataList.filter { it.userProfile?.uuid == uuid }.forEach { it.gameMode = GameMode.SPECTATOR }
+                }
+                PacketType.Play.Server.RESPAWN -> {
+                    val wrapper = WrapperPlayServerRespawn(event)
+                    wrapper.gameMode = GameMode.SPECTATOR
+                }
+            }
     }
 }
