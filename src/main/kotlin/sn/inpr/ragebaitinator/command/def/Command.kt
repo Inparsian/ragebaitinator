@@ -176,6 +176,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun addFlag(player: Player, flag: String) = addFlag(player.uniqueId, flag)
     fun hasFlag(uuid: UUID, flag: String): Boolean = players[uuid]?.contains(flag) ?: false
     fun hasFlag(player: Player, flag: String): Boolean = hasFlag(player.uniqueId, flag)
+    fun removeFlag(uuid: UUID, flag: String): Boolean = players[uuid]?.remove(flag) ?: false
 
     open fun onRemovePlayer(player: Player, reason: String) {}
 
@@ -205,13 +206,17 @@ abstract class BaseToggleTroll : BaseTroll() {
         return true
     }
 
-    fun addTask(player: Player, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
+    fun addTask(uuid: UUID, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
+        if (!ignorePlayerCheck && !players.containsKey(uuid))
             return null
-        removeTask(player.uniqueId)
+        removeTask(uuid)
         val t = runTaskLater(runnable, delay)
-        this.tasks[player.uniqueId] = t
+        this.tasks[uuid] = t
         return t
+    }
+
+    fun addTask(player: Player, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
+        return addTask(player.uniqueId, runnable, delay, ignorePlayerCheck)
     }
 
     fun addTaskTimer(player: Player, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
