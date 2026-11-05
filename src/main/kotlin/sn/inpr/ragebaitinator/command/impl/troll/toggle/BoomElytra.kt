@@ -1,14 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityToggleGlideEvent
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "boomelytra",
@@ -32,13 +30,10 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class BoomElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
+class BoomElytra : BaseBoomTroll(), EntityToggleGlideSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
-        if (persistent)
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+        addBoomFlags(target, args)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they start gliding")
             .put("player", target.name)
@@ -54,18 +49,6 @@ class BoomElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
 
     override fun onEntityToggleGlide(event: EntityToggleGlideEvent) {
         val player = event.entity as? Player ?: return
-        event.cancelIfAndThen(hasPlayer(player)) {
-            if (hasFlag(player, "destructive"))
-                player.world.createExplosion(player.location, 5f, true)
-            else {
-                LocationUtil.createSafeExplosion(player.location, 5f)
-            }
-
-            if (player.gameMode == GameMode.CREATIVE || player.gameMode == GameMode.SPECTATOR)
-                player.health = 0.0
-
-            if (!hasFlag(player, "persistent"))
-                removePlayer(player)
-        }
+        kaboom(event, player, player.location)
     }
 }

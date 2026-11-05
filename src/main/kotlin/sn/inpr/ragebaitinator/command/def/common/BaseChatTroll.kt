@@ -1,7 +1,8 @@
-package sn.inpr.ragebaitinator.command.def
+package sn.inpr.ragebaitinator.command.def.common
 
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 
 /**

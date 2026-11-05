@@ -1,15 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityPickupItemEvent
-import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "boompickup",
@@ -33,13 +30,10 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class BoomPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
+class BoomPickup : BaseBoomTroll(), EntityPickupItemSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
-        if (persistent)
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+        addBoomFlags(target, args)
 
         return placeholdersOr("init", "%prefix% %c2%%^next% item %c1%%player% %c2%picks up will now explode")
             .put("player", target.name)
@@ -55,20 +49,6 @@ class BoomPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {
         val player = event.entity as? Player ?: return
-        event.cancelIfAndThen(hasPlayer(player)) {
-            runTaskLater({
-                if (hasFlag(player, "destructive"))
-                    event.item.world.createExplosion(event.item.location, 5f, true)
-                else {
-                    LocationUtil.createSafeExplosion(event.item.location, 5f)
-                }
-
-                if (player.gameMode == GameMode.CREATIVE || player.gameMode == GameMode.SPECTATOR)
-                    player.health = 0.0
-
-                if (!hasFlag(player, "persistent"))
-                    removePlayer(player)
-            }, 1)
-        }
+        kaboom(event, player, event.item.location)
     }
 }

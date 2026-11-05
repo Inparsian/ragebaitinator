@@ -2,9 +2,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import sn.inpr.ragebaitinator.command.def.BaseChatTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
 import sn.inpr.ragebaitinator.utility.TextTransform
 
 @CommandInfo(

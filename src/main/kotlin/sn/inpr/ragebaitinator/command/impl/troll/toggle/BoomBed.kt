@@ -1,15 +1,13 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import org.bukkit.GameMode
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerBedEnterEvent
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.PlayerBedEnterSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "boombed",
@@ -33,13 +31,10 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class BoomBed : BaseToggleTroll(), PlayerBedEnterSubscriber {
+class BoomBed : BaseBoomTroll(), PlayerBedEnterSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
-        if (persistent)
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+        addBoomFlags(target, args)
 
         return placeholdersOr("init", "%prefix% %c2%%^next% bed %c1%%player% %c2%sleeps in will now explode")
             .put("player", target.name)
@@ -58,18 +53,6 @@ class BoomBed : BaseToggleTroll(), PlayerBedEnterSubscriber {
         if (event.player.world.environment != World.Environment.NORMAL)
             return
 
-        event.cancelIfAndThen(hasPlayer(event.player)) {
-            if (hasFlag(event.player, "destructive"))
-                event.bed.world.createExplosion(event.bed.location, 5f, true)
-            else {
-                LocationUtil.createSafeExplosion(event.bed.location, 5f)
-            }
-
-            if (event.player.gameMode == GameMode.CREATIVE || event.player.gameMode == GameMode.SPECTATOR)
-                event.player.health = 0.0
-
-            if (!hasFlag(event.player, "persistent"))
-                removePlayer(event.player)
-        }
+        kaboom(event, event.player, event.bed.location)
     }
 }

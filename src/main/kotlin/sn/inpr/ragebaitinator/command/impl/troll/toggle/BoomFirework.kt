@@ -1,14 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil.isFireworkBoost
 
 @CommandInfo(
@@ -33,13 +31,10 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.isFireworkBoost
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class BoomFirework : BaseToggleTroll(), PlayerInteractSubscriber {
+class BoomFirework : BaseBoomTroll(), PlayerInteractSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
-        if (persistent)
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+        addBoomFlags(target, args)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they firework boost")
             .put("player", target.name)
@@ -54,18 +49,7 @@ class BoomFirework : BaseToggleTroll(), PlayerInteractSubscriber {
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        event.cancelIfAndThen(hasPlayer(event.player) && isFireworkBoost(event)) {
-            if (hasFlag(event.player, "destructive"))
-                event.player.world.createExplosion(event.player.location, 5f, true)
-            else {
-                LocationUtil.createSafeExplosion(event.player.location, 5f)
-            }
-
-            if (event.player.gameMode == GameMode.CREATIVE || event.player.gameMode == GameMode.SPECTATOR)
-                event.player.health = 0.0
-
-            if (!hasFlag(event.player, "persistent"))
-                removePlayer(event.player)
-        }
+        if (isFireworkBoost(event))
+            kaboom(event, event.player, event.player.location)
     }
 }

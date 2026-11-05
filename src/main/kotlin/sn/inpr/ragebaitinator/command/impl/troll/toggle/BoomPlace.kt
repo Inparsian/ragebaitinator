@@ -1,14 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import org.bukkit.GameMode
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "boomplace",
@@ -32,13 +30,10 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class BoomPlace : BaseToggleTroll(), BlockPlaceSubscriber {
+class BoomPlace : BaseBoomTroll(), BlockPlaceSubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
-        if (persistent)
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+        addBoomFlags(target, args)
 
         return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%places will now explode")
             .put("player", target.name)
@@ -52,19 +47,5 @@ class BoomPlace : BaseToggleTroll(), BlockPlaceSubscriber {
             .put("player", target.name)
             .toString()
 
-    override fun onBlockPlace(event: BlockPlaceEvent) {
-        event.cancelIfAndThen(hasPlayer(event.player)) {
-            if (hasFlag(event.player, "destructive"))
-                event.block.world.createExplosion(event.block.location, 5f, true)
-            else {
-                LocationUtil.createSafeExplosion(event.block.location, 5f)
-            }
-
-            if (event.player.gameMode == GameMode.CREATIVE || event.player.gameMode == GameMode.SPECTATOR)
-                event.player.health = 0.0
-
-            if (!hasFlag(event.player, "persistent"))
-                removePlayer(event.player)
-        }
-    }
+    override fun onBlockPlace(event: BlockPlaceEvent) = kaboom(event, event.player, event.block.location)
 }
