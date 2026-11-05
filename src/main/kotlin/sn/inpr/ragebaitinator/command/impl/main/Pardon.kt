@@ -5,7 +5,6 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseCommand
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.Placeholders
@@ -16,7 +15,7 @@ import sn.inpr.ragebaitinator.utility.ChatUtil.send
     description = "Disables all persistent trolls for a player.",
     aliases = ["stop"],
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER)
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false)
     ]
 )
 class Pardon : BaseCommand() {

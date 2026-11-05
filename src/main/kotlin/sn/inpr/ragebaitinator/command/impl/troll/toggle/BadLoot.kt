@@ -15,7 +15,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "badloot",
     description = "Makes a player catch silverfish instead of fish.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

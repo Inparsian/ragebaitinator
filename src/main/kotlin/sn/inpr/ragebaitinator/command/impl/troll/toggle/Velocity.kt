@@ -15,7 +15,7 @@ import java.util.UUID
     name = "velocity",
     description = "Magnifies a player's velocity when they take damage.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.DOUBLE,
             purpose = "Multiplier",

@@ -25,7 +25,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "genie",
     description = "Be careful what you wish for :)",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

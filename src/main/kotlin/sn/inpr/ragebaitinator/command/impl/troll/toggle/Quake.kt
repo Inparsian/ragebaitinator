@@ -15,7 +15,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "quake",
     description = "Constantly changes the player's FOV.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

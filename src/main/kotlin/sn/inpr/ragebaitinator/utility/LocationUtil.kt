@@ -15,14 +15,13 @@ object LocationUtil {
     val downHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) -64 else 0
     val upHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) 319 else 255
 
-    fun vectorRelativeYaw(player: Player, radians: Int, distance: Double): Vector {
-        val yaw: Double = player.location.yaw.toDouble() + radians
-
+    fun vectorRelativeYaw(entity: Entity, radians: Int, distance: Double): Vector {
+        val yaw: Double = entity.location.yaw.toDouble() + radians
         return Vector(-rsin(yaw) * distance, 0.0, rcos(yaw) * distance)
     }
 
-    fun locationRelativeYaw(player: Player, radians: Int, distance: Double): Location
-        = vectorRelativeYaw(player, radians, distance).toLocation(player.world).add(player.location)
+    fun locationRelativeYaw(entity: Entity, radians: Int, distance: Double): Location
+        = vectorRelativeYaw(entity, radians, distance).toLocation(entity.world).add(entity.location)
 
     fun blockify(location: Location, pointFive: Boolean): Location {
         val factor = if (pointFive) 0.5 else 0.0

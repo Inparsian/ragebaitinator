@@ -14,7 +14,7 @@ import sn.inpr.ragebaitinator.type.EntitySnapshot
     name = "hydra",
     description = "Hail Hydra!",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

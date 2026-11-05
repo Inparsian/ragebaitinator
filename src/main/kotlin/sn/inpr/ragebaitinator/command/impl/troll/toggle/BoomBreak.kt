@@ -14,7 +14,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "boombreak",
     description = "Makes the next (or every) block a player breaks explode.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Persistent",
@@ -53,13 +53,13 @@ class BoomBreak : BaseToggleTroll(), BlockBreakSubscriber {
             .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {
-        if (players.contains(event.player.uniqueId)) {
+        if (players.containsKey(event.player.uniqueId)) {
             if (hasFlag(event.player, "destructive"))
                 event.block.world.createExplosion(event.block.location, 5f, true)
             else
                 LocationUtil.createSafeExplosion(event.block.location, 5f)
 
-            if (event.player.gameMode != GameMode.CREATIVE && event.player.gameMode != GameMode.SPECTATOR)
+            if (event.player.gameMode == GameMode.CREATIVE || event.player.gameMode == GameMode.SPECTATOR)
                 event.player.health = 0.0
 
             if (!hasFlag(event.player, "persistent"))

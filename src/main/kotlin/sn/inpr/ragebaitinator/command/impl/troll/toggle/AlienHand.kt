@@ -16,7 +16,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "alienhand",
     description = "MY HAND IS INFECTED BY SOME ALIEN PARASITE",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Local",

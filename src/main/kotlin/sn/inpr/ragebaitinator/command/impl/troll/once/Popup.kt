@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.InventoryType
     name = "popup",
     description = "Opens a random inventory menu for a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Popup : BaseTroll() {

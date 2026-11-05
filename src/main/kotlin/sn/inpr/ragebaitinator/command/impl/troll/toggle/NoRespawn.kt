@@ -16,7 +16,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
     name = "norespawn",
     description = "Prevents a player from respawning.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

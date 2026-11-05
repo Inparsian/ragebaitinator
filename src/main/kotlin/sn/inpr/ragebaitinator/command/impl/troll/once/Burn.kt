@@ -10,7 +10,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
     name = "burn",
     description = "Phew; it's starting to get hot in here.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.INTEGER,
             purpose = "Ticks",

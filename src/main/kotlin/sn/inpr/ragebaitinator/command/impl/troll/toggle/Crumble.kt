@@ -18,7 +18,7 @@ import java.util.UUID
     name = "crumble",
     description = "Naturally \"breaks\" blocks around a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Local",

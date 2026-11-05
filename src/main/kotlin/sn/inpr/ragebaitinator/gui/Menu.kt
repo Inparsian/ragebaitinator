@@ -89,8 +89,8 @@ abstract class PaginationMenu(
             }
 
             if (page < pages) {
-                addItem(inventory, bottomRow + 2, Material.SPECTRAL_ARROW, "§aNext Page", listOf(), false)
-                addItem(inventory, bottomRow + 3, Material.ARROW, "§aLast Page", listOf(), false)
+                addItem(inventory, bottomRow + 2, Material.ARROW, "§aNext Page", listOf(), false)
+                addItem(inventory, bottomRow + 3, Material.SPECTRAL_ARROW, "§aLast Page", listOf(), false)
             }
         }
     }

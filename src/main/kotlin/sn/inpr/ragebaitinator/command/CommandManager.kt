@@ -44,6 +44,7 @@ object CommandManager : CommandExecutor, TabCompleter {
                         cmd.onInstantiate()
                     }
             }
+
         info("Registered ${commands.size} commands")
     }
 
@@ -62,7 +63,7 @@ object CommandManager : CommandExecutor, TabCompleter {
                 else SQLite.CommandHistory.addConsoleCommand(everything)
             }
         } else {
-            send(sender, Placeholders("commandNotFound","%prefix% %c1%Command not found"))
+            send(sender, Placeholders("commandNotFound","%prefix% &cCommand not found"))
         }
 
         return true

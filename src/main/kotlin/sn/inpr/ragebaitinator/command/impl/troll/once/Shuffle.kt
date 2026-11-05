@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
     name = "shuffle",
     description = "Shuffles the player's inventory and hotbar",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER)
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false)
     ]
 )
 class Shuffle : BaseTroll() {

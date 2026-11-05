@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
     name = "anorexia",
     description = "Makes a player unable to eat (also makes gapples ineffective).",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

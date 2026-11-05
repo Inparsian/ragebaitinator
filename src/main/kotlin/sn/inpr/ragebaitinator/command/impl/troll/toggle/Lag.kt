@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit
     name = "lag",
     description = "Makes a player \"lag\".",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.LONG,
             purpose = "RTT",

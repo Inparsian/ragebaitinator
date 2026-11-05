@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "lure",
     description = "Lures every creature within a 100 block radius to a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Lure : BaseTroll() {

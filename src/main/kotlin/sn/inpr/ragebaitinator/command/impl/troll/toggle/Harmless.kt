@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
     name = "harmless",
     description = "They punch like a girl!!",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

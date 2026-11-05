@@ -19,9 +19,7 @@ class PacketListener : PacketEventsListener {
             return
 
         for (command in CommandManager.commands) {
-            if (command is PacketEventSendSubscriber) {
-                command.onPacketSend(event)
-            }
+            if (command is PacketEventSendSubscriber) command.onPacketSend(event)
         }
     }
 
@@ -30,9 +28,7 @@ class PacketListener : PacketEventsListener {
             return
 
         for (command in CommandManager.commands) {
-            if (command is PacketEventReceiveSubscriber) {
-                command.onPacketReceive(event)
-            }
+            if (command is PacketEventReceiveSubscriber) command.onPacketReceive(event)
         }
     }
 }

@@ -34,6 +34,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerJoinSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
+import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.Reflection
 import java.util.UUID
 
@@ -41,7 +42,7 @@ import java.util.UUID
     name = "potato",
     description = "Oh hi, how are you holding up? Because I'M A POTATO.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
@@ -82,7 +83,10 @@ class Potato : BaseToggleTroll(),
 
         // tp the player so the item does not unload on their end
         addTaskTimer(target, {
-            target.teleport(potato.location.add(0.0, 2.0, 0.0))
+            val teleportLocation = potato.location.clone()
+            teleportLocation.y = (LocationUtil.downHeightLimit - 2).toDouble()
+            target.teleport(teleportLocation)
+            target.isFlying = true
             target.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 72005, 0, false, false))
             potato.pickupDelay = Int.MAX_VALUE
         }, 0, 2, true)
@@ -101,14 +105,16 @@ class Potato : BaseToggleTroll(),
     override fun onRemovePlayer(player: Player, reason: String) {
         if (potatoes.containsKey(player.uniqueId)) {
             val [potato, snapshot] = potatoes.remove(player.uniqueId)!!
-            player.teleport(potato.location.setDirection(player.location.direction))
-            player.velocity = potato.velocity
-            Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.instance(), player) }
             snapshot.restore()
             potato.remove()
-
-            val camera = WrapperPlayServerCamera(player.entityId)
-            PacketEvents.getAPI().playerManager.sendPacket(player, camera)
+            if (player.isOnline) {
+                player.teleport(potato.location.setDirection(player.location.direction))
+                player.isFlying = false
+                player.velocity = potato.velocity
+                Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.instance(), player) }
+                val camera = WrapperPlayServerCamera(player.entityId)
+                PacketEvents.getAPI().playerManager.sendPacket(player, camera)
+            }
         }
     }
 

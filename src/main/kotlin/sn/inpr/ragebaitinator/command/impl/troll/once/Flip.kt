@@ -11,7 +11,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.teleportRetainVelocity
     name = "flip",
     description = "Rotates a player 180 degrees.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Flip : BaseTroll() {

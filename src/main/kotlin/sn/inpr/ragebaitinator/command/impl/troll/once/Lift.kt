@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
     name = "lift",
     description = "We have lift-off! Launches a player into the air",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.DOUBLE,
             purpose = "Power",

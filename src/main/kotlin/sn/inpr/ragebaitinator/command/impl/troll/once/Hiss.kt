@@ -16,7 +16,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "hiss",
     description = "Plays a creeper hiss sound from directly behind the player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Hiss : BaseTroll() {

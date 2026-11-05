@@ -14,7 +14,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
     name = "slap",
     description = "Slaps the player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.DOUBLE,
             purpose = "Power",

@@ -12,6 +12,8 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityDeathEvent
 import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
+import org.bukkit.event.entity.EntityRegainHealthEvent
+import org.bukkit.event.entity.EntityResurrectEvent
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.EntityToggleGlideEvent
 import org.bukkit.event.entity.PlayerDeathEvent
@@ -29,7 +31,6 @@ import org.bukkit.event.player.PlayerRespawnEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.event.player.PlayerVelocityEvent
 import sn.inpr.ragebaitinator.command.CommandManager
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 
 fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
@@ -45,6 +46,8 @@ fun interface EntityDamageByEntitySubscriber { fun onEntityDamageByEntity(event:
 fun interface EntityDamageSubscriber { fun onEntityDamage(event: EntityDamageEvent) }
 fun interface PlayerDeathSubscriber { fun onPlayerDeath(event: PlayerDeathEvent) }
 fun interface EntityDeathSubscriber { fun onEntityDeath(event: EntityDeathEvent) }
+fun interface EntityRegainHealthSubscriber { fun onEntityRegainHealth(event: EntityRegainHealthEvent) }
+fun interface EntityResurrectSubscriber { fun onEntityResurrect(event: EntityResurrectEvent) }
 fun interface PlayerRespawnSubscriber { fun onPlayerRespawn(event: PlayerRespawnEvent) }
 fun interface EntityShootBowSubscriber { fun onEntityShootBow(event: EntityShootBowEvent) }
 fun interface EntityPickupItemSubscriber { fun onEntityPickupItem(event: EntityPickupItemEvent) }
@@ -78,6 +81,8 @@ object BukkitEventListener : Listener {
             if (command is EntityDamageSubscriber && event is EntityDamageEvent) command.onEntityDamage(event)
             if (command is PlayerDeathSubscriber && event is PlayerDeathEvent) command.onPlayerDeath(event)
             if (command is EntityDeathSubscriber && event is EntityDeathEvent) command.onEntityDeath(event)
+            if (command is EntityRegainHealthSubscriber && event is EntityRegainHealthEvent) command.onEntityRegainHealth(event)
+            if (command is EntityResurrectSubscriber && event is EntityResurrectEvent) command.onEntityResurrect(event)
             if (command is PlayerRespawnSubscriber && event is PlayerRespawnEvent) command.onPlayerRespawn(event)
             if (command is EntityShootBowSubscriber && event is EntityShootBowEvent) command.onEntityShootBow(event)
             if (command is EntityPickupItemSubscriber && event is EntityPickupItemEvent) command.onEntityPickupItem(event)
@@ -121,6 +126,10 @@ object BukkitEventListener : Listener {
     fun onEntityDamage(event: EntityDamageEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityDeath(event: EntityDeathEvent) = interceptBukkitEvent(event) // EntityDeath & PlayerDeath
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onEntityRegainHealth(event: EntityRegainHealthEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onEntityResurrect(event: EntityResurrectEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerRespawn(event: PlayerRespawnEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)

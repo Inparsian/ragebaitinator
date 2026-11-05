@@ -23,7 +23,7 @@ import kotlin.math.absoluteValue
     name = "sinkhole",
     description = "Conjures a sinkhole beneath a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH

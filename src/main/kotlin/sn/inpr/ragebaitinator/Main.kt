@@ -7,7 +7,6 @@ import com.github.retrooper.packetevents.event.PacketListenerPriority
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
-import org.intellij.lang.annotations.Language
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.gui.GuiHandler
@@ -63,7 +62,7 @@ class Main : JavaPlugin() {
             info("&6CPU time is not supported on this system, timing may be inaccurate.")
         }
 
-        val time: String = TimeUtil.formatNano(TimeUtil.timeTask({
+        val time: String = TimeUtil.formatNano(TimeUtil.timeTask {
             synchronized(this) {
                 Bukkit.getPluginManager().registerEvents(BukkitEventListener, this)
                 Bukkit.getPluginManager().registerEvents(GuiHandler, this)
@@ -73,7 +72,7 @@ class Main : JavaPlugin() {
                 else
                     info("&cFailed to connect to SQLite database")
 
-                if(PAPI.present) {
+                if (PAPI.present) {
                     PAPIExpansion().register()
                     info("&aPlaceholderAPI integration complete")
                 }
@@ -81,7 +80,7 @@ class Main : JavaPlugin() {
                 getCommand("ragebaitinator")?.setExecutor(CommandManager)
                 CommandManager.registerCommands()
             }
-        }))
+        })
 
         info("&aPlugin initialized in $time")
     }

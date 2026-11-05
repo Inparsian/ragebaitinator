@@ -23,7 +23,7 @@ import kotlin.math.absoluteValue
     name = "hottub",
     description = "It's not lava it's just lukewarm water",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {

@@ -10,7 +10,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
     name = "boom",
     description = "Makes a player explode. Literally, that's it.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.FLOAT,
             purpose = "Power",

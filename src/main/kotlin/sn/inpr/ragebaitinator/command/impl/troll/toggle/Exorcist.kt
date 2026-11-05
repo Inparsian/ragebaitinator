@@ -21,7 +21,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "exorcist",
     description = "Causes entities around a player to spaz out.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Local",

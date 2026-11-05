@@ -22,7 +22,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "creep",
     description = "Spawns a few charged creepers at the player's location",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Harmless",

@@ -15,7 +15,7 @@ import java.util.UUID
     name = "fall",
     description = "Makes a player fall indefinitely.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH

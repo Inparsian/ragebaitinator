@@ -15,7 +15,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
     name = "aquaphobia",
     description = "Makes a player allergic to water.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT

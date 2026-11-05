@@ -13,7 +13,7 @@ import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
     name = "snowballfight",
     description = "Replaces every arrow shot by the player with snowballs.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

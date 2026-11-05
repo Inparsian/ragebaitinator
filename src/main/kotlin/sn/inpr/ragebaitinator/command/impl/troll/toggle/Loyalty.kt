@@ -16,7 +16,7 @@ import java.util.UUID
     name = "loyalty",
     description = "Stop shooting yourself!",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

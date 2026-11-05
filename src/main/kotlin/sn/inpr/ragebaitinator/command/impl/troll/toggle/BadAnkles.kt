@@ -13,7 +13,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
     name = "badankles",
     description = "Makes a player more susceptible to fall damage (yes, jumping will cause damage)",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH

@@ -29,7 +29,9 @@ abstract class BaseCommand {
     fun stringifySyntax(): String =
         info.syntax.mapNotNull { syntax ->
             if (syntax.purpose.isEmpty()) {
-                return@mapNotNull if (syntax.type == CommandSyntax.Type.PLAYER) "<player>" else null
+                return@mapNotNull if (syntax.type == CommandSyntax.Type.PLAYER) {
+                    if (syntax.optional) "[player]" else "<player>"
+                } else null
             }
 
             val name = syntax.purpose
@@ -74,11 +76,15 @@ abstract class BaseTroll : BaseCommand() {
         label: String,
         args: Array<out String>
     ): Boolean {
-        val targets: List<Player> = targetPlayers(sender, args.getOrNull(1) ?: return false)
-        if (targets.isNotEmpty()) {
-            targets.forEach { target ->
+        val playerArguments = info.syntax.indices
+            .filter { info.syntax[it].type == CommandSyntax.Type.PLAYER }
+            .map { args.getOrNull(it + 1)?.let { input -> targetPlayers(sender, input) } ?: return false }
+        val targets = playerArguments.firstOrNull() ?: return false
+        if (playerArguments.all { it.isNotEmpty() }) {
+            val allTargets = playerArguments.flatten().distinctBy { it.uniqueId }
+            for (target in allTargets) {
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
-                    val placeholders = placeholdersOr("immune", "%prefix% %c1%%player% is immune to %command%!")
+                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
                         .put("player", target.name)
                         .put("command", this.info.name)
                     send(sender, target, placeholders)
@@ -87,12 +93,15 @@ abstract class BaseTroll : BaseCommand() {
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull()
                 if (firstHitCondition?.predicate == true) {
-                    val placeholders = placeholdersOr("conditionsFail", "%prefix% %c1%%message%")
+                    val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)
                     return true
                 }
 
+            }
+
+            targets.forEach { target ->
                 val message = init(sender, target, args)
                 if (message != null)
                     send(sender, target, message)
@@ -124,7 +133,7 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
-                    val placeholders = placeholdersOr("immune", "%prefix% %c1%%player% is immune to %command%!")
+                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
                         .put("player", target.name)
                         .put("command", this.info.name)
                     send(sender, target, placeholders)
@@ -134,7 +143,7 @@ abstract class BaseToggleTroll : BaseTroll() {
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull()
                 if (firstHitCondition?.predicate == true) {
-                    val placeholders = placeholdersOr("conditionsFail", "%prefix% %c1%%message%")
+                    val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)
                     return true
@@ -197,7 +206,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTask(player: Player, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.contains(player.uniqueId))
+        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
             return null
         removeTask(player.uniqueId)
         val t = runTaskLater(runnable, delay)
@@ -206,7 +215,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTaskTimer(player: Player, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.contains(player.uniqueId))
+        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
             return null
         removeTask(player.uniqueId)
         val t = runTaskTimer(runnable, delay, period)
@@ -215,7 +224,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     }
 
     fun addTaskRandomTimer(player: Player, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !players.contains(player.uniqueId))
+        if (!ignorePlayerCheck && !players.containsKey(player.uniqueId))
             return null
         removeTask(player.uniqueId)
         val t = runTaskRandomTimer(runnable, delay, minPeriod, maxPeriod)

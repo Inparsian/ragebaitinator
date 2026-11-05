@@ -12,7 +12,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCh
     name = "demo",
     description = "WTF I thought my account was genuine??!1",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Demo : BaseTroll() {

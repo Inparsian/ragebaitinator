@@ -15,7 +15,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "bludger",
     description = "Sends a homing fireball after a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "From Shooter",

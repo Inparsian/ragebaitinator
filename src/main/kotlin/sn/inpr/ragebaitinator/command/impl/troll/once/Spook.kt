@@ -12,7 +12,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerCh
     name = "spook",
     description = "Plays the elder guardian mob appearance.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Spook : BaseTroll() {

@@ -18,7 +18,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "squidrain",
     description = "Rains squids upon a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

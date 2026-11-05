@@ -10,7 +10,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
     name = "annoy",
     description = "Hrmm. Annoys a player with villager sounds.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

@@ -11,7 +11,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     name = "fakedamage",
     description = "Sends fake damage to a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class FakeDamage : BaseTroll() {

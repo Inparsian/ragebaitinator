@@ -17,7 +17,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "erroneous",
     description = "That's some amazing accuracy you've got there!",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT

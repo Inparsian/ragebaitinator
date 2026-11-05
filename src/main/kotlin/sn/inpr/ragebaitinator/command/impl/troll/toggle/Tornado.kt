@@ -19,7 +19,7 @@ import kotlin.math.pow
     name = "tornado",
     description = "Sends a tornado after a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.INTEGER,
             purpose = "Strength",

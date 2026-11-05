@@ -19,7 +19,7 @@ import java.util.UUID
     name = "void",
     description = "Banishes a player into the void.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
@@ -57,18 +57,18 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, Pl
     override fun onEntityDamage(event: EntityDamageEvent) {
         if (event.entity is Player) {
             val player = event.entity as Player
-            if (this.players.contains(player.uniqueId) && inVoid(player, -2.0))
+            if (this.players.containsKey(player.uniqueId) && inVoid(player, -2.0))
                 event.isCancelled = true
         }
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (this.players.contains(event.player.uniqueId) && !inVoid(event.player, -2.0))
+        if (this.players.containsKey(event.player.uniqueId) && !inVoid(event.player, -2.0))
             event.player.teleport(get65536(event.player))
     }
 
     override fun onPlayerTeleport(event: PlayerTeleportEvent) {
-        if (this.players.contains(event.player.uniqueId) && inVoid(event.player, -2.0))
+        if (this.players.containsKey(event.player.uniqueId) && inVoid(event.player, -2.0))
             event.isCancelled = true
     }
 }

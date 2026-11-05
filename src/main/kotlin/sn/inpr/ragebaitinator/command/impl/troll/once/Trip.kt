@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     name = "trip",
     description = "Makes a player drop everything in their inventory.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Clone",

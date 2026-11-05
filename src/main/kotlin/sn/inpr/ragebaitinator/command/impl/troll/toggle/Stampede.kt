@@ -24,7 +24,7 @@ private const val PURSUIT_SPEED_MULTIPLIER = 2.4
     name = "stampede",
     description = "Unleashes a herd of cows on a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "From Shooter",

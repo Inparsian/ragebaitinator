@@ -18,7 +18,7 @@ import kotlin.jvm.java
     name = "bomb",
     description = "Fires projectiles from thin air at a player.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.STRING,
             completions = ["arrow", "snowball", "egg", "fireball"],

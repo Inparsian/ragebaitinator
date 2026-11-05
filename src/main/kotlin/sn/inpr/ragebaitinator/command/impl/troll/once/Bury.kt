@@ -21,7 +21,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     name = "bury",
     description = "Buries a player alive.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
     ]
 )
 class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {

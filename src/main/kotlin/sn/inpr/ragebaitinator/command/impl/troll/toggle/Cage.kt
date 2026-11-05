@@ -23,7 +23,7 @@ import java.util.*
     name = "cage",
     description = "Puts a player in a cage.",
     syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "At Sender",

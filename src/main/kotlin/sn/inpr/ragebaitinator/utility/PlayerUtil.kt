@@ -13,12 +13,13 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import org.bukkit.event.block.Action
+import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.CommandManager
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.impl.troll.toggle.Potato
 import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
@@ -93,6 +94,16 @@ object PlayerUtil {
     fun getHead(player: OfflinePlayer): ItemStack {
         val name = player.name ?: return ItemStack(Material.BARRIER)
         return getHead(name)
+    }
+
+    fun isFireworkBoost(event: PlayerInteractEvent): Boolean {
+        return if (event.player.isGliding && event.action == Action.RIGHT_CLICK_AIR) {
+            val material = if(PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
+                Reflection.getMaterial("FIREWORK") ?: return false
+            else
+                Material.FIREWORK_ROCKET
+            event.item?.type == material
+        } else false
     }
 
     // works even without a source
