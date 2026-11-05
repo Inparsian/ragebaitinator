@@ -7,29 +7,8 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.entity.EntityDamageByEntityEvent
-import org.bukkit.event.entity.EntityDamageEvent
-import org.bukkit.event.entity.EntityDeathEvent
-import org.bukkit.event.entity.EntityExplodeEvent
-import org.bukkit.event.entity.EntityPickupItemEvent
-import org.bukkit.event.entity.EntityRegainHealthEvent
-import org.bukkit.event.entity.EntityResurrectEvent
-import org.bukkit.event.entity.EntityShootBowEvent
-import org.bukkit.event.entity.EntityToggleGlideEvent
-import org.bukkit.event.entity.PlayerDeathEvent
-import org.bukkit.event.entity.ProjectileHitEvent
-import org.bukkit.event.entity.ProjectileLaunchEvent
-import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.event.player.PlayerBedEnterEvent
-import org.bukkit.event.player.PlayerFishEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerItemConsumeEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerMoveEvent
-import org.bukkit.event.player.PlayerQuitEvent
-import org.bukkit.event.player.PlayerRespawnEvent
-import org.bukkit.event.player.PlayerTeleportEvent
-import org.bukkit.event.player.PlayerVelocityEvent
+import org.bukkit.event.entity.*
+import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 
@@ -42,6 +21,8 @@ fun interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVeloc
 fun interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
 fun interface BlockBreakSubscriber { fun onBlockBreak(event: BlockBreakEvent) }
 fun interface BlockPlaceSubscriber { fun onBlockPlace(event: BlockPlaceEvent) }
+fun interface PlayerBucketEmptySubscriber { fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) }
+fun interface PlayerBucketFillSubscriber { fun onPlayerBucketFill(event: PlayerBucketFillEvent) }
 fun interface EntityDamageByEntitySubscriber { fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) }
 fun interface EntityDamageSubscriber { fun onEntityDamage(event: EntityDamageEvent) }
 fun interface PlayerDeathSubscriber { fun onPlayerDeath(event: PlayerDeathEvent) }
@@ -77,6 +58,8 @@ object BukkitEventListener : Listener {
             if (command is PlayerInteractSubscriber && event is PlayerInteractEvent) command.onPlayerInteract(event)
             if (command is BlockBreakSubscriber && event is BlockBreakEvent) command.onBlockBreak(event)
             if (command is BlockPlaceSubscriber && event is BlockPlaceEvent) command.onBlockPlace(event)
+            if (command is PlayerBucketEmptySubscriber && event is PlayerBucketEmptyEvent) command.onPlayerBucketEmpty(event)
+            if (command is PlayerBucketFillSubscriber && event is PlayerBucketFillEvent) command.onPlayerBucketFill(event)
             if (command is EntityDamageByEntitySubscriber && event is EntityDamageByEntityEvent) command.onEntityDamageByEntity(event)
             if (command is EntityDamageSubscriber && event is EntityDamageEvent) command.onEntityDamage(event)
             if (command is PlayerDeathSubscriber && event is PlayerDeathEvent) command.onPlayerDeath(event)
@@ -120,6 +103,10 @@ object BukkitEventListener : Listener {
     fun onBlockBreak(event: BlockBreakEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onBlockPlace(event: BlockPlaceEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerBucketFill(event: PlayerBucketFillEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)

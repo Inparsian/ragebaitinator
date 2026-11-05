@@ -28,9 +28,7 @@ class Placeholders(val original: String) {
         return this
     }
 
-    override fun toString(): String {
-        return placeholdersRegex.replace(original) { match ->
-            placeholders[match.groupValues[1]] ?: match.value
-        }
+    override fun toString(): String = placeholdersRegex.replace(original) { match ->
+        placeholders[match.groupValues[1]] ?: match.value
     }
 }
