@@ -134,17 +134,17 @@ class TrollsMenu(player: Player, val target: Player) : PaginationMenu(
 }
 
 class TrollMenu(player: Player, val troll: BaseTroll, val target: Player) : Menu(player, true) {
+    val syntax = troll.info.syntax.filter { it.purpose.isNotEmpty() }
     val params: MutableMap<Int, String> = mutableMapOf()
 
     init {
-        for ([i, syntax] in troll.info.syntax.withIndex()) {
-            if (syntax.purpose.isEmpty()) continue
+        for ([i, syntax] in syntax.withIndex()) {
             params[i] = syntax.default
         }
     }
 
     fun complete(): Boolean {
-        for ([i, syntax] in troll.info.syntax.withIndex()) {
+        for ([i, syntax] in syntax.withIndex()) {
             if (syntax.optional) continue
             if (!params.containsKey(i) || params[i].equals("")) return false
         }
@@ -200,16 +200,14 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player) : Menu
             in 30..34 -> slot - 20
             else -> return null
         }
-        return index.takeIf { it in troll.info.syntax.indices }
+        return index.takeIf { it in syntax.indices }
     }
 
     override fun getInventory(): Inventory {
         val inventory = Bukkit.createInventory(this, 45, troll.info.name)
         addItem(inventory, 10, item())
 
-        for ([i, syntax] in troll.info.syntax.withIndex()) {
-            if (syntax.purpose.isEmpty()) continue
-
+        for ([i, syntax] in syntax.withIndex()) {
             val param = params.getOrDefault(i, "")
             val item = ItemStack(Material.PAPER)
             val meta = item.itemMeta!!
@@ -256,13 +254,13 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player) : Menu
             }
             else -> {
                 val slotId = paramIndexFromSlot(event.slot) ?: return
-                val syntax = troll.info.syntax[slotId]
-                if (syntax.type == CommandSyntax.Type.BOOLEAN) {
+                val field = syntax[slotId]
+                if (field.type == CommandSyntax.Type.BOOLEAN) {
                     params[slotId] = (!params.getOrDefault(slotId, "false").toBoolean()).toString()
                     open()
                 } else {
                     close()
-                    GuiHandler.initDataInput(player, TrollGuiDataInput(this, syntax, slotId))
+                    GuiHandler.initDataInput(player, TrollGuiDataInput(this, field, slotId))
                 }
             }
         }

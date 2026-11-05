@@ -13,7 +13,7 @@ import sn.inpr.ragebaitinator.type.Placeholders
     description = "Swaps two players' locations (and inventories if you want to)",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false, purpose = "Player"),
         CommandSyntax(
             type = CommandSyntax.Type.BOOLEAN,
             purpose = "Swap Inventories",
