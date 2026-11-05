@@ -39,6 +39,9 @@ fun interface PlayerItemConsumeSubscriber { fun onPlayerItemConsume(event: Playe
 fun interface EntityToggleGlideSubscriber { fun onEntityToggleGlide(event: EntityToggleGlideEvent) }
 fun interface PlayerBedEnterSubscriber { fun onPlayerBedEnter(event: PlayerBedEnterEvent) }
 fun interface PlayerFishSubscriber { fun onPlayerFish(event: PlayerFishEvent) }
+fun interface PlayerToggleSneakSubscriber { fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) }
+fun interface PlayerExpChangeSubscriber { fun onPlayerExpChange(event: PlayerExpChangeEvent) }
+fun interface PlayerCommandPreprocessSubscriber { fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) }
 
 object BukkitEventListener : Listener {
     fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {
@@ -76,6 +79,9 @@ object BukkitEventListener : Listener {
             if (command is EntityToggleGlideSubscriber && event is EntityToggleGlideEvent) command.onEntityToggleGlide(event)
             if (command is PlayerBedEnterSubscriber && event is PlayerBedEnterEvent) command.onPlayerBedEnter(event)
             if (command is PlayerFishSubscriber && event is PlayerFishEvent) command.onPlayerFish(event)
+            if (command is PlayerToggleSneakSubscriber && event is PlayerToggleSneakEvent) command.onPlayerToggleSneak(event)
+            if (command is PlayerExpChangeSubscriber && event is PlayerExpChangeEvent) command.onPlayerExpChange(event)
+            if (command is PlayerCommandPreprocessSubscriber && event is PlayerCommandPreprocessEvent) command.onPlayerCommandPreprocess(event)
         }
 
         // remove corresponding attributes
@@ -137,4 +143,10 @@ object BukkitEventListener : Listener {
     fun onPlayerBedEnter(event: PlayerBedEnterEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerFish(event: PlayerFishEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerExpChange(event: PlayerExpChangeEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) = interceptBukkitEvent(event)
 }

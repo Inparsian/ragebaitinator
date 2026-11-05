@@ -1,0 +1,33 @@
+package sn.inpr.ragebaitinator.command.impl.troll.toggle
+
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.BaseChatTroll
+import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.utility.TextTransform
+
+@CommandInfo(
+    name = "garble",
+    description = "Now they maek even less senes!",
+    syntax = [
+        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
+    ],
+    attributes = [
+        CommandInfo.Attribute.LOGOUT
+    ],
+    incompatible = [ "haxorman", "uwu", "oink" ]
+)
+class Garble : BaseChatTroll() {
+    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s messages are now incoherent")
+            .put("player", target.name)
+            .toString()
+
+    override fun deinit(sender: CommandSender, target: Player): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s messages make sense again")
+            .put("player", target.name)
+            .toString()
+
+    override fun transform(player: Player, message: String): String = TextTransform.garble(message)
+}
