@@ -1,18 +1,21 @@
 package sn.inpr.ragebaitinator.type
 
+import org.bukkit.GameMode
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.util.Vector
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import java.lang.reflect.Method
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
 
 class PlayerSnapshot(val player: Player) {
-    val inventory: List<ItemStack?> field = mutableListOf()
-    val effects: List<PotionEffect> field = mutableListOf()
+    private val inventory: MutableList<ItemStack?> = mutableListOf()
+    private val effects: MutableList<PotionEffect> = mutableListOf()
+    private var gameMode: GameMode = player.gameMode
+    private var allowFlight: Boolean = player.allowFlight
+    private var flying: Boolean = player.isFlying
 
     init {
         capture()
@@ -21,6 +24,9 @@ class PlayerSnapshot(val player: Player) {
     fun capture() {
         inventory.addAll(player.inventory.contents)
         effects.addAll(player.activePotionEffects)
+        gameMode = player.gameMode
+        allowFlight = player.allowFlight
+        flying = player.isFlying
     }
 
     fun restore() {
@@ -28,6 +34,9 @@ class PlayerSnapshot(val player: Player) {
         inventory.forEachIndexed { index, item -> player.inventory.setItem(index, item) }
         player.activePotionEffects.forEach { player.removePotionEffect(it.type) }
         effects.forEach { player.addPotionEffect(it) }
+        player.gameMode = gameMode
+        player.allowFlight = allowFlight
+        player.isFlying = flying
     }
 }
 

@@ -16,7 +16,8 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
     ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
-    ]
+    ],
+    incompatible = [ "thorns" ]
 )
 class Harmless : BaseToggleTroll(), EntityDamageByEntitySubscriber {
     override fun init(sender: CommandSender, target: Player, args: Array<out String>): String

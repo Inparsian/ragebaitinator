@@ -56,7 +56,7 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
     }
 
     override fun onPacketSend(event: PacketSendEvent) {
-        if (players.containsKey(event.user.uuid)) {
+        if (event.user.uuid != null && players.containsKey(event.user.uuid)) {
             when (event.packetType) {
                 // velocity is usually dealt after damage
                 PacketType.Play.Server.DAMAGE_EVENT -> markDamaged(event.user.uuid)

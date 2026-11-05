@@ -81,13 +81,19 @@ class Potato : BaseToggleTroll(),
         val camera = WrapperPlayServerCamera(potato.entityId)
         PacketEvents.getAPI().playerManager.sendPacket(target, camera)
 
-        // tp the player so the item does not unload on their end
         addTaskTimer(target, {
-            val teleportLocation = potato.location.clone()
-            teleportLocation.y = (LocationUtil.downHeightLimit - 2).toDouble()
-            target.teleport(teleportLocation)
-            target.isFlying = true
-            target.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 72005, 0, false, false))
+            // tp the player so the item does not unload on their end
+            val playerChunk = LocationUtil.chunkify(target.location).setY(0)
+            val potatoChunk = LocationUtil.chunkify(potato.location).setY(0)
+            val chunkDistance = playerChunk.distance(potatoChunk)
+            if (chunkDistance > 0 || target.location.y < LocationUtil.MAX_PLAYER_ALTITUDE - 1000) {
+                val teleportLocation = potato.location.clone()
+                teleportLocation.y = LocationUtil.MAX_PLAYER_ALTITUDE
+                target.teleport(teleportLocation)
+            }
+            if (!target.activePotionEffects.any { it.type == PotionEffectType.INVISIBILITY }) {
+                target.addPotionEffect(PotionEffect(PotionEffectType.INVISIBILITY, 1728000, 0, false, false))
+            }
             potato.pickupDelay = Int.MAX_VALUE
         }, 0, 2, true)
 
@@ -109,7 +115,6 @@ class Potato : BaseToggleTroll(),
             potato.remove()
             if (player.isOnline) {
                 player.teleport(potato.location.setDirection(player.location.direction))
-                player.isFlying = false
                 player.velocity = potato.velocity
                 Bukkit.getOnlinePlayers().forEach { it.showPlayer(Main.instance(), player) }
                 val camera = WrapperPlayServerCamera(player.entityId)

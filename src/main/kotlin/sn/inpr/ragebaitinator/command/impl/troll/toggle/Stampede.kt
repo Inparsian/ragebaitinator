@@ -110,7 +110,11 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
                     // damage
                     if (cow.location.distanceSquared(target.location) <= 1.0) {
-                        val damageSource = DamageSource.builder(DamageType.MOB_ATTACK).build()
+                        val damageSource = DamageSource.builder(DamageType.MOB_ATTACK)
+                            .withCausingEntity(cow)
+                            .withDirectEntity(cow)
+                            .withDamageLocation(cow.location)
+                            .build()
                         val event = EntityDamageByEntityEvent(
                             cow,
                             target,
@@ -118,7 +122,6 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                             damageSource,
                             1.0
                         )
-
                         Bukkit.getPluginManager().callEvent(event)
                         if (!event.isCancelled)
                             target.damage(event.damage, cow)

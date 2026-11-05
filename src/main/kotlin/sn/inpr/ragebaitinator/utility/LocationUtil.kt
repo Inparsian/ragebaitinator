@@ -4,7 +4,6 @@ import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.manager.server.ServerVersion
 import org.bukkit.Location
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.utility.MathUtil.rcos
 import sn.inpr.ragebaitinator.utility.MathUtil.rsin
@@ -14,6 +13,8 @@ object LocationUtil {
     // The vertical height limit was extended 64 blocks in both directions starting in 1.18
     val downHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) -64 else 0
     val upHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) 319 else 255
+    // The max altitude a player can be teleported to. Any higher than this will cause them to be rubber-banded back
+    const val MAX_PLAYER_ALTITUDE = 20_000_000.0
 
     fun vectorRelativeYaw(entity: Entity, radians: Int, distance: Double): Vector {
         val yaw: Double = entity.location.yaw.toDouble() + radians
@@ -22,6 +23,14 @@ object LocationUtil {
 
     fun locationRelativeYaw(entity: Entity, radians: Int, distance: Double): Location
         = vectorRelativeYaw(entity, radians, distance).toLocation(entity.world).add(entity.location)
+
+    fun chunkify(vector: Vector): Vector = Vector(
+        vector.x.toInt() shr 4,
+        vector.y.toInt(),
+        vector.z.toInt() shr 4
+    )
+
+    fun chunkify(location: Location): Vector = chunkify(location.toVector())
 
     fun blockify(location: Location, pointFive: Boolean): Location {
         val factor = if (pointFive) 0.5 else 0.0
