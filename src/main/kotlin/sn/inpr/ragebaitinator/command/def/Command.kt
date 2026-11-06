@@ -105,14 +105,13 @@ abstract class BaseTroll : BaseCommand() {
                     return true
                 }
 
-                val firstHitCondition = getConditions(target)?.list?.firstOrNull()
-                if (firstHitCondition?.predicate == true) {
+                val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
+                if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)
                     return true
                 }
-
             }
 
             targets.forEach { target ->
@@ -155,8 +154,8 @@ abstract class BaseToggleTroll : BaseTroll() {
                     return true
                 }
 
-                val firstHitCondition = getConditions(target)?.list?.firstOrNull()
-                if (firstHitCondition?.predicate == true) {
+                val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
+                if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)

@@ -35,13 +35,13 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
             api.sendPacket(target, WrapperPlayServerPlayerInfoRemove(others.map { it.uniqueId }))
         }
 
-        return placeholdersOr("init", "%prefix% %c2%Everyone has vanished from %c1%%player%'s %c2%world")
+        return placeholdersOr("init", "%prefix% %c2%Everyone has vanished from %c1%%player%%c2%'s world")
             .put("player", target.name)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c2%Everyone is back in %c1%%player%'s %c2%world")
+        = placeholdersOr("deinit", "%prefix% %c2%Everyone is back in %c1%%player%%c2%'s world")
             .put("player", target.name)
             .toString()
 

@@ -8,6 +8,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.*
+import org.bukkit.event.inventory.FurnaceStartSmeltEvent
+import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -42,6 +45,15 @@ fun interface PlayerFishSubscriber { fun onPlayerFish(event: PlayerFishEvent) }
 fun interface PlayerToggleSneakSubscriber { fun onPlayerToggleSneak(event: PlayerToggleSneakEvent) }
 fun interface PlayerExpChangeSubscriber { fun onPlayerExpChange(event: PlayerExpChangeEvent) }
 fun interface PlayerCommandPreprocessSubscriber { fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) }
+fun interface PlayerItemHeldSubscriber { fun onPlayerItemHeld(event: PlayerItemHeldEvent) }
+fun interface PlayerSwapHandItemsSubscriber { fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) }
+fun interface InventoryClickSubscriber { fun onInventoryClick(event: InventoryClickEvent) }
+fun interface InventoryDragSubscriber { fun onInventoryDrag(event: InventoryDragEvent) }
+fun interface PlayerItemDamageSubscriber { fun onPlayerItemDamage(event: PlayerItemDamageEvent) }
+fun interface PotionSplashSubscriber { fun onPotionSplash(event: PotionSplashEvent) }
+fun interface AreaEffectCloudApplySubscriber { fun onAreaEffectCloudApply(event: AreaEffectCloudApplyEvent) }
+fun interface FurnaceStartSmeltSubscriber { fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) }
+fun interface EntityChangeBlockSubscriber { fun onEntityChangeBlock(event: EntityChangeBlockEvent) }
 
 object BukkitEventListener : Listener {
     fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {
@@ -82,6 +94,15 @@ object BukkitEventListener : Listener {
             if (command is PlayerToggleSneakSubscriber && event is PlayerToggleSneakEvent) command.onPlayerToggleSneak(event)
             if (command is PlayerExpChangeSubscriber && event is PlayerExpChangeEvent) command.onPlayerExpChange(event)
             if (command is PlayerCommandPreprocessSubscriber && event is PlayerCommandPreprocessEvent) command.onPlayerCommandPreprocess(event)
+            if (command is PlayerItemHeldSubscriber && event is PlayerItemHeldEvent) command.onPlayerItemHeld(event)
+            if (command is PlayerSwapHandItemsSubscriber && event is PlayerSwapHandItemsEvent) command.onPlayerSwapHandItems(event)
+            if (command is InventoryClickSubscriber && event is InventoryClickEvent) command.onInventoryClick(event)
+            if (command is InventoryDragSubscriber && event is InventoryDragEvent) command.onInventoryDrag(event)
+            if (command is PlayerItemDamageSubscriber && event is PlayerItemDamageEvent) command.onPlayerItemDamage(event)
+            if (command is PotionSplashSubscriber && event is PotionSplashEvent) command.onPotionSplash(event)
+            if (command is AreaEffectCloudApplySubscriber && event is AreaEffectCloudApplyEvent) command.onAreaEffectCloudApply(event)
+            if (command is FurnaceStartSmeltSubscriber && event is FurnaceStartSmeltEvent) command.onFurnaceStartSmelt(event)
+            if (command is EntityChangeBlockSubscriber && event is EntityChangeBlockEvent) command.onEntityChangeBlock(event)
         }
 
         // remove corresponding attributes
@@ -149,4 +170,22 @@ object BukkitEventListener : Listener {
     fun onPlayerExpChange(event: PlayerExpChangeEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerItemHeld(event: PlayerItemHeldEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryClick(event: InventoryClickEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryDrag(event: InventoryDragEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerItemDamage(event: PlayerItemDamageEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPotionSplash(event: PotionSplashEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onAreaEffectCloudApply(event: AreaEffectCloudApplyEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onEntityChangeBlock(event: EntityChangeBlockEvent) = interceptBukkitEvent(event)
 }
