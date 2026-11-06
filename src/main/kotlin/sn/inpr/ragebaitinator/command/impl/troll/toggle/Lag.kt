@@ -1,9 +1,9 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.event.PacketReceiveEvent
-import com.github.retrooper.packetevents.event.PacketSendEvent
-import com.github.retrooper.packetevents.event.ProtocolPacketEvent
+import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.*
 import com.github.retrooper.packetevents.protocol.ConnectionState
+import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
@@ -13,8 +13,6 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
-import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.*
@@ -56,9 +54,16 @@ import java.util.concurrent.*
         CommandInfo.Attribute.LOGOUT
     ]
 )
-class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubscriber {
+class Lag : BaseToggleTroll() {
     // Shared scheduler for each duplex
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
+
+    // After packets have gone past the main listener (w/ HIGH priority), this one decides the
+    // final state (i.e., whether it must be delayed)
+    private class LagPacketListener(val parent: Lag) : PacketListenerAbstract(PacketListenerPriority.HIGHEST) {
+        override fun onPacketSend(event: PacketSendEvent?) = parent.interceptEvent(event)
+        override fun onPacketReceive(event: PacketReceiveEvent?) = parent.interceptEvent(event)
+    }
 
     private class OrderedPacketQueue(val scheduler: ScheduledExecutorService) {
         private class Entry(val deadline: Long, val send: () -> Unit)
@@ -127,6 +132,10 @@ class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubs
         val outbound: OrderedPacketQueue
     )
 
+    init {
+        PacketEvents.getAPI().eventManager.registerListener(LagPacketListener(this))
+    }
+
     private val sessions = ConcurrentHashMap<UUID, Session>()
 
     override fun onDisable() {
@@ -157,11 +166,33 @@ class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubs
         }
     }
 
-    // We are only really interested in delaying the PLAY state
-    private fun isUnsafe(event: ProtocolPacketEvent): Boolean
-        = event.connectionState != ConnectionState.PLAY
-
+    // Whatever a listener changes through a wrapper (Velocity, for one) isn't written back into the event's buffer until
+    // every listener has run, so at this point the buffer still holds the packet as it was before any of them touched
+    // it. When that has happened, the wrapper is written out the same way it will be once we're done
     private fun snapshot(event: ProtocolPacketEvent): ByteArray {
+        val wrapper = event.lastUsedWrapper
+        return if (wrapper != null && event.needsReEncode())
+            serialize(event, wrapper)
+        else
+            snapshotBuffer(event)
+    }
+
+    private fun serialize(event: ProtocolPacketEvent, wrapper: PacketWrapper<*>): ByteArray {
+        val original = wrapper.getBuffer()
+        val buffer = Unpooled.buffer()
+        return try {
+            wrapper.setBuffer(buffer)
+            wrapper.writeVarInt(event.packetId)
+            wrapper.write()
+            ByteBufUtil.getBytes(buffer)
+        } finally {
+            // if this packet isn't delayed after all, it still has to be written where it was going to be
+            wrapper.setBuffer(original)
+            buffer.release()
+        }
+    }
+
+    private fun snapshotBuffer(event: ProtocolPacketEvent): ByteArray {
         val buffer = event.fullBufferClone as ByteBuf
         return try {
             ByteBufUtil.getBytes(buffer)
@@ -177,8 +208,10 @@ class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubs
         return (session.rtt + MathUtil.random(-session.jitter, session.jitter)) / 2
     }
 
-    fun interceptEvent(event: ProtocolPacketEvent) {
-        if (isUnsafe(event)) return
+    fun interceptEvent(event: ProtocolPacketEvent?) {
+        // We are only really interested in delaying the PLAY state
+        if (event == null || event.isCancelled || event.connectionState != ConnectionState.PLAY)
+            return
         val session = sessions[event.user.uuid] ?: return
         val packet = snapshot(event)
         if (session.inbound.enqueue(jitteryOneTripDelay(event.user.uuid)) {
@@ -190,7 +223,4 @@ class Lag : BaseToggleTroll(), PacketEventReceiveSubscriber, PacketEventSendSubs
             event.isCancelled = true
         }
     }
-
-    override fun onPacketReceive(event: PacketReceiveEvent) = interceptEvent(event)
-    override fun onPacketSend(event: PacketSendEvent) = interceptEvent(event)
 }

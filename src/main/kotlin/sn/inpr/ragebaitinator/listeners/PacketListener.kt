@@ -1,6 +1,7 @@
 package sn.inpr.ragebaitinator.listeners
 
-import com.github.retrooper.packetevents.event.PacketListener as PacketEventsListener
+import com.github.retrooper.packetevents.event.PacketListenerAbstract
+import com.github.retrooper.packetevents.event.PacketListenerPriority
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import sn.inpr.ragebaitinator.command.CommandManager
@@ -13,7 +14,7 @@ fun interface PacketEventReceiveSubscriber {
     fun onPacketReceive(event: PacketReceiveEvent)
 }
 
-class PacketListener : PacketEventsListener {
+class PacketListener : PacketListenerAbstract(PacketListenerPriority.HIGH) {
     override fun onPacketSend(event: PacketSendEvent?) {
         if (event == null || event.isCancelled)
             return

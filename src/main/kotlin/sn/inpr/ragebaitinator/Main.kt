@@ -3,7 +3,6 @@
 package sn.inpr.ragebaitinator
 
 import com.github.retrooper.packetevents.PacketEvents
-import com.github.retrooper.packetevents.event.PacketListenerPriority
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -55,8 +54,7 @@ class Main : JavaPlugin() {
     override fun onLoad() {
         configuration = Config("config.yml")
         language = LanguageConfig("language.yml")
-        val events = PacketEvents.getAPI().eventManager
-        events.registerListener(PacketListener(), PacketListenerPriority.HIGH)
+        PacketEvents.getAPI().eventManager.registerListener(PacketListener())
     }
 
     override fun onEnable() {
