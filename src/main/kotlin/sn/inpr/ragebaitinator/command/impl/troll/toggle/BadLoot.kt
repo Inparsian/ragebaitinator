@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.entity.Silverfish
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "badloot",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.FISHING_ROD,
     description = "Makes a player catch silverfish instead of fish.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

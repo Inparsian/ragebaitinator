@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityPickupItemEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
 
 @CommandInfo(
     name = "boompickup",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.HOPPER_MINECART,
     description = "Makes the next (or every) item a player picks up explode.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

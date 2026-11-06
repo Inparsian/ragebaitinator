@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerBedEnterSubscriber
 
 @CommandInfo(
     name = "boombed",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.RED_BED,
     description = "Makes the next (or every) bed a player sleeps in explode.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

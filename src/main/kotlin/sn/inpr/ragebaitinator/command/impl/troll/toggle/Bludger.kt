@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "bludger",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.FIRE_CHARGE,
     description = "Sends a homing fireball after a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

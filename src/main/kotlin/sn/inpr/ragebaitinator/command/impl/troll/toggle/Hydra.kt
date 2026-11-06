@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDeathEvent
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.type.EntitySnapshot
 
 @CommandInfo(
     name = "hydra",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.DRAGON_HEAD,
     description = "Hail Hydra!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

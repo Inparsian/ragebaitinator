@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityToggleGlideEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
 
 @CommandInfo(
     name = "boomelytra",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.ELYTRA,
     description = "Makes a player explode next (or every) time they try to use their elytra.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

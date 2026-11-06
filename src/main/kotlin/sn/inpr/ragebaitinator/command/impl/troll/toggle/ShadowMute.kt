@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 
 @CommandInfo(
     name = "shadowmute",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.NOTE_BLOCK,
     description = "Talking to yourself is the first sign.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -10,10 +10,7 @@ import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.*
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.FluidCollisionMode
-import org.bukkit.Location
-import org.bukkit.SoundCategory
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -28,6 +25,8 @@ import com.github.retrooper.packetevents.protocol.world.Location as PacketLocati
 
 @CommandInfo(
     name = "fromthefog",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.PLAYER_HEAD,
     description = "You can't see him, but I promise, he can see you.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerInteractEvent
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.isFireworkBoost
 
 @CommandInfo(
     name = "boomfirework",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.FIREWORK_ROCKET,
     description = "Makes a player explode next (or every) time they try to firework boost while gliding.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

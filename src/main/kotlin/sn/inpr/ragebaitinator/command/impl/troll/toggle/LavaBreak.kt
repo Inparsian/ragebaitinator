@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 
 @CommandInfo(
     name = "lavabreak",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.MAGMA_BLOCK,
     description = "Mining is a hot job. Makes the next (or every) block a player breaks turn into lava.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

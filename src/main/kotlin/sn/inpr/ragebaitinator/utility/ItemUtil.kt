@@ -9,4 +9,8 @@ object ItemUtil {
         meta.addEnchant(Enchantment.PROTECTION, 1, true);
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
     }
+
+    fun hideTooltips(meta: ItemMeta) {
+        meta.addItemFlags(*ItemFlag.entries.toTypedArray())
+    }
 }

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerExpChangeEvent
@@ -12,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "taxman",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.EXPERIENCE_BOTTLE,
     description = "Death and taxes. Takes a cut out of every XP orb a player collects.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 
 @CommandInfo(
     name = "badankles",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.BONE,
     description = "Makes a player more susceptible to fall damage (yes, jumping will cause damage)",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

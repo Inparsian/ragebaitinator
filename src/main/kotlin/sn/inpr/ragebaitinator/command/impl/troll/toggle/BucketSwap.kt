@@ -11,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerBucketEmptySubscriber
 
 @CommandInfo(
     name = "bucketswap",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.LAVA_BUCKET,
     description = "Why is my water... lava?",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

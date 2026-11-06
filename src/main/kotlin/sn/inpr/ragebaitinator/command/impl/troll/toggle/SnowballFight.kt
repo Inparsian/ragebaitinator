@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.entity.Snowball
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 
 @CommandInfo(
     name = "snowballfight",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.SNOWBALL,
     description = "Replaces every arrow shot by the player with snowballs.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

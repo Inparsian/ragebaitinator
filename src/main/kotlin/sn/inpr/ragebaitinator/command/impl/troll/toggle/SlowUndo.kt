@@ -21,6 +21,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "slowundo",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.CLOCK,
     description = "Gradually undoes the block changes a player makes.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Creature
 import org.bukkit.entity.Player
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "lure",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.CARROT_ON_A_STICK,
     description = "Lures every creature within a 100 block radius to a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

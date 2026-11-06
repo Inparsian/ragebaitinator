@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 
 @CommandInfo(
     name = "harmless",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.WOODEN_SWORD,
     description = "They punch like a girl!!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

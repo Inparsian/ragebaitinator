@@ -9,7 +9,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.command.CommandManager
-import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.gui.Menu
 import sn.inpr.ragebaitinator.gui.PaginationMenu
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -83,7 +82,7 @@ class PlayerMenu(player: Player, val target: Player) : Menu(player, true) {
         val player = event.whoClicked as Player
         when (event.currentItem?.itemMeta?.displayName) {
             "§cBack" -> PlayersMenu(player).open()
-            "§eTroll" -> TrollsMenu(player, target).open()
+            "§eTroll" -> TrollCategoriesMenu(player, target).open()
             "§9Pardon" -> {
                 player.performCommand("ragebaitinator pardon ${target.name}")
                 open()

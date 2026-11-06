@@ -11,16 +11,25 @@ import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.gui.Menu
 
 class MainMenu(player: Player) : Menu(player, false) {
+    companion object {
+        const val RELOAD_PERMISSION = "ragebaitinator.commands.reload"
+    }
+
     override fun getInventory(): Inventory {
         val inventory = Bukkit.createInventory(this, 27, "Ragebaitinator")
 
         addItem(inventory, 10, Material.BOOK, "§bPlayers", listOf("§7Manage players."), false)
 
+        val reloadSlot = if (CommandHistory.hasHistoryAccess(player)) 14 else 13
+        val historySlot = if (player.hasPermission(RELOAD_PERMISSION)) 12 else 13
         if(CommandHistory.hasHistoryAccess(player))
-            addItem(inventory, 12, Material.PAPER, "§dHistory", listOf(
+            addItem(inventory, historySlot, Material.PAPER, "§dHistory", listOf(
                 "§7View command history. To date, a total of",
                 "§c" + CommandHistory.size + "§7 command(s) have been executed."
             ), false)
+
+        if (player.hasPermission(RELOAD_PERMISSION))
+            addItem(inventory, reloadSlot, Material.LEVER, "§6Reload Configs", listOf("§7Reloads the plugin's configuration files."), false)
 
         addItem(inventory, 16, Material.REDSTONE, "§c§lRagebaitinator", listOf(
             "§7You are running §cRagebaitinator v"+ Main.instance().description.version,
@@ -33,10 +42,13 @@ class MainMenu(player: Player) : Menu(player, false) {
     }
 
     override fun onClick(event: InventoryClickEvent) {
-        val player = event.whoClicked as Player
+        val player = event.whoClicked as? Player ?: return
         when (event.currentItem?.itemMeta?.displayName) {
             "§bPlayers" -> PlayersMenu(player).open()
-            "§dHistory" -> HistoryMenu(player).open()
+            "§6Reload Configs" -> if (player.hasPermission(RELOAD_PERMISSION))
+                player.performCommand("ragebaitinator reload")
+            "§dHistory" -> if(CommandHistory.hasHistoryAccess(player))
+                HistoryMenu(player).open()
         }
     }
 }

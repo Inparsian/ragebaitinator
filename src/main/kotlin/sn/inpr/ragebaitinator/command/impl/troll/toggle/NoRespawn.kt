@@ -3,6 +3,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClientStatus
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
 
 @CommandInfo(
     name = "norespawn",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.RESPAWN_ANCHOR,
     description = "Prevents a player from respawning.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

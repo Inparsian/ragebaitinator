@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Creeper
 import org.bukkit.entity.Entity
@@ -20,6 +21,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "creep",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.CREEPER_HEAD,
     description = "Spawns a few charged creepers at the player's location",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

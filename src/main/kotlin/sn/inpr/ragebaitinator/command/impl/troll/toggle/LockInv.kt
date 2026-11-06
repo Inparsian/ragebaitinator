@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.listeners.InventoryDragSubscriber
 
 @CommandInfo(
     name = "lockinv",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.SHULKER_BOX,
     description = "Look, but don't touch. Prevents a player from moving anything around in their inventory.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

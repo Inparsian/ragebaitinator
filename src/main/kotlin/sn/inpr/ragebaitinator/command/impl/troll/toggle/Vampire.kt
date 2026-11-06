@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 
 @CommandInfo(
     name = "vampire",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.DAYLIGHT_DETECTOR,
     description = "Makes a player burn under direct sunlight.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

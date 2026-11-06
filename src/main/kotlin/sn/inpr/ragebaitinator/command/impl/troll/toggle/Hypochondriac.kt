@@ -2,6 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateHealth
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -13,6 +14,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "hypochondriac",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.REDSTONE,
     description = "It's probably nothing. Every so often, a player's health bar says they're about to die.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

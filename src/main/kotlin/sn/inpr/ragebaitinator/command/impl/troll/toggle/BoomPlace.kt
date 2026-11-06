@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 
 @CommandInfo(
     name = "boomplace",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.COBBLESTONE,
     description = "Makes the next (or every) block a player places explode.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

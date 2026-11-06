@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -24,6 +25,8 @@ import java.util.*
 
 @CommandInfo(
     name = "narcolepsy",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.BLACK_BED,
     description = "Zzz...",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

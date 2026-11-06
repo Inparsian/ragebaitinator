@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -14,6 +15,8 @@ import java.util.*
 
 @CommandInfo(
     name = "loyalty",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.TRIDENT,
     description = "Stop shooting yourself!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
 
 @CommandInfo(
     name = "lift",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.SLIME_BLOCK,
     description = "We have lift-off! Launches a player into the air",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

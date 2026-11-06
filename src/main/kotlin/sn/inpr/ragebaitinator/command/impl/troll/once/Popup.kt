@@ -1,15 +1,18 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryType
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import org.bukkit.Bukkit
-import org.bukkit.event.inventory.InventoryType
 
 @CommandInfo(
     name = "popup",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.CRAFTING_TABLE,
     description = "Opens a random inventory menu for a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

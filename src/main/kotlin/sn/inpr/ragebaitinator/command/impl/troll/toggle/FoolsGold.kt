@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "foolsgold",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.DIAMOND_ORE,
     description = "All that glitters is not diamond.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

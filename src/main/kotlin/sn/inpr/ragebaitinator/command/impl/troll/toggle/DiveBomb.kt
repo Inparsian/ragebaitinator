@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 
 @CommandInfo(
     name = "divebomb",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.PHANTOM_MEMBRANE,
     description = "Mayday, mayday!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

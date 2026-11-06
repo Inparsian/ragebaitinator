@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -9,6 +10,8 @@ import sn.inpr.ragebaitinator.utility.TextTransform
 
 @CommandInfo(
     name = "oink",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.PORKCHOP,
     description = "Ig-pay Atin-lay",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

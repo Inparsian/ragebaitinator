@@ -21,6 +21,8 @@ import kotlin.math.absoluteValue
 
 @CommandInfo(
     name = "hottub",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.WATER_BUCKET,
     description = "It's not lava it's just lukewarm water",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

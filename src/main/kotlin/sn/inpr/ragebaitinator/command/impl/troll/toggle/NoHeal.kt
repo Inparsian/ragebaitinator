@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityRegainHealthEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityRegainHealthSubscriber
 
 @CommandInfo(
     name = "noheal",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.GLISTERING_MELON_SLICE,
     description = "It's like always being low on hunger!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

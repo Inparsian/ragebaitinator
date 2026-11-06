@@ -18,6 +18,8 @@ import sn.inpr.ragebaitinator.utility.Reflection
 
 @CommandInfo(
     name = "radiation",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.GLOWSTONE_DUST,
     description = "Makes a player radioactive, slowly killing all players, animals, and plants around them.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

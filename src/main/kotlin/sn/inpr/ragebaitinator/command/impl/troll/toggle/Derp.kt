@@ -2,6 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerRotation
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "derp",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.SKELETON_SKULL,
     description = "Something is off about their neck. Makes a player's head spasm every so often.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

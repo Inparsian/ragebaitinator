@@ -1,6 +1,7 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import net.md_5.bungee.api.ChatColor
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.*
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -18,6 +19,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 // without it looking like spaghetti :)
 @CommandInfo(
     name = "genie",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.LANTERN,
     description = "Be careful what you wish for :)",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

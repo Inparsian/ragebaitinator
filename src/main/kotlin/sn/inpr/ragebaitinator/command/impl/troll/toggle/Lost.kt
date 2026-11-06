@@ -3,6 +3,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnPosition
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "lost",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.COMPASS,
     description = "Makes a player's compass spaz out.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

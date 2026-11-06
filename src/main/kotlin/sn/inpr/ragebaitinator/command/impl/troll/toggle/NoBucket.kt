@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerBucketEmptyEvent
@@ -14,6 +15,8 @@ import sn.inpr.ragebaitinator.type.Placeholders
 
 @CommandInfo(
     name = "nobucket",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.BUCKET,
     description = "Prevents a player from emptying or filling buckets.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

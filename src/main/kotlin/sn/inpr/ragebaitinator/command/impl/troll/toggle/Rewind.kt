@@ -2,17 +2,20 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTimeUpdate
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import java.util.UUID
+import java.util.*
 import kotlin.math.absoluteValue
 
 @CommandInfo(
     name = "rewind",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.RECOVERY_COMPASS,
     description = "Rewinds a player's time (specify a negative speed to move it forward)",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

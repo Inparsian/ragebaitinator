@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemHeldEvent
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerSwapHandItemsSubscriber
 
 @CommandInfo(
     name = "lockhotbar",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.TRIPWIRE_HOOK,
     description = "Stuck with what you've got. Prevents a player from changing their held item.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -8,6 +9,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 
 @CommandInfo(
     name = "invert",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.COMPARATOR,
     description = "Up is down, down is up... Makes sense...",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

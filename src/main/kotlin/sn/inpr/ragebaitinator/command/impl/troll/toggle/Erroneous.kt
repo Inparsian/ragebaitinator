@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -15,6 +16,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "erroneous",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.BOW,
     description = "That's some amazing accuracy you've got there!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

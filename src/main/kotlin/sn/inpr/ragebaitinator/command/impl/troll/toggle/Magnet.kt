@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Enemy
 import org.bukkit.entity.Player
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "magnet",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.LODESTONE,
     description = "Attracts hostile mobs & TNT to a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

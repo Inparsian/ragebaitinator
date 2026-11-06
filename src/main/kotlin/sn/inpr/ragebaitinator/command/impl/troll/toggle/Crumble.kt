@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockBreakAnimation
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -12,10 +13,12 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.UUID
+import java.util.*
 
 @CommandInfo(
     name = "crumble",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.CRACKED_STONE_BRICKS,
     description = "Naturally \"breaks\" blocks around a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

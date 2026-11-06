@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.Furnace
 import org.bukkit.command.CommandSender
@@ -16,6 +17,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "slowcooker",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.FURNACE,
     description = "A watched pot never boils. Makes the furnaces a player uses take forever to cook.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

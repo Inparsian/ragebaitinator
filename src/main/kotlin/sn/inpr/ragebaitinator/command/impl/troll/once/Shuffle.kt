@@ -10,6 +10,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 
 @CommandInfo(
     name = "shuffle",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.BUNDLE,
     description = "Shuffles the player's inventory and hotbar",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false)

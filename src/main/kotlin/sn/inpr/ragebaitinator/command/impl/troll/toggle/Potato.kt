@@ -32,6 +32,8 @@ import kotlin.math.absoluteValue
 
 @CommandInfo(
     name = "potato",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.POTATO,
     description = "Oh hi, how are you holding up? Because I'M A POTATO.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

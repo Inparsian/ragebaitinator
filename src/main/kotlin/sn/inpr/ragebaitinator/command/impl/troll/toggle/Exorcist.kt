@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityHeadLook
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityRotation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.IronGolem
@@ -19,6 +20,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "exorcist",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.BELL,
     description = "Causes entities around a player to spaz out.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

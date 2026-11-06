@@ -21,6 +21,8 @@ import kotlin.math.absoluteValue
 
 @CommandInfo(
     name = "sinkhole",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.SUSPICIOUS_SAND,
     description = "Conjures a sinkhole beneath a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

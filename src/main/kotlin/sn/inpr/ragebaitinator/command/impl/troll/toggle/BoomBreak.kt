@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 
 @CommandInfo(
     name = "boombreak",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.IRON_PICKAXE,
     description = "Makes the next (or every) block a player breaks explode.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

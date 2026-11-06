@@ -1,6 +1,7 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -17,6 +18,8 @@ import java.util.*
 
 @CommandInfo(
     name = "void",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.END_PORTAL_FRAME,
     description = "Banishes a player into the void.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

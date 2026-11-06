@@ -21,6 +21,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "anvil",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.ANVIL,
     description = "X marks the spot.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
 
 @CommandInfo(
     name = "slap",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.STICK,
     description = "Slaps the player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

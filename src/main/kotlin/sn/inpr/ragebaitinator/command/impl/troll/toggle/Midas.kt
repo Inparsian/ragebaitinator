@@ -16,6 +16,8 @@ import kotlin.math.floor
 
 @CommandInfo(
     name = "midas",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.GOLD_BLOCK,
     description = "Everything they touch turns to gold. Well, the floor does.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

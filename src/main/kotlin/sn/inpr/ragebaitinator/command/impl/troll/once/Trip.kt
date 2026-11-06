@@ -1,15 +1,18 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "trip",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.DROPPER,
     description = "Makes a player drop everything in their inventory.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

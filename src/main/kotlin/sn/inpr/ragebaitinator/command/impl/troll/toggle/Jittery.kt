@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "jittery",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.COCOA_BEANS,
     description = "Sneaking is hard after four coffees.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,21 +1,18 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Arrow
-import org.bukkit.entity.Egg
-import org.bukkit.entity.Fireball
-import org.bukkit.entity.Player
-import org.bukkit.entity.Projectile
-import org.bukkit.entity.Snowball
+import org.bukkit.entity.*
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.UUID
-import kotlin.jvm.java
+import java.util.*
 
 @CommandInfo(
     name = "bomb",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.DISPENSER,
     description = "Fires projectiles from thin air at a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

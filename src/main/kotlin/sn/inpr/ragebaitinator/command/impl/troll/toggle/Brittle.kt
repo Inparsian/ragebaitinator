@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
@@ -11,6 +12,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "brittle",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.GLASS,
     description = "Kills a player next time they take damage.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

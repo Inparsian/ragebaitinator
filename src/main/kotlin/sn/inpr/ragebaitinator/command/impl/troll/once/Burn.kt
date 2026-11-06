@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseTroll
@@ -8,6 +9,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 
 @CommandInfo(
     name = "burn",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.FLINT_AND_STEEL,
     description = "Phew; it's starting to get hot in here.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

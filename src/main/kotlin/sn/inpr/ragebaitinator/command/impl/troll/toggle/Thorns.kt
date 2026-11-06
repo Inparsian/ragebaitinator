@@ -1,6 +1,7 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
@@ -14,6 +15,8 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 
 @CommandInfo(
     name = "thorns",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.CACTUS,
     description = "Makes any damage a player deals return to them.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

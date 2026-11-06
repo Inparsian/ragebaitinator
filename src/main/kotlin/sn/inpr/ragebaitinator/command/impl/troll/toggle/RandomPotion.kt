@@ -20,6 +20,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "randompotion",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.POTION,
     description = "Mystery flavor. Potions a player drinks or is hit with give them a random effect instead.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

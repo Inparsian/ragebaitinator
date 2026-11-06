@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -11,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "randomspeed",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.SUGAR,
     description = "Gotta go fast. Or slow. I don't know.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

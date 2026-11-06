@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Animals
 import org.bukkit.entity.Player
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "repel",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.POISONOUS_POTATO,
     description = "Why does everybody hate me? Is it because I'm ugly?",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

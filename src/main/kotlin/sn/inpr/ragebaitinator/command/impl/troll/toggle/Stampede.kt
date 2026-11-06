@@ -2,6 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.damage.DamageSource
 import org.bukkit.damage.DamageType
@@ -21,6 +22,8 @@ private const val PURSUIT_SPEED_MULTIPLIER = 2.4
 
 @CommandInfo(
     name = "stampede",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.COW_SPAWN_EGG,
     description = "Unleashes a herd of cows on a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

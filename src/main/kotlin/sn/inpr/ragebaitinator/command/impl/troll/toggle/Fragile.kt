@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemDamageEvent
@@ -12,6 +13,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "fragile",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.WOODEN_PICKAXE,
     description = "Made in the cheapest factory. Makes a player's tools and armor wear out far faster.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

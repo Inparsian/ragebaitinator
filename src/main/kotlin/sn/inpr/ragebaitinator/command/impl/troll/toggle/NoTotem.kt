@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityResurrectEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityResurrectSubscriber
 
 @CommandInfo(
     name = "nototem",
+    category = CommandInfo.Category.INVENTORY,
+    icon = Material.TOTEM_OF_UNDYING,
     description = "Makes a player's totem(s) of undying not work.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -3,6 +3,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerAbilities
 import org.bukkit.GameMode
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "quake",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.SPYGLASS,
     description = "Constantly changes the player's FOV.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -9,6 +10,8 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 
 @CommandInfo(
     name = "starve",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.ROTTEN_FLESH,
     description = "Starves a player. Yeah.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

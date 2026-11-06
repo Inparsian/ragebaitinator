@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
@@ -15,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "typo",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.NAME_TAG,
     description = "Fat-fingers a player's commands. Was that /hmoe or /home?",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

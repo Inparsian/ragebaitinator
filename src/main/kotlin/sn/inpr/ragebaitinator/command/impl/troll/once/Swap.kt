@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.language
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.type.Placeholders
 
 @CommandInfo(
     name = "swap",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.ENDER_PEARL,
     description = "Swaps two players' locations (and inventories if you want to)",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

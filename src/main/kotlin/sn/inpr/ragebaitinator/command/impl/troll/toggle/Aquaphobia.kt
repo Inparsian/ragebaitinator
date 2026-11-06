@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.damage.DamageSource
@@ -13,6 +14,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 
 @CommandInfo(
     name = "aquaphobia",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.PUFFERFISH,
     description = "Makes a player allergic to water.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

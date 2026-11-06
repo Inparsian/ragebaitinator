@@ -21,6 +21,8 @@ import java.util.*
 
 @CommandInfo(
     name = "cage",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.IRON_BARS,
     description = "Puts a player in a cage.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

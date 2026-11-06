@@ -19,6 +19,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "bury",
+    category = CommandInfo.Category.WORLD,
+    icon = Material.DIRT,
     description = "Buries a player alive.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

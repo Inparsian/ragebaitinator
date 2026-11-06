@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -9,6 +10,8 @@ import sn.inpr.ragebaitinator.utility.TextTransform
 
 @CommandInfo(
     name = "haxorman",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.COMMAND_BLOCK,
     description = "I'm in. Turns a player's chat messages into MD5 hashes.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -2,6 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerBedEnterEvent
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerBedEnterSubscriber
 
 @CommandInfo(
     name = "insomnia",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.WHITE_BED,
     description = "Prevents a player from sleeping.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

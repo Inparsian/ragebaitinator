@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.block.Container
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 
 @CommandInfo(
     name = "boomcontainer",
+    category = CommandInfo.Category.EXPLOSIVES,
+    icon = Material.CHEST,
     description = "Makes the next (or every) container a player opens explode.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

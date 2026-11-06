@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.protocol.sound.SoundCategory
 import com.github.retrooper.packetevents.protocol.sound.Sounds
 import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSoundEffect
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseTroll
@@ -14,6 +15,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "hiss",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.CREEPER_SPAWN_EGG,
     description = "Plays a creeper hiss sound from directly behind the player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

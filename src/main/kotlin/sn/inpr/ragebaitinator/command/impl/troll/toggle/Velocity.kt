@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityVelocity
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -14,6 +15,8 @@ import java.util.*
 
 @CommandInfo(
     name = "velocity",
+    category = CommandInfo.Category.COMBAT,
+    icon = Material.SPECTRAL_ARROW,
     description = "Magnifies a player's velocity when they take damage.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

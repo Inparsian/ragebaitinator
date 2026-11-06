@@ -6,6 +6,7 @@ import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.*
 import org.bukkit.Bukkit
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
@@ -18,6 +19,8 @@ import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 
 @CommandInfo(
     name = "deserted",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.DEAD_BUSH,
     description = "Where did everyone go?",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

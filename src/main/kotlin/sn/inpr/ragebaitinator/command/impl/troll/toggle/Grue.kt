@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 
 @CommandInfo(
     name = "grue",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.COAL,
     description = "What are you talking about? The dark can't hurt you!",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -14,6 +14,8 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
     name = "alienhand",
+    category = CommandInfo.Category.ILLUSIONS,
+    icon = Material.ENDERMITE_SPAWN_EGG,
     description = "MY HAND IS INFECTED BY SOME ALIEN PARASITE",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

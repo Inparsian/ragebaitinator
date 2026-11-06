@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemConsumeEvent
@@ -12,6 +13,8 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 
 @CommandInfo(
     name = "spoiled",
+    category = CommandInfo.Category.SURVIVAL,
+    icon = Material.SPIDER_EYE,
     description = "Smells fine, looks fine... Poisons a player the next (or every) time they eat.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

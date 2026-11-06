@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityToggleGlideEvent
@@ -10,6 +11,8 @@ import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
 
 @CommandInfo(
     name = "noelytra",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.COBWEB,
     description = "Makes a player unable to glide with an elytra.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.ConnectionState
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -15,14 +16,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.ArrayDeque
-import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.Executors
-import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
+import java.util.*
+import java.util.concurrent.*
 
 /*
     This simulates actual network lag by delaying packets in transit instead of using
@@ -39,6 +34,8 @@ import java.util.concurrent.TimeUnit
 */
 @CommandInfo(
     name = "lag",
+    category = CommandInfo.Category.MOVEMENT,
+    icon = Material.REPEATER,
     description = "Makes a player \"lag\".",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

@@ -1,5 +1,6 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
+import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -11,6 +12,8 @@ import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "uwu",
+    category = CommandInfo.Category.CHAT,
+    icon = Material.PINK_DYE,
     description = "OwO what's this? Makes a player talk in UwUspeak.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),

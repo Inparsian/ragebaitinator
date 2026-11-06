@@ -1,6 +1,7 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
@@ -12,11 +13,13 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
-import java.util.UUID
+import java.util.*
 import kotlin.math.pow
 
 @CommandInfo(
     name = "tornado",
+    category = CommandInfo.Category.HAZARDS,
+    icon = Material.WIND_CHARGE,
     description = "Sends a tornado after a player.",
     syntax = [
         CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
