@@ -42,15 +42,6 @@ object PlayerUtil {
         return enabled
     }
 
-    fun getColoredTrollInfo(player: Player): MutableList<String> {
-        val trolls: MutableList<String> = mutableListOf()
-        for (cmd in CommandManager.toggleTrolls) {
-            val info: CommandInfo = cmd.info
-            trolls.add((if (cmd.hasPlayer(player)) "§a" else "§c") + info.name)
-        }
-        return trolls
-    }
-
     // using these methods will work even with active trolls that transform the
     // player into, say, a potato
     fun getVelocity(player: Player): Vector {

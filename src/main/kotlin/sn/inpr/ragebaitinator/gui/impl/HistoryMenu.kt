@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.database.CommandHistory
+import sn.inpr.ragebaitinator.gui.GuiText
 import sn.inpr.ragebaitinator.gui.PaginationMenu
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
@@ -24,14 +25,12 @@ class HistoryMenu(player: Player) : PaginationMenu(
     fun historyItem(entry: CommandHistory.CommandHistoryEntry): ItemStack {
         val item = if (entry.playerName == "!!") ItemStack(Material.PAPER) else PlayerUtil.getHead(entry.playerName)
         val meta = item.itemMeta ?: return ItemStack(Material.BARRIER)
-        val lore = mutableListOf<String>()
-        meta.setDisplayName("§c${entry.command}")
-        lore.add("§7Executed by:")
-        lore.add("§f" + entry.playerName.replace("!!", "§dServer"))
-        lore.add("")
-        lore.add("§7Executed at:")
-        lore.add("§f" + TimeUtil.epochToDate(entry.timestamp))
-        meta.lore = lore
+        val executor = if (entry.playerName == "!!") GuiText.text("gui.history.server") else entry.playerName
+        meta.setDisplayName(GuiText.text("gui.history.entry.name", "command" to entry.command))
+        meta.lore = GuiText.lines(
+            "gui.history.entry.lore",
+            "command" to entry.command, "executor" to executor, "time" to TimeUtil.epochToDate(entry.timestamp)
+        )
         item.itemMeta = meta
         return item
     }
@@ -42,7 +41,7 @@ class HistoryMenu(player: Player) : PaginationMenu(
             .map { historyItem(it) }
         pages = MathUtil.pages(CommandHistory.size, PAGE_SIZE)
 
-        val inv: Inventory = Bukkit.createInventory(this, 45, "History ($page/$pages)")
+        val inv: Inventory = Bukkit.createInventory(this, 45, GuiText.text("gui.history.title", "page" to page.toString(), "pages" to pages.toString()))
         inv.contents = items.toTypedArray()
         addPaginationItems(inv, page, pages)
         return inv

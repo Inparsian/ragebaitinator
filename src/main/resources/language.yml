@@ -43,3 +43,256 @@
 # command.<toggleTroll>.deinit
 # Sent when a toggle troll command has been successfully disabled.
 # This can have multiple variations - for example, /rb bomb also has deinitArrow, deinitSnowball, and deinitEgg.
+
+#
+# commands.<command>.description
+# What a command is described as in /rb help and in the GUI. Without it, the command's built-in description is used.
+#
+# commands.<command>.parameters.<parameter>.name
+# commands.<command>.parameters.<parameter>.description
+# What a parameter of a command is called and described as in the GUI. <parameter> is its name in the command's syntax,
+# like Persistent in /rb boombreak.
+#
+# categories.<category>.name
+# categories.<category>.description
+# What a category of trolls is called and described as in /rb help and in the GUI.
+#
+# Everything in the GUI is in the gui section below, and it follows the same color scheme as everything else.
+# Items that are in a state, like trolls that are enabled or not, have a separate message for each state, with the color
+# it should have in it. Where a message is a list of lines, a line that is nothing but a placeholder, like %description%,
+# is replaced by as many lines as it takes. PAPI placeholders are not supported in the GUI.
+#
+# The placeholders that each message can use are listed with it. %prefix%, %version%, %plugin%, and the colors are
+# always available.
+
+categories:
+  explosives:
+    name: "Explosives"
+    description: "Things that go boom."
+  hazards:
+    name: "Mobs & Hazards"
+    description: "Mobs, projectiles and other things out to get a player."
+  world:
+    name: "Blocks & World"
+    description: "Changes to the blocks and the world around a player."
+  movement:
+    name: "Movement"
+    description: "Changes to how a player moves, falls and flies."
+  inventory:
+    name: "Inventory & Items"
+    description: "What a player carries, picks up and uses."
+  combat:
+    name: "Combat"
+    description: "Changes to how a player fights and takes hits."
+  survival:
+    name: "Health & Hunger"
+    description: "Health, hunger, sleep and respawning."
+  chat:
+    name: "Chat & Commands"
+    description: "Changes what a player says, and what happens when they say it."
+  illusions:
+    name: "Illusions & Scares"
+    description: "Things only the player sees, hears or feels."
+  misc:
+    name: "Miscellaneous"
+    description: "Everything else."
+
+gui:
+  # Messages that are sent in chat while the GUI is waiting for a value to be typed in.
+  # %field% is the name of the parameter, %completions% are the values that can be typed in, %value% is what was typed in,
+  # and %type% is the kind of value that was expected.
+  messages:
+    fieldPrompt: "%prefix% %c2%Please enter a value for %c1%%field%"
+    fieldCompletions: "%prefix% %c2%Possible values: %c1%%completions%"
+    fieldInvalidCompletion: "%prefix% &cThis value must be one of the possible values listed above"
+    fieldInvalidPlayer: "%prefix% &cPlayer(s) not found"
+    fieldInvalid: "%prefix% &cInvalid %type%"
+    fieldSet: "%prefix% %c2%Set %c1%%field% %c2%to %c1%%value%"
+
+  # What the kinds of values that a parameter can have are called.
+  types:
+    string: "String"
+    boolean: "Boolean"
+    integer: "Integer"
+    long: "Long"
+    float: "Float"
+    double: "Double"
+    player: "Player"
+
+  # Items that are on every menu with pages.
+  common:
+    back:
+      name: "%c1%Back"
+    refresh:
+      name: "%c1%Refresh"
+    firstPage:
+      name: "%c1%First Page"
+    previousPage:
+      name: "%c1%Previous Page"
+    nextPage:
+      name: "%c1%Next Page"
+    lastPage:
+      name: "%c1%Last Page"
+
+  main:
+    title: "Ragebaitinator"
+    players:
+      name: "%c1%Players"
+      lore:
+        - "%c3%Manage players."
+    history:
+      name: "%c1%History"
+      # %count% is how many commands have been executed.
+      lore:
+        - "%c3%View command history. To date, a total of"
+        - "%c1%%count% %c3%command(s) have been executed."
+    reload:
+      name: "%c1%Reload Configs"
+      lore:
+        - "%c3%Reloads the plugin's configuration files."
+    info:
+      name: "%c1%&lRagebaitinator"
+      # %trolls% is how many trolls there are.
+      lore:
+        - "%c3%You are running %c1%Ragebaitinator v%version%"
+        - "%c3%made by %c1%Inparsian%c3%!"
+        - ""
+        - "%c3%This plugin has a total of %c1%%trolls% %c3%trolls!"
+
+  players:
+    # %page% and %pages% are the page that's open and how many there are.
+    title: "Players (%page%/%pages%)"
+    head:
+      name: "%c2%%player%"
+      # %enabled%, %disabled% and %total% are how many toggle trolls are on, off and there are. %trolls% is the name of every
+      # toggle troll, in the color of the state it's in (see gui.troll.name)
+      lore:
+        - "%c3%Trolls (&a%enabled%%c3%:&c%disabled%%c3%:%c2%%total%%c3%):"
+        - "%trolls%"
+      # These are only added when the player isn't the one whose menu it is.
+      manage:
+        - ""
+        - "%c3%Click to manage this player."
+
+  player:
+    # %player% is the player the menu is about.
+    title: "%player%"
+    pardon:
+      name: "%c1%Pardon"
+      lore:
+        - "%c3%Disables all persistent trolls for this player."
+    troll:
+      name: "%c1%Troll"
+      lore:
+        - "%c3%Trolls this player."
+
+  categories:
+    title: "Trolls"
+    item:
+      # %category% is the name of the category (see categories). In the lore, %description% is its description, %count% is how
+      # many trolls it has, and %enabled% and %toggles% are how many toggle trolls of it are on for the player, and
+      # how many there are. %player% is the player the menu is about.
+      name: "%c1%%category%"
+      lore:
+        - "%description%"
+        - ""
+        - "%c3%Trolls: %c2%%count%"
+        - "%c3%Enabled on %c2%%player%%c3%: %c2%%enabled%%c3%/%c2%%toggles%"
+        - ""
+        - "%c3%Click to view."
+    all:
+      # The title is what the menu with every troll in it is called, in place of the name of a category.
+      title: "All Trolls"
+      name: "%c2%All Trolls"
+      # %count% is how many trolls there are.
+      lore:
+        - "%c3%Every troll, in alphabetical order."
+        - ""
+        - "%c3%Trolls: %c2%%count%"
+        - ""
+        - "%c3%Click to view."
+
+  trolls:
+    # %category% is the name of the category, or the title of the one with every troll (see gui.categories.all).
+    title: "%category% (%page%/%pages%)"
+
+  # How a troll is shown, both in the lists of them and on the menu of its parameters.
+  troll:
+    # %troll% is the name of the troll.
+    name:
+      enabled: "&a%troll%"
+      disabled: "&c%troll%"
+      once: "&6%troll%"
+    # %state% is one of the states below.
+    type:
+      toggle: "%c3%Type: %c1%Toggle %c3%(%state%%c3%)"
+      once: "%c3%Type: &6One-time"
+    state:
+      enabled: "&aEnabled"
+      disabled: "&cDisabled"
+    # %condition% is the condition, which the troll can't be used without while it's in the second state.
+    conditions:
+      header: "%c3%Conditions:"
+      none: "%c2%None"
+      met: "%c3%- &a%condition%"
+      unmet: "%c3%- &c%condition%"
+    # %name% is the name of the parameter, %type% is what kind of value it is, and %default% and %required% are
+    # added when it has a default value or isn't optional. %value% is the default value.
+    parameters:
+      header: "%c3%Additional Parameters:"
+      none: "%c2%None"
+      line: "%c3%- %c1%%name% %c3%: %c2%%type%%default%%required%"
+      default: " %c3%(%c2%%value%%c3%)"
+      defaultTrue: " %c3%(&2%value%%c3%)"
+      defaultFalse: " %c3%(&4%value%%c3%)"
+      required: " &c(Required)"
+    click:
+      toggle: "%c3%Left click to toggle."
+      execute: "%c3%Left click to execute."
+      toggleDefaults: "%c3%Right click to toggle with default parameters."
+      executeDefaults: "%c3%Right click to execute with default parameters."
+
+  # The menu where the parameters of a troll are filled in.
+  parameters:
+    # %troll% is the name of the troll.
+    title: "%troll%"
+    item:
+      # %name% is the name of the parameter. The names for a true and false value are for parameters that are either.
+      name: "%c1%%name%"
+      nameTrue: "&a%name%"
+      nameFalse: "&c%name%"
+      # %description% is its description, %type% is what kind of value it is, and %optional% is one of the below.
+      lore:
+        - "%description%"
+        - ""
+        - "%c3%Type: %c2%%type%"
+        - "%c3%Optional: %optional%"
+      noDescription: "%c2%No description."
+      optional: "&aYes"
+      required: "&cNo"
+      # %value% is the value it has now.
+      value:
+        - "%c3%Current Value"
+        - "%c2%%value%"
+      noValue:
+        - "%c3%Current Value"
+        - "&4None"
+    confirm:
+      name: "&aConfirm"
+    # This is what the confirm item is while a parameter that's needed doesn't have a value.
+    confirmBlocked:
+      name: "&4Confirm"
+
+  history:
+    title: "History (%page%/%pages%)"
+    # What the server's name is, in place of that of a player.
+    server: "%c1%Server"
+    entry:
+      # %command% is the command that was executed, %executor% is who executed it, and %time% is when.
+      name: "%c1%%command%"
+      lore:
+        - "%c3%Executed by:"
+        - "%c2%%executor%"
+        - ""
+        - "%c3%Executed at:"
+        - "%c2%%time%"

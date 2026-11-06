@@ -74,6 +74,12 @@ abstract class BaseCommand {
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
 
+    // what a command and its parameters are described as can be changed in the language file, and are described by their
+    // annotations otherwise
+    val description: String get() = languageOr("description", info.description)
+    fun parameterName(syntax: CommandSyntax): String = languageOr("parameters.${syntax.purpose}.name", syntax.purpose)
+    fun parameterDescription(syntax: CommandSyntax): String = languageOr("parameters.${syntax.purpose}.description", syntax.description)
+
     fun targetPlayers(sender: CommandSender, input: String): List<Player> = PlayerUtil.targetPlayers(input, sender)
 }
 

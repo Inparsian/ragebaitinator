@@ -70,7 +70,7 @@ class Help : BaseCommand() {
     ))
         .put("command", command.info.name)
         .put("syntax", command.stringifySyntax())
-        .put("description", command.info.description)
+        .put("description", command.description)
         .toString()
 
     private fun trollsOf(category: CommandInfo.Category, allowed: List<BaseCommand>): List<BaseCommand>
@@ -81,15 +81,15 @@ class Help : BaseCommand() {
         val general = allowed.filter { it !is BaseTroll }
         val categories = CommandInfo.Category.entries
             .map { it to trollsOf(it, allowed).size }
-            .filter { (_, count) -> count > 0 }
+            .filter { [_, count] -> count > 0 }
 
-        val categoryItems = categories.map { (category, count) ->
+        val categoryItems = categories.map { [category, count] ->
             Placeholders("commands.help.categoryItem", listOf(
                 "%c3%- %c1%/rb help %key% %c3%(%c2%%count% trolls%c3%): %c2%%description%"
             ))
                 .put("key", category.key)
                 .put("count", count.toString())
-                .put("description", category.blurb)
+                .put("description", category.localDescription)
                 .toString()
         }
 
@@ -118,7 +118,7 @@ class Help : BaseCommand() {
         list(
             sender, "commands.help.category",
             listOf("%c3%%category% trolls:", "%c3%Page %c1%%page% %c3%of %c1%%pages%", "%items%"),
-            trollsOf(category, allowed), page, category.displayName
+            trollsOf(category, allowed), page, category.localName
         )
     }
 

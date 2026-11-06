@@ -12,47 +12,91 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.*
-import sn.inpr.ragebaitinator.gui.GuiHandler
-import sn.inpr.ragebaitinator.gui.Menu
-import sn.inpr.ragebaitinator.gui.PaginationMenu
-import sn.inpr.ragebaitinator.gui.TrollGuiDataInput
+import sn.inpr.ragebaitinator.gui.*
 import sn.inpr.ragebaitinator.utility.ItemUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import sn.inpr.ragebaitinator.utility.TypeUtil
 
-private const val BACK = "§cBack"
-private const val NONE = "§fNone"
 private const val PAGE_SIZE = 36
+private const val TROLL = "troll:"
+private const val CATEGORY = "category:"
+private const val ALL = "all"
+private const val CONFIRM = "confirm"
 
 private fun trollsIn(category: CommandInfo.Category?): List<BaseTroll>
     = CommandManager.trolls.filter { category == null || it.info.category == category }.sortedBy { it.info.name }
 
 private fun blocked(troll: BaseTroll, target: Player) = troll.getConditions(target)?.list?.any { it.predicate } == true
 
+// the first parameter of a troll is always the player it's used on, so it's everything after that which has to be
+// filled in, if any of it is required. this is what lets a troll be run with all of its defaults in one click
 private fun runsWithDefaults(command: BaseCommand) = command.info.syntax.drop(1).all { it.optional }
 
+private fun trollName(troll: BaseTroll, enabled: Boolean) = GuiText.text(
+    when {
+        troll !is BaseToggleTroll -> "gui.troll.name.once"
+        enabled -> "gui.troll.name.enabled"
+        else -> "gui.troll.name.disabled"
+    },
+    "troll" to troll.info.name
+)
+
+// a toggle glows while it's on, and the name of one says whether it is. what is clicked is kept on the item, since the
+// name of it can be anything
 private fun icon(troll: BaseTroll, meta: ItemMeta, enabled: Boolean) {
     ItemUtil.hideTooltips(meta)
-    if (troll is BaseToggleTroll) {
-        if (enabled) ItemUtil.makeGlow(meta)
-        meta.setDisplayName((if (enabled) "§a" else "§c") + troll.info.name)
-    } else {
-        meta.setDisplayName("§6${troll.info.name}")
+    if (troll is BaseToggleTroll && enabled) ItemUtil.makeGlow(meta)
+    meta.setDisplayName(trollName(troll, enabled))
+    Menu.tag(meta, TROLL + troll.info.name)
+}
+
+private fun typeLine(troll: BaseTroll, enabled: Boolean) = if (troll is BaseToggleTroll)
+    GuiText.text("gui.troll.type.toggle", "state" to GuiText.text(if (enabled) "gui.troll.state.enabled" else "gui.troll.state.disabled"))
+else
+    GuiText.text("gui.troll.type.once")
+
+private fun typeName(type: CommandSyntax.Type) = GuiText.text("gui.types.${type.name.lowercase()}")
+
+private fun conditionLines(troll: BaseTroll, target: Player): List<String> {
+    val conditions = troll.getConditions(target)?.list
+    if (conditions.isNullOrEmpty())
+        return listOf(GuiText.text("gui.troll.conditions.none"))
+
+    return conditions.map { [humanReadable, _, predicate] ->
+        GuiText.text(if (predicate) "gui.troll.conditions.unmet" else "gui.troll.conditions.met", "condition" to humanReadable)
     }
 }
 
-private fun typeLine(troll: BaseTroll, enabled: Boolean)
-    = if (troll is BaseToggleTroll) "§7Type: §bToggle §8(${if (enabled) "§aEnabled" else "§cDisabled"}§8)" else "§7Type: §6One-time"
+private fun parameterLines(troll: BaseTroll): List<String> {
+    val parameters = troll.info.syntax.filter { it.purpose.isNotEmpty() }
+    if (parameters.isEmpty())
+        return listOf(GuiText.text("gui.troll.parameters.none"))
+
+    return parameters.map { syntax ->
+        val default = when {
+            syntax.default.isEmpty() -> ""
+            syntax.type == CommandSyntax.Type.BOOLEAN -> GuiText.text(
+                if (syntax.default.toBoolean()) "gui.troll.parameters.defaultTrue" else "gui.troll.parameters.defaultFalse",
+                "value" to syntax.default
+            )
+            else -> GuiText.text("gui.troll.parameters.default", "value" to syntax.default)
+        }
+
+        GuiText.text(
+            "gui.troll.parameters.line",
+            "name" to troll.parameterName(syntax),
+            "type" to typeName(syntax.type),
+            "default" to default,
+            "required" to if (syntax.optional) "" else GuiText.text("gui.troll.parameters.required")
+        )
+    }
+}
 
 class TrollCategoriesMenu(player: Player, val target: Player) : Menu(player, true) {
     private companion object {
         val CATEGORY_SLOTS = listOf(11, 12, 13, 14, 15, 20, 21, 22, 23, 24)
         const val BACK_SLOT = 27
         const val ALL_SLOT = 31
-        const val ALL_NAME = "§fAll Trolls"
     }
-
-    private fun categoryName(category: CommandInfo.Category) = category.color + category.displayName
 
     private fun categoryItem(category: CommandInfo.Category): ItemStack? {
         val trolls = CommandManager.trolls.filter { it.info.category == category }
@@ -65,43 +109,40 @@ class TrollCategoriesMenu(player: Player, val target: Player) : Menu(player, tru
         val item = ItemStack(category.icon)
         val meta = item.itemMeta!!
         ItemUtil.hideTooltips(meta)
-        meta.setDisplayName(categoryName(category))
-        val lore = TypeUtil.splitAtLength(category.blurb, 50, "§f")
-        lore.addAll(listOf(
-            "",
-            "§7Trolls: §f${trolls.size}",
-            "§7Enabled on ${target.name}: §${if (enabled > 0) "a" else "7"}$enabled§8/§7${toggles.size}",
-            "",
-            "§8Click to view."
-        ))
+        meta.setDisplayName(GuiText.text("gui.categories.item.name", "category" to category.localName))
+        meta.lore = GuiText.lines(
+            "gui.categories.item.lore",
+            "count" to trolls.size.toString(),
+            "enabled" to enabled.toString(),
+            "toggles" to toggles.size.toString(),
+            "player" to target.name,
+            multiline = mapOf("description" to GuiText.wrap(category.localDescription))
+        )
         if (enabled > 0) ItemUtil.makeGlow(meta)
-        meta.lore = lore
+        tag(meta, CATEGORY + category.key)
         item.itemMeta = meta
         return item
     }
 
     override fun getInventory(): Inventory {
-        val inventory = Bukkit.createInventory(this, 36, "Trolls")
+        val inventory = Bukkit.createInventory(this, 36, GuiText.text("gui.categories.title"))
         val items = CommandInfo.Category.entries.mapNotNull { categoryItem(it) }
         items.zip(CATEGORY_SLOTS).forEach { [item, slot] -> addItem(inventory, slot, item) }
 
-        addItem(inventory, ALL_SLOT, Material.NETHER_STAR, ALL_NAME, listOf(
-            "§7Every troll, in no particular order.",
-            "",
-            "§7Trolls: §f${CommandManager.trolls.size}",
-            "",
-            "§8Click to view."
-        ), false)
-        addItem(inventory, BACK_SLOT, Material.REDSTONE_BLOCK, BACK, listOf(), false)
+        addItem(
+            inventory, ALL_SLOT, Material.NETHER_STAR, GuiText.text("gui.categories.all.name"),
+            GuiText.lines("gui.categories.all.lore", "count" to CommandManager.trolls.size.toString()), false, ALL
+        )
+        addItem(inventory, BACK_SLOT, Material.REDSTONE_BLOCK, GuiText.text("gui.common.back.name"), listOf(), false, BACK)
         return inventory
     }
 
     override fun onClick(event: InventoryClickEvent) {
         val player = event.whoClicked as Player
-        when (val name = event.currentItem?.itemMeta?.displayName) {
+        when (val action = actionOf(event.currentItem)) {
             BACK -> PlayerMenu(player, target).open()
-            ALL_NAME -> TrollsMenu(player, target, null).open()
-            else -> CommandInfo.Category.entries.firstOrNull { categoryName(it) == name }
+            ALL -> TrollsMenu(player, target, null).open()
+            else -> CommandInfo.Category.entries.firstOrNull { action == CATEGORY + it.key }
                 ?.let { TrollsMenu(player, target, it).open() }
         }
     }
@@ -117,48 +158,22 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
     MathUtil.pages(trollsIn(category).size, PAGE_SIZE),
     TrollCategoriesMenu(player, target)
 ) {
-    fun addItemCommons(troll: BaseTroll, lore: MutableList<String>, params: List<String>) {
-        val word = if (troll is BaseToggleTroll) "toggle" else "execute"
-        lore.addAll(listOf("", "§7Conditions:"))
-
-        val conditions = troll.getConditions(target)
-        if (conditions != null) {
-            for ([humanReadable, _, predicate] in conditions.list) {
-                lore.add("§8- §${if (predicate) "c" else "a"}$humanReadable")
-            }
-        } else {
-            lore.add(NONE)
-        }
-
-        lore.addAll(listOf("", "§7Additional Parameters:"))
-        if (params.isNotEmpty()) lore.addAll(params) else lore.add(NONE)
-        lore.addAll(listOf("", "§8Left click to $word."))
-
-        if (runsWithDefaults(troll))
-            lore.add("§8Right click to $word with default parameters.")
-    }
-
     fun trollItem(troll: BaseTroll): ItemStack {
         val item = ItemStack(if (blocked(troll, target)) Material.BARRIER else troll.info.icon)
         val meta = item.itemMeta!!
-        val lore: MutableList<String> = TypeUtil.splitAtLength(troll.info.description, 50, "§f")
-        val params: MutableList<String> = mutableListOf()
-
-        for (syntax in troll.info.syntax.filter { it.purpose.isNotEmpty() }) {
-            val type = syntax.type.toString()
-            val defaultPart = if (syntax.default.isNotEmpty()) {
-                val color = if (syntax.type == CommandSyntax.Type.BOOLEAN) (if (syntax.default.toBoolean()) "§2" else "§4") else "§7"
-                " §8(${color}${syntax.default}§8)"
-            } else ""
-            val requiredPart = if (!syntax.optional) " §c(Required)" else ""
-
-            params.add("§8- §b${syntax.purpose} §7: §f" + type + defaultPart + requiredPart)
-        }
-
         val enabled = troll is BaseToggleTroll && troll.hasPlayer(target)
         icon(troll, meta, enabled)
-        lore.addAll(listOf("", typeLine(troll, enabled)))
-        addItemCommons(troll, lore, params)
+
+        val lore = GuiText.wrap(troll.description).toMutableList()
+        lore.addAll(listOf("", typeLine(troll, enabled), "", GuiText.text("gui.troll.conditions.header")))
+        lore.addAll(conditionLines(troll, target))
+        lore.addAll(listOf("", GuiText.text("gui.troll.parameters.header")))
+        lore.addAll(parameterLines(troll))
+
+        val word = if (troll is BaseToggleTroll) "toggle" else "execute"
+        lore.addAll(listOf("", GuiText.text("gui.troll.click.$word")))
+        if (runsWithDefaults(troll))
+            lore.add(GuiText.text("gui.troll.click.${word}Defaults"))
 
         meta.lore = lore
         item.itemMeta = meta
@@ -170,7 +185,13 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
         val trolls = trollsIn(category).chunked(PAGE_SIZE)[page - 1]
         for (command in trolls)
             items.add(trollItem(command))
-        val inventory = Bukkit.createInventory(this, 45, "${category?.displayName ?: "All Trolls"} ($page/$pages)")
+
+        val title = GuiText.text(
+            "gui.trolls.title",
+            "category" to (category?.localName ?: GuiText.text("gui.categories.all.title")),
+            "page" to page.toString(), "pages" to pages.toString()
+        )
+        val inventory = Bukkit.createInventory(this, 45, title)
         inventory.contents = items.toTypedArray()
         addPaginationItems(inventory, page, pages)
         return inventory
@@ -178,7 +199,7 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
 
     override fun onClickItem(event: InventoryClickEvent) {
         val player = event.whoClicked as Player
-        val command = CommandManager.getCommand(event.currentItem?.itemMeta?.displayName?.substring(2))
+        val command = CommandManager.getCommand(actionOf(event.currentItem)?.takeIf { it.startsWith(TROLL) }?.removePrefix(TROLL))
         if (command != null) {
             if (command.info.syntax.any { it.purpose.isNotEmpty() }) {
                 if (event.click == ClickType.LEFT) {
@@ -219,20 +240,11 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
     fun item(): ItemStack {
         val item = ItemStack(if (blocked(troll, target)) Material.BARRIER else troll.info.icon)
         val meta = item.itemMeta!!
-        val lore = mutableListOf<String>()
-
         val enabled = troll is BaseToggleTroll && troll.hasPlayer(target)
         icon(troll, meta, enabled)
-        lore.addAll(listOf(typeLine(troll, enabled), "", "§7Conditions:"))
-        val conditions = troll.getConditions(target)
-        if (conditions != null) {
-            for ([humanReadable, _, predicate] in conditions.list) {
-                lore.add("§8- §${if (predicate) "c" else "a"}$humanReadable")
-            }
-        } else {
-            lore.add(NONE)
-        }
 
+        val lore = mutableListOf(typeLine(troll, enabled), "", GuiText.text("gui.troll.conditions.header"))
+        lore.addAll(conditionLines(troll, target))
         meta.lore = lore
         item.itemMeta = meta
         return item
@@ -256,26 +268,33 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
     }
 
     override fun getInventory(): Inventory {
-        val inventory = Bukkit.createInventory(this, 45, troll.info.name)
+        val inventory = Bukkit.createInventory(this, 45, GuiText.text("gui.parameters.title", "troll" to troll.info.name))
         addItem(inventory, 10, item())
 
         for ([i, syntax] in syntax.withIndex()) {
             val param = params.getOrDefault(i, "")
             val item = ItemStack(Material.PAPER)
             val meta = item.itemMeta!!
-            val lore = if (syntax.description.isNotEmpty())
-                TypeUtil.splitAtLength(troll.info.description, 50, "§f")
-            else
-                mutableListOf("§fNo description.")
+            val name = troll.parameterName(syntax)
+            val description = troll.parameterDescription(syntax)
+            val lore = GuiText.lines(
+                "gui.parameters.item.lore",
+                "type" to typeName(syntax.type),
+                "optional" to GuiText.text(if (syntax.optional) "gui.parameters.item.optional" else "gui.parameters.item.required"),
+                multiline = mapOf("description" to
+                    if (description.isNotEmpty()) GuiText.wrap(description) else listOf(GuiText.text("gui.parameters.item.noDescription")))
+            )
 
-            lore.addAll(listOf("", "§7Type: §f${syntax.type}", "§7Optional: ${if (syntax.optional) "§aYes" else "§cNo"}"))
             if (syntax.type == CommandSyntax.Type.BOOLEAN) {
                 val isTrue = param.toBoolean()
                 if (isTrue) ItemUtil.makeGlow(meta)
-                meta.setDisplayName("§${if (isTrue) "a" else "c"}${syntax.purpose}")
+                meta.setDisplayName(GuiText.text(if (isTrue) "gui.parameters.item.nameTrue" else "gui.parameters.item.nameFalse", "name" to name))
             } else {
-                meta.setDisplayName("§b${syntax.purpose}")
-                lore.addAll(listOf("§7Current Value", if (param.isNotEmpty()) "§f$param" else "§4None"))
+                meta.setDisplayName(GuiText.text("gui.parameters.item.name", "name" to name))
+                lore.addAll(
+                    if (param.isNotEmpty()) GuiText.lines("gui.parameters.item.value", "value" to param)
+                    else GuiText.lines("gui.parameters.item.noValue")
+                )
             }
 
             meta.lore = lore
@@ -283,20 +302,20 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
             addItem(inventory, paperSlot(i), item)
         }
 
-        if(complete())
-            addItem(inventory, 19, Material.EMERALD_BLOCK, "§aConfirm", listOf(), false)
+        if (complete())
+            addItem(inventory, 19, Material.EMERALD_BLOCK, GuiText.text("gui.parameters.confirm.name"), listOf(), false, CONFIRM)
         else
-            addItem(inventory, 19, Material.BARRIER, "§4Confirm", listOf(), false)
-        addItem(inventory, 28, Material.REDSTONE_BLOCK, BACK, listOf(), false)
+            addItem(inventory, 19, Material.BARRIER, GuiText.text("gui.parameters.confirmBlocked.name"), listOf(), false)
+        addItem(inventory, 28, Material.REDSTONE_BLOCK, GuiText.text("gui.common.back.name"), listOf(), false, BACK)
 
         return inventory
     }
 
     override fun onClick(event: InventoryClickEvent) {
         val player = event.whoClicked as Player
-        when (event.currentItem?.itemMeta?.displayName) {
+        when (actionOf(event.currentItem)) {
             BACK -> TrollsMenu(player, target, category).open()
-            "§aConfirm" -> {
+            CONFIRM -> {
                 val args: MutableList<String> = mutableListOf()
                 for (param in params.values)
                     args.add(param)
