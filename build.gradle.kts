@@ -43,7 +43,15 @@ tasks {
         }
     }
 
+    // the plain jar has none of the dependencies in it, so it can't run on its own. the shadow jar is the one that can
+    jar {
+        enabled = false
+    }
+
     shadowJar {
-        destinationDirectory = file("/home/inparsian/262_test_server/plugins/")
+        archiveClassifier = ""
+
+        // set deployDir in ~/.gradle/gradle.properties (or pass -PdeployDir=...) to build the jar straight into a plugins folder
+        providers.gradleProperty("deployDir").orNull?.let { destinationDirectory = file(it) }
     }
 }
