@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
-    incompatible = [ "haxorman", "oink", "garble" ]
+    incompatible = [ "haxorman", "oink", "garble", "mock", "leet", "clap", "backwards", "yell", "censor" ]
 )
 class Uwu : BaseChatTroll() {
     private val chances = ConcurrentHashMap<UUID, Double>()

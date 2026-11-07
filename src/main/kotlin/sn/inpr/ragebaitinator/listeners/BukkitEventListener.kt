@@ -53,6 +53,7 @@ fun interface PlayerItemDamageSubscriber { fun onPlayerItemDamage(event: PlayerI
 fun interface PotionSplashSubscriber { fun onPotionSplash(event: PotionSplashEvent) }
 fun interface AreaEffectCloudApplySubscriber { fun onAreaEffectCloudApply(event: AreaEffectCloudApplyEvent) }
 fun interface FurnaceStartSmeltSubscriber { fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) }
+fun interface PlayerDropItemSubscriber { fun onPlayerDropItem(event: PlayerDropItemEvent) }
 fun interface EntityChangeBlockSubscriber { fun onEntityChangeBlock(event: EntityChangeBlockEvent) }
 
 object BukkitEventListener : Listener {
@@ -102,6 +103,7 @@ object BukkitEventListener : Listener {
             if (command is PotionSplashSubscriber && event is PotionSplashEvent) command.onPotionSplash(event)
             if (command is AreaEffectCloudApplySubscriber && event is AreaEffectCloudApplyEvent) command.onAreaEffectCloudApply(event)
             if (command is FurnaceStartSmeltSubscriber && event is FurnaceStartSmeltEvent) command.onFurnaceStartSmelt(event)
+            if (command is PlayerDropItemSubscriber && event is PlayerDropItemEvent) command.onPlayerDropItem(event)
             if (command is EntityChangeBlockSubscriber && event is EntityChangeBlockEvent) command.onEntityChangeBlock(event)
         }
 
@@ -135,9 +137,7 @@ object BukkitEventListener : Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerBucketFill(event: PlayerBucketFillEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
-    fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) = interceptBukkitEvent(event)
-    @EventHandler(priority = EventPriority.HIGHEST)
-    fun onEntityDamage(event: EntityDamageEvent) = interceptBukkitEvent(event)
+    fun onEntityDamage(event: EntityDamageEvent) = interceptBukkitEvent(event) // EntityDamageByEntity & EntityDamage
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityDeath(event: EntityDeathEvent) = interceptBukkitEvent(event) // EntityDeath & PlayerDeath
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -186,6 +186,8 @@ object BukkitEventListener : Listener {
     fun onAreaEffectCloudApply(event: AreaEffectCloudApplyEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onPlayerDropItem(event: PlayerDropItemEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityChangeBlock(event: EntityChangeBlockEvent) = interceptBukkitEvent(event)
 }

@@ -76,6 +76,29 @@ object TextTransform {
         return word.first() + shuffled.joinToString("") + word.last()
     }
 
+    private val leetLetters = mapOf('a' to '4', 'e' to '3', 'i' to '1', 'o' to '0', 's' to '5', 't' to '7')
+
+    fun mock(message: String): String {
+        var upper = false
+        return buildString {
+            for (char in message) {
+                if (!char.isLetter()) {
+                    append(char)
+                    continue
+                }
+                append(if (upper) char.uppercaseChar() else char.lowercaseChar())
+                upper = !upper
+            }
+        }
+    }
+
+    fun leet(message: String): String = message.map { leetLetters[it.lowercaseChar()] ?: it }.joinToString("")
+
+    fun clap(message: String): String = message.split(' ').filter { it.isNotEmpty() }.joinToString(" *clap* ")
+
+    fun censor(message: String, chance: Double = 0.3, random: Random = Random.Default): String
+        = Regex("""\S+""").replace(message) { if (random.nextDouble() < chance) "*".repeat(it.value.length) else it.value }
+
     fun typo(word: String, random: Random = Random.Default): String {
         if (word.length < 2)
             return word
