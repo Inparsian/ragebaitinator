@@ -1,12 +1,19 @@
 # Ragebaitinator
 
-A Spigot plugin that allows you to piss off people in block game
+A Spigot plugin for 26.1+ that allows you to piss off people in block game
 
 - Costs nothing! Completely free and open-source software
 - Integration with PlaceholderAPI
 - 100+ trolls, many ways to make ppl angry!!!
 - Extremely configurable
 - Block rollback system that rolls back block changes even after a crash
+
+## Notes
+
+- This is a re-code of my old private Troll plugin (in Java) from 2022. About 90 of the commands and the inventory GUI handler came from it
+- This is beta software, please report any bugs or other issues you find :)
+- Some AI assistance was used for more tricky portions, but 95% of the plugin was written by hand and AI assisted code has been independently verified
+- I can only guarantee support for server versions 26.1 and above. Support for versions below that (down to 1.12 and maybe 1.8) is a work in progress and is far from finished
 
 ## So... what can it do?
 
@@ -50,7 +57,7 @@ deployDir=/path/to/server/plugins
 
 You need at least:
 
-- A Spigot server on Minecraft 26.1 or newer (compatibility with server versions lower than 26.1 is W.I.P but has not been tested)
+- A Spigot server on Minecraft 26.1 or newer
 - [PacketEvents](https://github.com/retrooper/packetevents) (built against 2.14.0), which is required as this is not shaded
 
 Put the jar in your `plugins` folder and start the server.
