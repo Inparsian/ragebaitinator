@@ -3,7 +3,7 @@ package sn.inpr.ragebaitinator.utility
 import java.lang.management.ManagementFactory
 import java.lang.management.ThreadMXBean
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.*
 
 object TimeUtil {
     private const val MINUTE_NANOS: Long = 60_000_000_000L
