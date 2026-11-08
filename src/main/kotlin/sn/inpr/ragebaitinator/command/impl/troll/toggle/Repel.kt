@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.utility.LocationUtil
+import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "repel",
@@ -31,10 +32,16 @@ class Repel : BaseToggleTroll() {
                     val distance = target.location.distance(entity.location)
                     val velocity = entity.location.toVector().subtract(target.location.toVector())
                         .normalize()
-                        .multiply(1.2 - (distance * 0.2))
+                        .multiply(if (distance > 0) 1.2 - (distance * 0.2) else 1.0)
                         .add(entity.velocity)
-                    if (distance < 6) {
-                        entity.velocity = velocity
+                    velocity.x = velocity.x.coerceAtMost(5.0)
+                    velocity.y = velocity.y.coerceAtMost(5.0)
+                    velocity.z = velocity.z.coerceAtMost(5.0)
+                    if (distance < 6 && LocationUtil.isFinite(velocity)) {
+                        if (entity is Player)
+                            PlayerUtil.setVelocity(entity, velocity)
+                        else
+                            entity.velocity = velocity
                     }
                 }
             }

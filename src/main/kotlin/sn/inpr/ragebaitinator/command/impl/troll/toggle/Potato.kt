@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
@@ -144,7 +145,20 @@ class Potato : BaseToggleTroll(),
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        event.cancelIf(event !is PlayerTeleportEvent && potatoes.containsKey(event.player.uniqueId))
+        if (event !is PlayerTeleportEvent)
+            event.cancelIf(potatoes.containsKey(event.player.uniqueId))
+        else if (event.to != null) {
+            val to = event.to!!
+            val [potato] = potatoes[event.player.uniqueId] ?: return
+
+            // if distance >= 1, and this would result in the potato falling outside sim distance, it
+            // will be unloaded
+            // our distance checks will handle this teleport
+            if (potato.location.distance(to) >= 1) {
+                event.isCancelled = true
+                potato.teleport(to)
+            }
+        }
     }
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
@@ -185,6 +199,18 @@ class Potato : BaseToggleTroll(),
 
     override fun onPacketSend(event: PacketSendEvent) {
         val uuid = event.user.uuid ?: return
+
+        // if this potato respawns as a result of a far teleport/world change, we should resync camera
+        if (event.packetType == PacketType.Play.Server.SPAWN_ENTITY) {
+            val potato = potatoes[uuid]?.first
+            if (potato != null && WrapperPlayServerSpawnEntity(event).entityId == potato.entityId)
+                runTask {
+                    val owner = Bukkit.getPlayer(uuid) ?: return@runTask
+                    if (potato.isValid)
+                        PacketEvents.getAPI().playerManager.sendPacket(owner, WrapperPlayServerCamera(potato.entityId))
+                }
+        }
+
         if (event.packetType == PacketType.Play.Server.SPAWN_PLAYER) { // <=1.20.1
             val id = WrapperPlayServerSpawnPlayer(event).entityId
             if (potatoes.keys.any { Bukkit.getPlayer(it)?.entityId == id }) event.isCancelled = true
