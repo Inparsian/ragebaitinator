@@ -6,6 +6,7 @@ import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.AsyncPlayerChatEvent
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
@@ -39,6 +40,13 @@ object GuiHandler : Listener {
                 .put("completions", input.syntax.completions.joinToString(", "))
             send(player, placeholders)
         }
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryClose(event: InventoryCloseEvent) {
+        val player = event.player as? Player ?: return
+        if (menus[player] == event.view.topInventory.holder)
+            removeMenu(player)
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)

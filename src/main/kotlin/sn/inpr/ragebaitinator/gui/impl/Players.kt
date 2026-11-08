@@ -74,14 +74,13 @@ class PlayersMenu(player: Player) : PaginationMenu(
     }
 
     override fun onClickItem(event: InventoryClickEvent) {
-        val player = event.whoClicked as Player
-        val name = actionOf(event.currentItem)?.takeIf { it.startsWith(PLAYER) }?.removePrefix(PLAYER)
-        val target = name?.let { Bukkit.getPlayer(it) }
-        if (target != null) PlayerMenu(player, target).open() else open()
+        val player = event.whoClicked as? Player ?: return
+        val name = actionOf(event.currentItem)?.takeIf { it.startsWith(PLAYER) }?.removePrefix(PLAYER) ?: return
+        PlayerMenu(player, Bukkit.getPlayer(name) ?: return).open()
     }
 
-    override fun onPlayerJoin(event: PlayerJoinEvent) = open()
-    override fun onPlayerQuit(event: PlayerQuitEvent) = open()
+    override fun onPlayerJoin(event: PlayerJoinEvent) = update()
+    override fun onPlayerQuit(event: PlayerQuitEvent) = update()
 }
 
 class PlayerMenu(player: Player, val target: Player) : Menu(player), TrollToggleSubscriber, PlayerQuitSubscriber {
@@ -107,10 +106,7 @@ class PlayerMenu(player: Player, val target: Player) : Menu(player), TrollToggle
         when (actionOf(event.currentItem)) {
             BACK -> PlayersMenu(player).open()
             TROLL -> TrollCategoriesMenu(player, target).open()
-            PARDON -> {
-                player.performCommand("ragebaitinator pardon ${target.name}")
-                open()
-            }
+            PARDON -> player.performCommand("ragebaitinator pardon ${target.name}")
         }
     }
 

@@ -142,6 +142,12 @@ abstract class BaseToggleTroll : BaseTroll() {
     internal val tasks: Map<UUID, BukkitTask>
         field = mutableMapOf()
 
+    fun broadcastGuiUpdate() {
+        GuiHandler.menus.values
+            .filter { it is TrollToggleSubscriber }
+            .forEach { it.update() }
+    }
+
     open fun deinit(sender: CommandSender, target: Player): String? = null
 
     override fun process(
@@ -182,12 +188,12 @@ abstract class BaseToggleTroll : BaseTroll() {
                 val had = this.hasPlayer(target)
                 if (!had) players[target.uniqueId] = mutableSetOf()
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
-                if (had) removePlayer(target, "")
+                if (had)
+                    removePlayer(target, "")
+                else
+                    broadcastGuiUpdate()
                 if (message != null)
                     send(sender, target, message)
-                GuiHandler.menus.values
-                    .filter { it is TrollToggleSubscriber }
-                    .forEach { it.open() }
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
@@ -213,6 +219,7 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (players.remove(uuid) != null) {
             removeTask(uuid)
             onRemovePlayer(player, reason)
+            broadcastGuiUpdate()
             return true
         }
         return false
@@ -225,6 +232,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                 return false
             else {
                 removeTask(uuid)
+                broadcastGuiUpdate()
                 val player = Bukkit.getPlayer(uuid)
                 if (player != null)
                     onRemovePlayer(player, "cleared")

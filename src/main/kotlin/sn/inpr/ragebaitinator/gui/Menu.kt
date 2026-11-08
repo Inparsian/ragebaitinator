@@ -31,7 +31,7 @@ abstract class Menu(val player: Player) : InventoryHolder {
         fun actionOf(item: ItemStack?): String? = item?.itemMeta?.persistentDataContainer?.get(actionKey, PersistentDataType.STRING)
     }
 
-    fun open() {
+    private fun openInventory() {
         runTaskIfNotPrimaryThread {
             if (setbackCondition())
                 setbackMenu()?.open()
@@ -39,6 +39,16 @@ abstract class Menu(val player: Player) : InventoryHolder {
                 // 1 tick delay as online player list updates can be late
                 runTaskLater({ player.openInventory(getInventory()) }, 1)
         }
+    }
+
+    fun update() {
+        val top = player.openInventory.topInventory
+        if (top.holder == this)
+            top.contents = getInventory().contents
+    }
+
+    fun open() {
+        openInventory()
         GuiHandler.setMenu(player, this)
     }
 
@@ -96,7 +106,7 @@ abstract class PaginationMenu(
     fun setPage(newPage: Int, predicate: () -> Boolean = { true }) {
         if (predicate()) {
             page = newPage
-            open()
+            update()
         }
     }
 
@@ -108,7 +118,7 @@ abstract class PaginationMenu(
     final override fun onClick(event: InventoryClickEvent) {
         when (actionOf(event.currentItem)) {
             BACK -> previousMenu.open()
-            REFRESH -> open()
+            REFRESH -> update()
             FIRST_PAGE -> firstPage()
             PREVIOUS_PAGE -> previousPage()
             NEXT_PAGE -> nextPage()

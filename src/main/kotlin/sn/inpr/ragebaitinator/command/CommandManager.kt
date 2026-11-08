@@ -64,7 +64,7 @@ object CommandManager : CommandExecutor, TabCompleter {
 
                 GuiHandler.menus.values
                     .filter { it is CommandHistorySubscriber }
-                    .forEach { it.open() }
+                    .forEach { it.update() }
             }
         } else {
             send(sender, Placeholders("commandNotFound","%prefix% &cCommand not found"))

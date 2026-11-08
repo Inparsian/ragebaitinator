@@ -211,11 +211,9 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
                     TrollMenu(player, command as BaseTroll, target, category).open()
                 } else if (event.click == ClickType.RIGHT && runsWithDefaults(command)) {
                     player.performCommand("ragebaitinator ${command.info.name} ${target.name}")
-                    open()
                 }
             } else {
                 player.performCommand("ragebaitinator ${command.info.name} ${target.name}")
-                open()
             }
         }
     }
@@ -330,14 +328,13 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
                     args.add(param)
                 val finalCommand = "ragebaitinator ${troll.info.name} ${target.name} ${args.joinToString(" ")}"
                 player.performCommand(finalCommand)
-                open()
             }
             else -> {
                 val slotId = paramIndexFromSlot(event.slot) ?: return
                 val field = syntax[slotId]
                 if (field.type == CommandSyntax.Type.BOOLEAN) {
                     params[slotId] = (!params.getOrDefault(slotId, "false").toBoolean()).toString()
-                    open()
+                    update()
                 } else {
                     close()
                     GuiHandler.initDataInput(player, TrollGuiDataInput(this, field, slotId))
