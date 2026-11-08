@@ -12,7 +12,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
-import sn.inpr.ragebaitinator.listeners.PlayerTeleportSubscriber
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
 import java.util.*
 
@@ -29,7 +28,7 @@ import java.util.*
     ],
     incompatible = [ "cage" ]
 )
-class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, PlayerTeleportSubscriber {
+class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
     private val locations = mutableMapOf<UUID, Location>()
 
     fun get65536(player: Player): Location {
@@ -63,11 +62,9 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber, Pl
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (hasPlayer(event.player) && !inVoid(event.player, -2.0))
+        if (event is PlayerTeleportEvent)
+            event.cancelIf(hasPlayer(event.player) && inVoid(event.player, -2.0))
+        else if (hasPlayer(event.player) && !inVoid(event.player, -2.0))
             event.player.teleport(get65536(event.player))
-    }
-
-    override fun onPlayerTeleport(event: PlayerTeleportEvent) {
-        event.cancelIf(hasPlayer(event.player) && inVoid(event.player, -2.0))
     }
 }

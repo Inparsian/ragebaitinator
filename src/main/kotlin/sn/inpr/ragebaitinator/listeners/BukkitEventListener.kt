@@ -19,7 +19,6 @@ import sn.inpr.ragebaitinator.gui.GuiHandler
 fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
 fun interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
 fun interface AsyncPlayerChatSubscriber { fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) }
-fun interface PlayerTeleportSubscriber { fun onPlayerTeleport(event: PlayerTeleportEvent) }
 fun interface PlayerMoveSubscriber { fun onPlayerMove(event: PlayerMoveEvent) }
 fun interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVelocityEvent) }
 fun interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
@@ -69,7 +68,6 @@ object BukkitEventListener : Listener {
             if (command is PlayerJoinSubscriber && event is PlayerJoinEvent) command.onPlayerJoin(event)
             if (command is PlayerQuitSubscriber && event is PlayerQuitEvent) command.onPlayerQuit(event)
             if (command is AsyncPlayerChatSubscriber && event is AsyncPlayerChatEvent) command.onAsyncPlayerChat(event)
-            if (command is PlayerTeleportSubscriber && event is PlayerTeleportEvent) command.onPlayerTeleport(event)
             if (command is PlayerMoveSubscriber && event is PlayerMoveEvent) command.onPlayerMove(event)
             if (command is PlayerVelocitySubscriber && event is PlayerVelocityEvent) command.onPlayerVelocity(event)
             if (command is PlayerInteractSubscriber && event is PlayerInteractEvent) command.onPlayerInteract(event)
@@ -126,6 +124,8 @@ object BukkitEventListener : Listener {
     fun onPlayerQuit(event: PlayerQuitEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) = interceptBukkitEvent(event)
+    // PlayerMove & PlayerTeleport are captured separately despite PlayerTeleport extending PlayerMove,
+    // both will be handled by PlayerMoveSubscriber
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerTeleport(event: PlayerTeleportEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
