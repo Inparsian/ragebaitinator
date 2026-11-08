@@ -12,10 +12,10 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.persistence.PersistentDataType
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.Main.Companion.runTaskIfNotPrimaryThread
-import sn.inpr.ragebaitinator.Main.Companion.runTaskTimerAsync
+import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.utility.ItemUtil
 
-abstract class Menu(val player: Player, val live: Boolean) : InventoryHolder {
+abstract class Menu(val player: Player) : InventoryHolder {
     companion object {
         const val BACK = "back"
         const val REFRESH = "refresh"
@@ -31,39 +31,20 @@ abstract class Menu(val player: Player, val live: Boolean) : InventoryHolder {
         fun actionOf(item: ItemStack?): String? = item?.itemMeta?.persistentDataContainer?.get(actionKey, PersistentDataType.STRING)
     }
 
-    private class LiveRunnable(val player: Player, val menu: Menu) : Runnable {
-        override fun run() {
-            // if at any point there is one item that doesn't reflect the current inventory, update the inventory
-            val inventory = menu.getInventory()
-            val playerInventory = player.openInventory.topInventory
-
-            if (playerInventory.holder == inventory.holder) {
-                if (menu.setbackCondition())
-                    menu.setbackMenu()?.open() ?: player.closeInventory()
-
-                for (i in 0 until inventory.size) {
-                    val item = inventory.getItem(i)
-                    val playerItem = playerInventory.getItem(i)
-                    if (playerItem != null && (item == null || item != playerItem)) {
-                        menu.open()
-                        break
-                    }
-                }
-            } else GuiHandler.removeTask(player)?.cancel()
-        }
-    }
-
     fun open() {
-        runTaskIfNotPrimaryThread { player.openInventory(getInventory()) }
-        if (live) {
-            GuiHandler.removeTask(player)?.cancel()
-            GuiHandler.addTask(player, runTaskTimerAsync(LiveRunnable(player, this), 0, 1))
+        runTaskIfNotPrimaryThread {
+            if (setbackCondition())
+                setbackMenu()?.open()
+            else
+                // 1 tick delay as online player list updates can be late
+                runTaskLater({ player.openInventory(getInventory()) }, 1)
         }
+        GuiHandler.setMenu(player, this)
     }
 
     fun close() {
-        if (live) GuiHandler.removeTask(player)?.cancel()
         runTaskIfNotPrimaryThread { player.closeInventory() }
+        GuiHandler.removeMenu(player)
     }
 
     open fun setbackMenu(): Menu? = null
@@ -90,16 +71,14 @@ abstract class Menu(val player: Player, val live: Boolean) : InventoryHolder {
 
 abstract class PaginationMenu(
     player: Player,
-    live: Boolean,
     var page: Int,
     var pages: Int,
     val previousMenu: Menu
-) : Menu(player, live) {
-    fun addPaginationItems(inventory: Inventory, page: Int, pages: Int) {
+) : Menu(player) {
+    fun addPaginationItems(inventory: Inventory) {
         val bottomRow = inventory.getSize() - 5
 
         addItem(inventory, bottomRow, Material.REDSTONE_BLOCK, GuiText.text("gui.common.back.name"), listOf(), false, BACK)
-        if (!live) addItem(inventory, bottomRow + 4, Material.STRING, GuiText.text("gui.common.refresh.name"), listOf(), false, REFRESH)
 
         if (pages > 1) {
             if (page > 1) {

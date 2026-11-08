@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.gui.GuiHandler
 
 fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
 fun interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
@@ -105,6 +106,11 @@ object BukkitEventListener : Listener {
             if (command is FurnaceStartSmeltSubscriber && event is FurnaceStartSmeltEvent) command.onFurnaceStartSmelt(event)
             if (command is PlayerDropItemSubscriber && event is PlayerDropItemEvent) command.onPlayerDropItem(event)
             if (command is EntityChangeBlockSubscriber && event is EntityChangeBlockEvent) command.onEntityChangeBlock(event)
+        }
+
+        for (menu in GuiHandler.menus.values) {
+            if (menu is PlayerJoinSubscriber && event is PlayerJoinEvent) menu.onPlayerJoin(event)
+            if (menu is PlayerQuitSubscriber && event is PlayerQuitEvent) menu.onPlayerQuit(event)
         }
 
         // remove corresponding attributes

@@ -14,7 +14,7 @@ private const val PLAYERS = "players"
 private const val HISTORY = "history"
 private const val RELOAD = "reload"
 
-class MainMenu(player: Player) : Menu(player, false) {
+class MainMenu(player: Player) : Menu(player) {
     companion object {
         const val RELOAD_PERMISSION = "ragebaitinator.commands.reload"
     }

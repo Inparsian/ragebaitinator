@@ -8,11 +8,13 @@ import org.bukkit.event.inventory.InventoryAction
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.scheduler.BukkitTask
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.gui.impl.TrollMenu
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
+
+interface TrollToggleSubscriber
+interface CommandHistorySubscriber
 
 data class TrollGuiDataInput(
     val menu: TrollMenu,
@@ -21,13 +23,11 @@ data class TrollGuiDataInput(
 )
 
 object GuiHandler : Listener {
-    val tasks: Map<Player, BukkitTask>
-        field = mutableMapOf()
-    val inputs: Map<Player, TrollGuiDataInput>
-        field = mutableMapOf()
+    val menus: Map<Player, Menu> field = mutableMapOf()
+    val inputs: Map<Player, TrollGuiDataInput> field = mutableMapOf()
 
-    fun addTask(player: Player, task: BukkitTask) = tasks.putIfAbsent(player, task)
-    fun removeTask(player: Player): BukkitTask? = tasks.remove(player)
+    fun setMenu(player: Player, menu: Menu) = menus.put(player, menu)
+    fun removeMenu(player: Player): Menu? = menus.remove(player)
 
     fun initDataInput(player: Player, input: TrollGuiDataInput) {
         inputs[player] = input

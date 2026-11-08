@@ -9,6 +9,8 @@ import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.CommandHistory
+import sn.inpr.ragebaitinator.gui.CommandHistorySubscriber
+import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.LogUtil.info
@@ -55,8 +57,14 @@ object CommandManager : CommandExecutor, TabCompleter {
                 first.sendUsage(sender)
             else {
                 val everything = "${command.label} ${args.joinToString(" ")}"
-                if (sender is Player) CommandHistory.addCommand(sender.name, everything)
-                else CommandHistory.addConsoleCommand(everything)
+                if (sender is Player)
+                    CommandHistory.addCommand(sender.name, everything)
+                else
+                    CommandHistory.addConsoleCommand(everything)
+
+                GuiHandler.menus.values
+                    .filter { it is CommandHistorySubscriber }
+                    .forEach { it.open() }
             }
         } else {
             send(sender, Placeholders("commandNotFound","%prefix% &cCommand not found"))

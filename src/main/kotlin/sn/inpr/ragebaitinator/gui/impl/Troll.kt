@@ -7,12 +7,14 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.gui.*
+import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.utility.ItemUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -91,7 +93,7 @@ private fun parameterLines(troll: BaseTroll): List<String> {
     }
 }
 
-class TrollCategoriesMenu(player: Player, val target: Player) : Menu(player, true) {
+class TrollCategoriesMenu(player: Player, val target: Player) : Menu(player), TrollToggleSubscriber, PlayerQuitSubscriber {
     private companion object {
         val CATEGORY_SLOTS = listOf(11, 12, 13, 14, 15, 20, 21, 22, 23, 24)
         const val BACK_SLOT = 27
@@ -147,17 +149,20 @@ class TrollCategoriesMenu(player: Player, val target: Player) : Menu(player, tru
         }
     }
 
-    override fun setbackCondition() = !target.isOnline()
+    override fun setbackCondition() = !target.isOnline
     override fun setbackMenu() = PlayersMenu(player)
+
+    override fun onPlayerQuit(event: PlayerQuitEvent) {
+        if (event.player == target) setbackMenu().open()
+    }
 }
 
 class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.Category?) : PaginationMenu(
     player,
-    true,
-    1,
-    MathUtil.pages(trollsIn(category).size, PAGE_SIZE),
-    TrollCategoriesMenu(player, target)
-) {
+    page = 1,
+    pages = MathUtil.pages(trollsIn(category).size, PAGE_SIZE),
+    previousMenu = TrollCategoriesMenu(player, target)
+), TrollToggleSubscriber, PlayerQuitSubscriber {
     fun trollItem(troll: BaseTroll): ItemStack {
         val item = ItemStack(if (blocked(troll, target)) Material.BARRIER else troll.info.icon)
         val meta = item.itemMeta!!
@@ -193,7 +198,7 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
         )
         val inventory = Bukkit.createInventory(this, 45, title)
         inventory.contents = items.toTypedArray()
-        addPaginationItems(inventory, page, pages)
+        addPaginationItems(inventory)
         return inventory
     }
 
@@ -215,11 +220,15 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
         }
     }
 
-    override fun setbackCondition() = !target.isOnline()
+    override fun setbackCondition() = !target.isOnline
     override fun setbackMenu() = PlayersMenu(player)
+
+    override fun onPlayerQuit(event: PlayerQuitEvent) {
+        if (event.player == target) setbackMenu().open()
+    }
 }
 
-class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val category: CommandInfo.Category?) : Menu(player, true) {
+class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val category: CommandInfo.Category?) : Menu(player), TrollToggleSubscriber, PlayerQuitSubscriber {
     val syntax = troll.info.syntax.filter { it.purpose.isNotEmpty() }
     val params: MutableMap<Int, String> = mutableMapOf()
 
@@ -337,6 +346,10 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
         }
     }
 
-    override fun setbackCondition() = !target.isOnline()
+    override fun setbackCondition() = !target.isOnline
     override fun setbackMenu() = PlayersMenu(player)
+
+    override fun onPlayerQuit(event: PlayerQuitEvent) {
+        if (event.player == target) setbackMenu().open()
+    }
 }

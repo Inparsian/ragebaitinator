@@ -6,12 +6,17 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.gui.GuiText
 import sn.inpr.ragebaitinator.gui.Menu
 import sn.inpr.ragebaitinator.gui.PaginationMenu
+import sn.inpr.ragebaitinator.gui.TrollToggleSubscriber
+import sn.inpr.ragebaitinator.listeners.PlayerJoinSubscriber
+import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import sn.inpr.ragebaitinator.utility.TypeUtil
@@ -47,11 +52,10 @@ private fun playerHeadItem(player: Player, inTheirMenu: Boolean): ItemStack {
 
 class PlayersMenu(player: Player) : PaginationMenu(
     player,
-    true,
-    1,
-    MathUtil.pages(Bukkit.getOnlinePlayers().size, PAGE_SIZE),
-    MainMenu(player)
-) {
+    page = 1,
+    pages = MathUtil.pages(Bukkit.getOnlinePlayers().size, PAGE_SIZE),
+    previousMenu = MainMenu(player)
+), TrollToggleSubscriber, PlayerJoinSubscriber, PlayerQuitSubscriber {
     override fun getInventory(): Inventory {
         val items: MutableList<ItemStack> = mutableListOf()
         val online = Bukkit.getOnlinePlayers().toList()
@@ -65,7 +69,7 @@ class PlayersMenu(player: Player) : PaginationMenu(
 
         val inv: Inventory = Bukkit.createInventory(this, 45, GuiText.text("gui.players.title", "page" to page.toString(), "pages" to pages.toString()))
         inv.contents = items.toTypedArray()
-        addPaginationItems(inv, page, pages)
+        addPaginationItems(inv)
         return inv
     }
 
@@ -75,9 +79,12 @@ class PlayersMenu(player: Player) : PaginationMenu(
         val target = name?.let { Bukkit.getPlayer(it) }
         if (target != null) PlayerMenu(player, target).open() else open()
     }
+
+    override fun onPlayerJoin(event: PlayerJoinEvent) = open()
+    override fun onPlayerQuit(event: PlayerQuitEvent) = open()
 }
 
-class PlayerMenu(player: Player, val target: Player) : Menu(player, true) {
+class PlayerMenu(player: Player, val target: Player) : Menu(player), TrollToggleSubscriber, PlayerQuitSubscriber {
     override fun getInventory(): Inventory {
         val inventory = Bukkit.createInventory(this, 27, GuiText.text("gui.player.title", "player" to target.name))
         val acceptableTrolls = CommandManager.trolls
@@ -109,4 +116,8 @@ class PlayerMenu(player: Player, val target: Player) : Menu(player, true) {
 
     override fun setbackCondition() = !target.isOnline
     override fun setbackMenu() = PlayersMenu(player)
+
+    override fun onPlayerQuit(event: PlayerQuitEvent) {
+        if (event.player == target) setbackMenu().open()
+    }
 }

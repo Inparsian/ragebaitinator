@@ -12,6 +12,8 @@ import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.Main.Companion.runTaskRandomTimer
 import sn.inpr.ragebaitinator.Main.Companion.runTaskTimer
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.gui.GuiHandler
+import sn.inpr.ragebaitinator.gui.TrollToggleSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.PlayerUtil
@@ -183,6 +185,9 @@ abstract class BaseToggleTroll : BaseTroll() {
                 if (had) removePlayer(target, "")
                 if (message != null)
                     send(sender, target, message)
+                GuiHandler.menus.values
+                    .filter { it is TrollToggleSubscriber }
+                    .forEach { it.open() }
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
