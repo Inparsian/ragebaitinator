@@ -3,12 +3,11 @@ package sn.inpr.ragebaitinator.database
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.World
-import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
-import org.bukkit.block.TileState
+import org.bukkit.block.*
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.world.WorldLoadEvent
+import org.bukkit.inventory.BlockInventoryHolder
 import org.bukkit.util.BlockVector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.Main.Companion.runTaskTimer
@@ -89,7 +88,7 @@ object Blocks : Listener {
 
         captured.forEach { [block, material, tracked] ->
             track(owner, tracked.first, tracked.second, material)
-            block.setType(material, false)
+            replace(block, material)
         }
 
         if (!applyPhysics) return
@@ -99,6 +98,32 @@ object Blocks : Listener {
         captured.forEach { [block, material, _] ->
             block.setType(if (material == Material.BARRIER) Material.STONE else Material.BARRIER, false)
             block.setType(material, true)
+        }
+    }
+
+    private fun replace(block: Block, material: Material) {
+        empty(block)
+        block.setType(material, false)
+    }
+
+    /**
+     * A container that's replaced drops everything it held. All of that is saved along with the block and comes back
+     * with it, so it must not also end up on the ground, or there would be 2x of everything after the rollback
+     */
+    private fun empty(block: Block) {
+        val state = block.state
+        if (state !is TileState) return
+
+        when (state) {
+            // a double chest has its other half's items in its inventory, and those are not ours to take
+            is Chest -> state.blockInventory.clear()
+            is BlockInventoryHolder -> state.inventory.clear()
+            // a campfire's food is in the state itself, not in an inventory
+            is Campfire -> {
+                for (slot in 0 until state.size)
+                    state.setItem(slot, null)
+                state.update(true, false)
+            }
         }
     }
 
@@ -177,7 +202,7 @@ object Blocks : Listener {
         fun remove(position: Position): Boolean {
             val block = position.block() ?: return false
             originals[position] = capture(block) ?: return false
-            block.setType(Material.AIR, false)
+            replace(block, Material.AIR)
             return true
         }
 
