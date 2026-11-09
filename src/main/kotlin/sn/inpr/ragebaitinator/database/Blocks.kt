@@ -4,6 +4,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.block.TileState
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -18,6 +19,7 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.Types
 import java.util.*
+import kotlin.collections.ArrayDeque
 
 object Blocks : Listener {
     // comfortably longer than the default autosave interval of 5 minutes
@@ -35,7 +37,11 @@ object Blocks : Listener {
     private class Layer(val owner: String, val material: Material)
     private class Entry(val original: Original) {
         val layers = mutableListOf<Layer>()
+        // what had to be taken away along with this block, and who it's held for
+        val collateral = mutableListOf<Pair<String, Position>>()
     }
+
+    private val FACES = listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST)
 
     private val entries = mutableMapOf<Position, Entry>()
     private val positionsByOwner = mutableMapOf<String, MutableSet<Position>>()
@@ -79,6 +85,31 @@ object Blocks : Listener {
         }
         if (captured.isEmpty()) return
 
+        persist(captured.map { [_, material, tracked] -> Triple(tracked.first, tracked.second.original, material) })
+
+        captured.forEach { [block, material, tracked] ->
+            track(owner, tracked.first, tracked.second, material)
+            block.setType(material, false)
+        }
+
+        if (!applyPhysics) return
+
+        detachDependents(owner, captured.map { it.first })
+
+        captured.forEach { [block, material, _] ->
+            block.setType(if (material == Material.BARRIER) Material.STONE else Material.BARRIER, false)
+            block.setType(material, true)
+        }
+    }
+
+    private fun track(owner: String, position: Position, entry: Entry, material: Material) {
+        entries[position] = entry
+        entry.layers.removeIf { it.owner == owner }
+        entry.layers.add(Layer(owner, material))
+        positionsByOwner.getOrPut(owner) { mutableSetOf() }.add(position)
+    }
+
+    private fun persist(rows: List<Triple<Position, Original, Material>>) {
         SQLite.transaction { connection ->
             connection.prepareStatement(
                 "INSERT INTO blocks (world, x, y, z, block_data, block_entity, placed) VALUES (?, ?, ?, ?, ?, ?, ?) " +
@@ -86,12 +117,11 @@ object Blocks : Listener {
                 "block_data = excluded.block_data, block_entity = excluded.block_entity, " +
                 "placed = excluded.placed || ',' || placed, released_at = NULL"
             ).use { statement ->
-                captured.forEach { [_, material, tracked] ->
-                    val [position, entry] = tracked
+                rows.forEach { [position, original, material] ->
                     statement.setPosition(position)
-                    statement.setString(5, entry.original.blockData)
-                    if (entry.original.blockEntity != null)
-                        statement.setBytes(6, entry.original.blockEntity)
+                    statement.setString(5, original.blockData)
+                    if (original.blockEntity != null)
+                        statement.setBytes(6, original.blockEntity)
                     else
                         statement.setNull(6, Types.BLOB)
                     statement.setString(7, material.name)
@@ -100,14 +130,74 @@ object Blocks : Listener {
                 statement.executeBatch()
             }
         }
+    }
 
-        captured.forEach { [block, material, tracked] ->
-            val [position, entry] = tracked
-            entries[position] = entry
-            entry.layers.removeIf { it.owner == owner }
-            entry.layers.add(Layer(owner, material))
-            positionsByOwner.getOrPut(owner) { mutableSetOf() }.add(position)
-            block.setType(material, applyPhysics)
+    fun <P : Any> findCollateral(
+        changed: Collection<P>,
+        neighbors: (P) -> Iterable<P>,
+        cannotStay: (P) -> Boolean,
+        remove: (P) -> Boolean,
+    ): List<Pair<P, P>> {
+        val taken = changed.toMutableSet()
+        val refused = mutableSetOf<P>()
+        val queue = ArrayDeque(changed)
+        val found = mutableListOf<Pair<P, P>>()
+
+        while (queue.isNotEmpty()) {
+            val parent = queue.removeFirst()
+            for (neighbor in neighbors(parent)) {
+                // something that held up has not made a difference until it's gone, which is why a neighbor that could stay
+                // is looked at again whenever something next to it goes
+                if (neighbor in taken || neighbor in refused || !cannotStay(neighbor))
+                    continue
+
+                if (!remove(neighbor)) {
+                    refused.add(neighbor)
+                    continue
+                }
+
+                taken.add(neighbor)
+                found.add(neighbor to parent)
+                queue.add(neighbor)
+            }
+        }
+
+        return found
+    }
+
+    private fun detachDependents(owner: String, changed: List<Block>) {
+        val originals = mutableMapOf<Position, Original>()
+
+        fun cannotStay(position: Position): Boolean {
+            if (position in entries) return false
+            val block = position.block() ?: return false
+            return !block.type.isAir && !block.isLiquid && !block.blockData.isSupported(block)
+        }
+
+        fun remove(position: Position): Boolean {
+            val block = position.block() ?: return false
+            originals[position] = capture(block) ?: return false
+            block.setType(Material.AIR, false)
+            return true
+        }
+
+        val found = findCollateral(changed.map(::Position), ::neighborsOf, ::cannotStay, ::remove)
+        if (found.isEmpty()) return
+
+        val tracked = found.map { [position, parent] -> Triple(position, parent, Entry(originals.getValue(position))) }
+        persist(tracked.map { [position, _, entry] -> Triple(position, entry.original, Material.AIR) })
+        tracked.forEach { [position, parent, entry] ->
+            track(owner, position, entry, Material.AIR)
+            entries[parent]?.collateral?.add(owner to position)
+        }
+    }
+
+    private fun neighborsOf(position: Position): List<Position> {
+        val world = Bukkit.getWorld(position.world) ?: return emptyList()
+        return FACES.mapNotNull { face ->
+            val x = position.x + face.modX
+            val z = position.z + face.modZ
+            if (world.isChunkLoaded(x shr 4, z shr 4)) Position(position.world, x, position.y + face.modY, z) else null
         }
     }
 
@@ -143,6 +233,9 @@ object Blocks : Listener {
             val block = position.block() ?: continue
             if (restore(block, entry.original))
                 restored.add(position)
+
+            // what was taken away along with this block comes back now that there is something for it to stand on
+            entry.collateral.forEach { [collateralOwner, dependent] -> release(collateralOwner, listOf(dependent)) }
         }
 
         markReleased(restored)
