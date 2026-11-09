@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.utility.TextTransform
 )
 class Garble : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s messages are now incoherent")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s messages are now incoherent", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s messages make sense again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s messages make sense again", target)
             .toString()
 
     override fun transform(player: Player, message: String): String = TextTransform.garble(message)

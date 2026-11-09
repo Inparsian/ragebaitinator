@@ -117,6 +117,8 @@ abstract class BaseCommand {
     fun languageOr(key: String, default: String) = language.getString("commands.${info.name}.$key") ?: default
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
+    fun placeholdersOr(key: String, default: String, player: RbPlayer) = Placeholders(languageOr(key, default))
+        .put("player", player.name)
 
     // what a command and its parameters are described as can be changed in the language file, and are described by what
     // they were declared with otherwise
@@ -155,8 +157,7 @@ abstract class BaseTroll : BaseCommand() {
             val allTargets = playerArguments.flatten().map { it.rb }.distinctBy { it.uuid }
             for (target in allTargets) {
                 if (target.isImmune(this)) {
-                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
-                        .put("player", target.name)
+                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
                     send(sender, target.bukkit, placeholders)
                     return true
@@ -224,8 +225,7 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
-                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
-                        .put("player", target.name)
+                    val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
                     send(sender, target.bukkit, placeholders)
                     removePlayer(target, "immune")

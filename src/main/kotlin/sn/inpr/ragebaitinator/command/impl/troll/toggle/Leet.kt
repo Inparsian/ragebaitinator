@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.utility.TextTransform
 )
 class Leet : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking 1337")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking 1337", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer speaking leetspeak")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer speaking leetspeak", target)
             .toString()
 
     override fun transform(player: Player, message: String): String = TextTransform.leet(message)

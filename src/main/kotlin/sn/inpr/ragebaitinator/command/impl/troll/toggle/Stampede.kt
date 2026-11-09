@@ -133,14 +133,12 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
             }
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

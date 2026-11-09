@@ -37,14 +37,12 @@ class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSub
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "chance", args[chance])
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a firm grip again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a firm grip again", target)
             .toString()
 
     private fun roll(player: Player) {

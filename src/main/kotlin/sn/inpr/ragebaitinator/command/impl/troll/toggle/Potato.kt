@@ -142,14 +142,12 @@ class Potato : BaseToggleTroll(),
             potato.pickupDelay = Int.MAX_VALUE
         }, 0, 2, true)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living in a potato battery")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living in a potato battery", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer living in a potato battery")
-            .put("player", target.name)
+        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer living in a potato battery", target)
             .toString()
     }
 

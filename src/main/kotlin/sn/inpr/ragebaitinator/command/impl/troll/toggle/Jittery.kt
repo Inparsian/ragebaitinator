@@ -34,14 +34,12 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "power", args[power])
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down", target)
             .toString()
 
     // finds the closest column nearby that's lava, or a drop of at least HOLE_DEPTH blocks, and returns the direction to it

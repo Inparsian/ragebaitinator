@@ -125,14 +125,12 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         setField(target, "cage", cageLocation)
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free", target)
             .toString()
 
     fun isOutsideCage(player: RbPlayer, to: Location): Boolean {

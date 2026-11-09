@@ -43,14 +43,12 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
                 target.teleportRetainVelocity(destination)
             }
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been freed from the falling curse")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been freed from the falling curse", target)
             .toString()
 
     // prevent premature fall damage despite our best efforts to prevent it proactively

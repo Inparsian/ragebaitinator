@@ -63,14 +63,12 @@ class Exorcist : BaseToggleTroll() {
             }
         }, 0, 1, 3, true)
 
-        return placeholdersOr("init", "%prefix% %c2%Entities around %c1%%player% %c2%are now spazzing out")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Entities around %c1%%player% %c2%are now spazzing out", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        return placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out")
-            .put("player", target.name)
+        return placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out", target)
             .toString()
     }
 }

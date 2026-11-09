@@ -20,8 +20,7 @@ class Lure : BaseTroll() {
         LocationUtil.getEntitiesWithinRadius(target.location, 100.0)
             .filterIsInstance<Creature>()
             .forEach { it.target = target.bukkit }
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now universally hated")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now universally hated", target)
             .toString()
     }
 }

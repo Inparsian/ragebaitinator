@@ -22,13 +22,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class LockHotbar : BaseToggleTroll(), PlayerItemHeldSubscriber, PlayerSwapHandItemsSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now stuck with the item they're holding")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now stuck with the item they're holding", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can change their held item again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can change their held item again", target)
             .toString()
 
     override fun onPlayerItemHeld(event: PlayerItemHeldEvent) = event.cancelIf(hasPlayer(event.player))

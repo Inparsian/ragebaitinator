@@ -52,7 +52,6 @@ class Starve : BaseToggleTroll() {
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hunger is no longer being decreased")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hunger is no longer being decreased", target)
             .toString()
 }

@@ -22,13 +22,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Hydra : BaseToggleTroll(), EntityDeathSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt now split into two")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt now split into two", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt no longer split into two")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt no longer split into two", target)
             .toString()
 
     override fun onEntityDeath(event: EntityDeathEvent) {

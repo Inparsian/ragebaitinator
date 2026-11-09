@@ -62,8 +62,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         target.teleport(target.location)
         anvils[anvil] = target
         runTaskLater({ thwomp(anvil) }, 25)
-        return placeholdersOr("init", "%prefix% %c2%Dropped an anvil on %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Dropped an anvil on %c1%%player%", target)
             .toString()
     }
 

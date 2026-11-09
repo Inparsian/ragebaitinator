@@ -20,13 +20,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Backwards : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking backwards")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking backwards", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer speaking backwards")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer speaking backwards", target)
             .toString()
 
     override fun transform(player: Player, message: String): String = message.reversed()

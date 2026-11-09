@@ -27,14 +27,12 @@ class Lost : BaseToggleTroll() {
             val z = (target.location.z + MathUtil.random(-10.0, 10.0)).toInt()
             target.sendPacket(WrapperPlayServerSpawnPosition(Vector3i(x, 0, z)))
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c2%An unknown force is now interfering with %c1%%player%%c2%'s compass")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%An unknown force is now interfering with %c1%%player%%c2%'s compass", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s compass is now back to normal")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s compass is now back to normal", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

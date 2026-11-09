@@ -37,13 +37,11 @@ class RandomPotion : BaseToggleTroll(), PlayerItemConsumeSubscriber, PotionSplas
     private val pool: List<PotionEffectType> by lazy { Registry.EFFECT.filterNot { it in excluded } }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s potions are now a lottery")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s potions are now a lottery", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s potions do what they say on the bottle again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s potions do what they say on the bottle again", target)
             .toString()
 
     private fun randomEffect(): PotionEffect {

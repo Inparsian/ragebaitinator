@@ -47,14 +47,12 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         wearers.add(target.entityId)
         show(target, pumpkin())
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

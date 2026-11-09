@@ -27,14 +27,12 @@ class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "chance", args[chance])
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hand stays where it's told")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hand stays where it's told", target)
             .toString()
 
     override fun onPlayerItemHeld(event: PlayerItemHeldEvent) {

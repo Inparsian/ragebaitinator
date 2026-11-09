@@ -30,13 +30,11 @@ class DiveBomb : BaseToggleTroll() {
             else
                 removePlayer(target, "done")
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now dive-bombing")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now dive-bombing", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s flight path has been stabilized")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s flight path has been stabilized", target)
             .toString()
 }

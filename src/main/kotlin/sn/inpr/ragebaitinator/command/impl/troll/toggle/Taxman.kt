@@ -26,15 +26,13 @@ class Taxman : BaseToggleTroll(), PlayerExpChangeSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val rate = args[rate]
         setField(target, "rate", rate)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now pays %c1%%rate% %c2%income tax on all XP")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now pays %c1%%rate% %c2%income tax on all XP", target)
             .put("rate", "${(rate * 100).toInt()}%")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been audited and no longer pays XP tax")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been audited and no longer pays XP tax", target)
             .toString()
 
     override fun onPlayerExpChange(event: PlayerExpChangeEvent) {

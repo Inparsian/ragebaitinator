@@ -30,8 +30,7 @@ class Hiss : BaseTroll() {
             1.0f,
             0.5f
         ))
-        return placeholdersOr("init", "%prefix% %c2%Gave %c1%%player% %c2%the scare of their life")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Gave %c1%%player% %c2%the scare of their life", target)
             .toString()
     }
 }

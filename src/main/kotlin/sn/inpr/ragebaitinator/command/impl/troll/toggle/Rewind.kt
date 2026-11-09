@@ -44,8 +44,7 @@ class Rewind : BaseToggleTroll() {
             setField(target, "entry", RewindEntry(entry.originalTime, deducted, speed))
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick", target)
             .put("speed", speed.absoluteValue.toString())
             .put("speedSign", if (speed < 0) "+" else "-")
             .put("direction", if (speed < 0) "forward" else "back")
@@ -53,8 +52,7 @@ class Rewind : BaseToggleTroll() {
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now back in the present")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now back in the present", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

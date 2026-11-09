@@ -79,8 +79,7 @@ class Slap : BaseTroll() {
 
         target.velocity = slapVector.setY(power * 0.4)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been slapped by some vengeful spirit")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been slapped by some vengeful spirit", target)
             .toString()
     }
 }

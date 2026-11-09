@@ -26,16 +26,14 @@ class LavaPlace : BaseLavaTroll(), BlockPlaceSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addPersistentFlag(target, args[persistent])
         val persistent = hasFlag(target, "persistent")
-        return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%places will now turn into lava")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%places will now turn into lava", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The blocks %c1%%player% %c2%places will no longer turn into lava")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The blocks %c1%%player% %c2%places will no longer turn into lava", target)
             .toString()
 
     override fun onBlockPlace(event: BlockPlaceEvent) {

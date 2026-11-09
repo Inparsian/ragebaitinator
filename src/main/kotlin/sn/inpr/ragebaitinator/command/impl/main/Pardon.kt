@@ -37,8 +37,8 @@ class Pardon : BaseCommand() {
                 for (command in CommandManager.toggleTrolls)
                     if (command.removePlayer(target, "pardoned")) pardoned++
                 val placeholders = placeholdersOr("success", "%prefix% %c1%%amount% %c2%persistent troll(s) disabled for %c1%%player%")
-                    .put("amount", pardoned.toString())
                     .put("player", target.name)
+                    .put("amount", pardoned.toString())
                 send(sender, target.bukkit, placeholders)
             }
         } else {

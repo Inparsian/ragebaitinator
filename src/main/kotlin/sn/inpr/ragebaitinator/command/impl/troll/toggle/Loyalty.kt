@@ -47,14 +47,12 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
                 }
             }
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will now home in on them")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will now home in on them", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will no longer home in on them")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will no longer home in on them", target)
             .toString()
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {

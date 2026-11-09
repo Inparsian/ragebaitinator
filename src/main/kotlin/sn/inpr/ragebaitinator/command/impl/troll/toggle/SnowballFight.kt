@@ -22,13 +22,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class SnowballFight : BaseToggleTroll(), EntityShootBowSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now reminiscing about their Christmas childhood")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now reminiscing about their Christmas childhood", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to shoot arrows again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to shoot arrows again", target)
             .toString()
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {

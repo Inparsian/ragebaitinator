@@ -40,14 +40,12 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "fakes", linkedSetOf<Block>())
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now find fake diamonds while mining")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now find fake diamonds while mining", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer find fake diamonds")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer find fake diamonds", target)
             .toString()
 
     private fun restore(player: RbPlayer, block: Block) {

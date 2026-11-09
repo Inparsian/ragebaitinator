@@ -45,13 +45,11 @@ class Repel : BaseToggleTroll() {
             }
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%", target)
             .toString()
 }

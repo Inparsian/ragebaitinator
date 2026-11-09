@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.utility.TextTransform
 )
 class Haxorman : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in salted MD5 hashes")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in salted MD5 hashes", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has stopped hashing their messages")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has stopped hashing their messages", target)
             .toString()
 
     override fun transform(player: Player, message: String): String = TextTransform.md5(message)

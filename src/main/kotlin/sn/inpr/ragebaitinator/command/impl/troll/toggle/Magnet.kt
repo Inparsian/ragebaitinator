@@ -38,13 +38,11 @@ class Magnet : BaseToggleTroll() {
             }
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c2%Unpleasant entities are now being attracted to %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Unpleasant entities are now being attracted to %c1%%player%", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%Unpleasant entities are no longer attracted to %c1%%player%")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%Unpleasant entities are no longer attracted to %c1%%player%", target)
             .toString()
 }

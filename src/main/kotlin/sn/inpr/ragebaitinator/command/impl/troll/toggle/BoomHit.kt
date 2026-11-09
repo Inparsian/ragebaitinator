@@ -30,16 +30,14 @@ class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
-        return placeholdersOr("init", "%prefix% %c2%%^next% entity %c1%%player% %c2%hits will now explode")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%%^next% entity %c1%%player% %c2%hits will now explode", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The next entity %c1%%player% %c2%hits will no longer explode")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The next entity %c1%%player% %c2%hits will no longer explode", target)
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {

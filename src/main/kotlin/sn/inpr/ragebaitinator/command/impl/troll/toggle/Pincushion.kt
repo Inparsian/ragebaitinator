@@ -47,14 +47,12 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
             if (type == "stingers" || type == "both") count else 0
         )
         broadcast(target)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

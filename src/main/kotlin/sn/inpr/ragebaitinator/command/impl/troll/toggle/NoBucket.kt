@@ -45,8 +45,7 @@ class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFil
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to use buckets")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to use buckets", target)
             .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {

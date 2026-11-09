@@ -104,14 +104,12 @@ class Radiation : BaseToggleTroll() {
             }
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now emitting a gajillion sieverts of radiation")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now emitting a gajillion sieverts of radiation", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) = Blocks.release(rollbackOwner(player))

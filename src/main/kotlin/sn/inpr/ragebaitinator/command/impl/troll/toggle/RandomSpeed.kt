@@ -31,14 +31,12 @@ class RandomSpeed : BaseToggleTroll() {
         // the walking and flying speeds they had before
         setField(target, "originalSpeeds", target.walkSpeed to target.flySpeed)
         addTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s speed will now change at random")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s speed will now change at random", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s speed is back to normal")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s speed is back to normal", target)
             .toString()
 
     // the speeds are saved with the player, so they have to be put back even when they're leaving

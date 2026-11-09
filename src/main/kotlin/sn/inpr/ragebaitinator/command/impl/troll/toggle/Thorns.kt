@@ -26,13 +26,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Thorns : BaseToggleTroll(), EntityDamageByEntitySubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now take damage when they hit someone")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now take damage when they hit someone", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer take damage when they hit someone")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer take damage when they hit someone", target)
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {

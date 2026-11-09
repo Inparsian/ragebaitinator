@@ -20,8 +20,7 @@ class Shuffle : BaseTroll() {
         // make sure the size is exactly 36
         while (contents.size < 36) contents.add(ItemStack(Material.AIR))
         target.storageContents = contents.shuffled().toTypedArray()
-        return placeholdersOr("init", "%prefix% %c2%Shuffled %c1%%player%%c2%'s inventory")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Shuffled %c1%%player%%c2%'s inventory", target)
             .toString()
     }
 }

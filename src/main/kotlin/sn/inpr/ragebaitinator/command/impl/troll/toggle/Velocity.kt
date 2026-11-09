@@ -30,15 +30,13 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val multiplier = args[multiplier]
         setField(target, "multiplier", multiplier)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks", target)
             .put("multiplier", multiplier.toString())
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s velocity is no longer being magnified")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s velocity is no longer being magnified", target)
             .toString()
 
     fun markDamaged(uuid: UUID) {

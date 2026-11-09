@@ -37,14 +37,12 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
         if (args[local]) addFlag(target, "local")
 
         setField(target, "trail", linkedSetOf<Block>())
-        return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The ground beneath %c1%%player% %c2%is no longer turning to gold")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The ground beneath %c1%%player% %c2%is no longer turning to gold", target)
             .toString()
 
     // whoever might have been shown the gold gets the real block back. it's harmless to resend it to everyone else

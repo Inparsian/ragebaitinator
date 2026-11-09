@@ -22,13 +22,11 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 )
 class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now die next time they take damage")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now die next time they take damage", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer die next time they take damage")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer die next time they take damage", target)
             .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {

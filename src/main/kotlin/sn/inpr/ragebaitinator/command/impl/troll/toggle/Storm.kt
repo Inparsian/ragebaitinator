@@ -43,14 +43,12 @@ class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
             val interval = (seconds.coerceIn(1.0, 60.0) * 20).toLong()
             addTaskRandomTimer(target, { flash(target) }, interval / 2, interval / 2, interval * 3 / 2)
         }
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in the middle of a storm")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in the middle of a storm", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s sky has cleared up")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s sky has cleared up", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

@@ -52,14 +52,12 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         setField(target, "pending", queue)
 
         addTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone", target)
             .toString()
 
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they

@@ -136,14 +136,12 @@ class Lag : BaseToggleTroll() {
         val jitter = args[jitter]
         val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
         setField(target, "session", Session(rtt, jitter, inbound, outbound))
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

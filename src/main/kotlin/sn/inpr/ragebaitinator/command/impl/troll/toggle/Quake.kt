@@ -37,14 +37,12 @@ class Quake : BaseToggleTroll() {
             val fovModifier = if (MathUtil.randomBool()) 0f else signed
             target.sendPacket(abilities(target, fovModifier))
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s field of view is now shaking")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s field of view is now shaking", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s field of view is now stable")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s field of view is now stable", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

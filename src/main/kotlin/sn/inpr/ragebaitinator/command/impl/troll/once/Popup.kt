@@ -29,8 +29,7 @@ class Popup : BaseTroll() {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         target.openInventory(Bukkit.createInventory(null, inventoryTypes.random()))
-        return placeholdersOr("init", "%prefix% %c2%Opened a random inventory menu for %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Opened a random inventory menu for %c1%%player%", target)
             .toString()
     }
 }

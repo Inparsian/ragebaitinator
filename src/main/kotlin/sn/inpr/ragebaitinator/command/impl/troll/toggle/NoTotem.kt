@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class NoTotem : BaseToggleTroll(), EntityResurrectSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s totems are now chinese counterfeits")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s totems are now chinese counterfeits", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s totems will now work as advertised")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s totems will now work as advertised", target)
             .toString()
 
     override fun onEntityResurrect(event: EntityResurrectEvent) {

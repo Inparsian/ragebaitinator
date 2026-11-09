@@ -21,14 +21,12 @@ class Invert : BaseToggleTroll() {
         addTaskTimer(target, {
             if (target.flySpeed >= 0) target.flySpeed *= -1
         }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

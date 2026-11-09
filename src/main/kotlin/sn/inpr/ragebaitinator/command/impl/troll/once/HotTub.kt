@@ -77,8 +77,7 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
                 lava.map { it to Material.LAVA }
         )
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been dropped into a nice and warm hot tub")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been dropped into a nice and warm hot tub", target)
             .toString()
     }
 

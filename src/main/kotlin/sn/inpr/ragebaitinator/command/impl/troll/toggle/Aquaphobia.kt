@@ -39,13 +39,11 @@ class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber {
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%now has aquagenic urticaria")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%now has aquagenic urticaria", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of aquagenic urticaria")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of aquagenic urticaria", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

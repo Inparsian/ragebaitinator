@@ -28,14 +28,12 @@ class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "chance", args[chance])
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has very clumsy fingers")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has very clumsy fingers", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fingers are no longer clumsy")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fingers are no longer clumsy", target)
             .toString()
 
     // never mangle our own command, or there'd be no way to turn this off

@@ -27,14 +27,12 @@ class Derp : BaseToggleTroll() {
         val seconds = args[interval]
         val period = (seconds * 20).toLong()
         addTaskTimer(target, { spasm(target) }, period, period)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s head is now spasming")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s head is now spasming", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s head has stopped spasming")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s head has stopped spasming", target)
             .toString()
 
     private fun spasm(player: RbPlayer) {

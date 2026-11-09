@@ -21,14 +21,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 class Hypochondriac : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         scheduleScare(target)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a clean bill of health")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a clean bill of health", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

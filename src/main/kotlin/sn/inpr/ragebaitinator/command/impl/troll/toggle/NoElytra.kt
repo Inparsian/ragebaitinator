@@ -22,14 +22,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 class NoElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         target.isGliding = false
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer glide with an elytra")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer glide with an elytra", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now glide with an elytra again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now glide with an elytra again", target)
             .toString()
 
     override fun onEntityToggleGlide(event: EntityToggleGlideEvent) {

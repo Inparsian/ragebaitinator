@@ -24,13 +24,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class LockInv : BaseToggleTroll(), InventoryClickSubscriber, InventoryDragSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer touch their inventory")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer touch their inventory", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can touch their inventory again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can touch their inventory again", target)
             .toString()
 
     // our own menus have to keep working for anyone who's trolled and also happens to be using them

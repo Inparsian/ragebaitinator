@@ -26,14 +26,12 @@ class Uwu : BaseChatTroll() {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "chance", args[chance])
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in UwUspeak")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in UwUspeak", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can speak like a normal person again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can speak like a normal person again", target)
             .toString()
 
     override fun transform(player: Player, message: String): String

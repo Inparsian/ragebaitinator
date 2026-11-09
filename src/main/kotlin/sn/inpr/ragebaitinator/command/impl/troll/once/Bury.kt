@@ -82,8 +82,7 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         Blocks.place(rollbackOwner(target), fill.filter { !it.type.isSolid }.map { it to Material.STONE })
 
         target.teleport(buryLocation.clone().add(0.0, 1.0, 0.0))
-        return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA", target)
             .toString()
     }
 

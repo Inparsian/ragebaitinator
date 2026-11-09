@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class NoHeal : BaseToggleTroll(), EntityRegainHealthSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer regenerate health")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer regenerate health", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now regenerate health again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now regenerate health again", target)
             .toString()
 
     override fun onEntityRegainHealth(event: EntityRegainHealthEvent) {

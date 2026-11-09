@@ -20,13 +20,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class ShadowMute : BaseToggleTroll(), AsyncPlayerChatSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now talking to themselves")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now talking to themselves", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can be heard by others again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can be heard by others again", target)
             .toString()
 
     override fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {

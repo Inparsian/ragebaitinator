@@ -21,8 +21,7 @@ class Burn : BaseTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val ticks: Int = args[ticks]
         target.fireTicks = ticks
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been set on fire for %c1%$ticks %c2%tick(s)!")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been set on fire for %c1%$ticks %c2%tick(s)!", target)
             .toString()
     }
 }

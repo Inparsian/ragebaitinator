@@ -28,16 +28,14 @@ class BoomDrop : BaseBoomTroll(), PlayerDropItemSubscriber {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
-        return placeholdersOr("init", "%prefix% %c2%%^next% item %c1%%player% %c2%drops will now explode")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%%^next% item %c1%%player% %c2%drops will now explode", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The next item %c1%%player% %c2%drops will no longer explode")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The next item %c1%%player% %c2%drops will no longer explode", target)
             .toString()
 
     // the item is let go of first, so it's the one that explodes and not something that never left their hand

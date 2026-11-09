@@ -28,16 +28,14 @@ class BoomEat : BaseBoomTroll(), PlayerItemConsumeSubscriber {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they eat something")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they eat something", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they eat something")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they eat something", target)
             .toString()
 
     // only food counts, and not milk or potions. the meal is spared, since it'd be the one thing left in the crater

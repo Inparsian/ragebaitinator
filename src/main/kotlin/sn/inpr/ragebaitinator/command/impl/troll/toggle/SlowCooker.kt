@@ -37,13 +37,11 @@ class SlowCooker : BaseToggleTroll(), InventoryClickSubscriber, FurnaceStartSmel
     private val originals = ConcurrentHashMap<Block, Int>()
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c2%The furnaces %c1%%player% %c2%uses will now take forever to cook")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c2%The furnaces %c1%%player% %c2%uses will now take forever to cook", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The furnaces %c1%%player% %c2%uses cook normally again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The furnaces %c1%%player% %c2%uses cook normally again", target)
             .toString()
 
     // whatever they were cooking carries on from where it got to

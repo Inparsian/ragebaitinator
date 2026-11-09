@@ -23,13 +23,11 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 )
 class BadLoot : BaseToggleTroll(), PlayerFishSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an extremely unlucky fisher(wo)man")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an extremely unlucky fisher(wo)man", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%now has regular fishing luck")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%now has regular fishing luck", target)
             .toString()
 
     override fun onPlayerFish(event: PlayerFishEvent) {

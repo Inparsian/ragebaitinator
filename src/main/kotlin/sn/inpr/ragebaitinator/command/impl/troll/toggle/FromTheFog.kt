@@ -76,14 +76,12 @@ class FromTheFog : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "interval", args[interval])
         scheduleAppearance(target)
-        return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%Whatever was watching %c1%%player% %c2%has gone")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%Whatever was watching %c1%%player% %c2%has gone", target)
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {

@@ -38,14 +38,12 @@ class Grue : BaseToggleTroll(), PlayerMoveSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         if (target.location.block.lightLevel <= 2)
             mark(target)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being stalked by a grue")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being stalked by a grue", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c2%The grue has left %c1%%player%")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c2%The grue has left %c1%%player%", target)
             .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) {

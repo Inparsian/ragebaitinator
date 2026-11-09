@@ -18,8 +18,7 @@ class Credits : BaseTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         // the server never marks them as having won, so when the credits end the game just carries on
         target.sendPacket(WrapperPlayServerChangeGameState(WrapperPlayServerChangeGameState.Reason.WIN_GAME, 1f))
-        return placeholdersOr("init", "%prefix% %c2%Rolled the credits for %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Rolled the credits for %c1%%player%", target)
             .toString()
     }
 }

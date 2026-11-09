@@ -17,8 +17,7 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 class Demo : BaseTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         target.sendPacket(WrapperPlayServerChangeGameState(WrapperPlayServerChangeGameState.Reason.DEMO_EVENT, 0f))
-        return placeholdersOr("init", "%prefix% %c2%Sent demo message to %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Sent demo message to %c1%%player%", target)
             .toString()
     }
 }

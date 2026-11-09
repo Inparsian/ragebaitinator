@@ -27,14 +27,12 @@ class Vampire : BaseToggleTroll(), PlayerMoveSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, { vampireTick(target) }, 0, 10, true)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now combust under sunlight")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now combust under sunlight", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer combust under sunlight")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer combust under sunlight", target)
             .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) = vampireTick(event.player.rb)

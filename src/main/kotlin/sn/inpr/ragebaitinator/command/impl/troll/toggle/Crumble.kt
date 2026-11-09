@@ -62,8 +62,7 @@ class Crumble : BaseToggleTroll() {
             }
         }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%", target)
             .toString()
     }
 
@@ -77,8 +76,7 @@ class Crumble : BaseToggleTroll() {
                 RbPlayer.online.forEach { it.sendPacket(packet) }
         }
 
-        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)
             .toString()
     }
 }

@@ -45,8 +45,7 @@ class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber 
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to make block changes")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to make block changes", target)
             .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {

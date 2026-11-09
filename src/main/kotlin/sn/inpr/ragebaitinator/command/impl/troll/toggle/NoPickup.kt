@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class NoPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer pick up items")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer pick up items", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now pick up items again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now pick up items again", target)
             .toString()
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {

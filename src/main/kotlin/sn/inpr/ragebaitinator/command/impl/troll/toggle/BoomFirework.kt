@@ -29,16 +29,14 @@ class BoomFirework : BaseBoomTroll(), PlayerInteractSubscriber {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they firework boost")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they firework boost", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they firework boost")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they firework boost", target)
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {

@@ -21,13 +21,11 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.isFireworkBoost
 )
 class NoFirework : BaseToggleTroll(), PlayerInteractSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer firework boost")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer firework boost", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now firework boost again")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now firework boost again", target)
             .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {

@@ -23,8 +23,7 @@ class Boom : BaseTroll() {
         target.world.createExplosion(target.location, power, power >= 0f)
         target.health = 0.0
 
-        return placeholdersOr("init","%prefix% %c1%%player% %c2%has now inexplicably exploded")
-            .put("player", target.name)
+        return placeholdersOr("init","%prefix% %c1%%player% %c2%has now inexplicably exploded", target)
             .toString()
     }
 }

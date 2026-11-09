@@ -108,13 +108,11 @@ class Tornado : BaseToggleTroll() {
 
         addTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1, true)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas", target)
             .toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated", target)
             .toString()
 }

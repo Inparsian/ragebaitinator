@@ -26,13 +26,11 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 )
 class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot")
-            .put("player", target.name)
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now mysteriously hit their targets... fluke?")
-            .put("player", target.name)
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now mysteriously hit their targets... fluke?", target)
             .toString()
 
     fun drunkenVelocity(entity: Entity) {

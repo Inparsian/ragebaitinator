@@ -28,8 +28,7 @@ class Trip : BaseTroll() {
             drop.velocity = Vector(MathUtil.rcos(yaw) * 0.3, 0.2, MathUtil.rsin(yaw) * 0.3)
             if (!clone) target.removeFromInventory(item)
         }
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has inexplicably dropped all their stuff")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has inexplicably dropped all their stuff", target)
             .toString()
     }
 }

@@ -20,13 +20,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class BucketSwap : BaseToggleTroll(), PlayerBucketEmptySubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String =
-        placeholdersOr("init", "%prefix% %c1%%player%%c2%'s buckets are now having an identity crisis")
-            .put("player", target.name)
+        placeholdersOr("init", "%prefix% %c1%%player%%c2%'s buckets are now having an identity crisis", target)
             .toString()
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s buckets are now back to normal")
-            .put("player", target.name)
+        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s buckets are now back to normal", target)
             .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {
