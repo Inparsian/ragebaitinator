@@ -20,6 +20,11 @@ fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
 fun interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
 fun interface AsyncPlayerChatSubscriber { fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) }
 fun interface PlayerMoveSubscriber { fun onPlayerMove(event: PlayerMoveEvent) }
+/**
+ * Gets teleports after every troll and plugin has had its say. Canceled teleports never get here, so this is for
+ * reacting to a teleport that is really going to happen
+ */
+fun interface PlayerTeleportMonitorSubscriber { fun onPlayerTeleportMonitor(event: PlayerTeleportEvent) }
 fun interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVelocityEvent) }
 fun interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
 fun interface BlockBreakSubscriber { fun onBlockBreak(event: BlockBreakEvent) }
@@ -130,6 +135,11 @@ object BukkitEventListener : Listener {
     fun onPlayerTeleport(event: PlayerTeleportEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerMove(event: PlayerMoveEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onPlayerTeleportMonitor(event: PlayerTeleportEvent) {
+        for (command in CommandManager.commands)
+            if (command is PlayerTeleportMonitorSubscriber) command.onPlayerTeleportMonitor(event)
+    }
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerVelocity(event: PlayerVelocityEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)

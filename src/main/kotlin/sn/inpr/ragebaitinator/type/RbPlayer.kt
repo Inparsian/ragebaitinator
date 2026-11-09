@@ -71,7 +71,7 @@ value class RbPlayer(val uuid: UUID) {
             entity?.velocity = value
         }
 
-    fun teleport(location: Location) = entity?.teleport(location)
+    fun teleport(location: Location): Boolean? = bukkit?.teleport(location)
     /** Teleports this player whilst retaining its velocity */
     fun teleportRetainVelocity(location: Location) {
         val oldVelocity = velocity
