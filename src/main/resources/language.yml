@@ -118,6 +118,7 @@ gui:
     float: "Float"
     double: "Double"
     player: "Player"
+    enum: "Choice"
 
   # Items that are on every menu with pages.
   common:

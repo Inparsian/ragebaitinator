@@ -6,6 +6,7 @@ import org.bukkit.permissions.Permissible
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.PlayerUtil
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 /** The players an argument selects, like a name, `@a` or `world=...`. There is always at least one */
@@ -18,6 +19,14 @@ class Targets(private val players: List<RbPlayer>) : AbstractList<RbPlayer>() {
 data class PlayerName(val value: String)
 
 /**
+ * Implemented by an enum whose constants can be typed under other names as well. Those names are accepted but are
+ * never suggested or listed, and no two constants may have the same one
+ */
+interface Aliased {
+    val aliases: List<String>
+}
+
+/**
  * How the text of an argument turns into a value. This is everything that is known about a type of argument, so adding
  * one means adding it to [ArgumentTypes]
  */
@@ -28,6 +37,10 @@ interface ArgumentType<T : Any> {
     fun parse(input: String, source: Permissible?): T?
     fun format(value: T): String = value.toString()
     fun completions(): List<String> = emptyList()
+    /** For a type that only has so many values, all of them. Nothing else is a value, so these are also what is listed */
+    val values: List<String> get() = emptyList()
+    /** Other ways of writing the values. These are accepted, but nothing suggests them */
+    val aliases: List<String> get() = emptyList()
 }
 
 object ArgumentTypes {
@@ -68,8 +81,33 @@ object ArgumentTypes {
         override fun completions(): List<String> = onlinePlayers()
     }
 
+    /** Any enum is a type of argument, as the constant that was typed. How it's capitalized doesn't matter */
+    private class EnumType<E : Enum<*>>(override val type: KClass<E>) : ArgumentType<E> {
+        private val constants: List<E> = type.java.enumConstants.toList()
+        private val aliasesOf: Map<E, List<String>> = constants.associateWith { (it as? Aliased)?.aliases.orEmpty() }
+        override val key = "enum"
+        override val values: List<String> = constants.map { it.name.lowercase() }
+        override val aliases: List<String> = aliasesOf.values.flatten()
+
+        init {
+            // two constants that can be typed the same way would leave the second one unreachable
+            val taken = (values + aliases).groupingBy { it.lowercase() }.eachCount().filterValues { it > 1 }.keys
+            check(taken.isEmpty()) { "${type.simpleName} has constants that can be typed the same way: $taken" }
+        }
+
+        override fun parse(input: String, source: Permissible?): E? =
+            constants.firstOrNull { it.name.equals(input, true) || aliasesOf.getValue(it).any { alias -> alias.equals(input, true) } }
+        override fun format(value: E): String = value.name.lowercase()
+        override fun completions(): List<String> = values
+    }
+
+    private val enumTypes = ConcurrentHashMap<KClass<*>, ArgumentType<*>>()
+
+    @Suppress("UNCHECKED_CAST")
     fun of(type: KClass<*>): ArgumentType<*> =
-        registry[type] ?: registry[type.javaObjectType.kotlin] ?: error("There is no type of argument for ${type.simpleName}")
+        registry[type] ?: registry[type.javaObjectType.kotlin]
+            ?: type.takeIf { it.java.isEnum }?.let { enumTypes.getOrPut(it) { EnumType(it as KClass<Enum<*>>) } }
+            ?: error("There is no type of argument for ${type.simpleName}")
 }
 
 /**
@@ -98,6 +136,9 @@ sealed class Parameter<T : Any>(
     val argumentType: ArgumentType<T> get() = ArgumentTypes.of(type) as ArgumentType<T>
 
     abstract val defaultText: String
+
+    /** What to tell somebody the choices are: what it was declared with, or else all there are */
+    val possibleValues: List<String> get() = completions.ifEmpty { argumentType.values }
 
     fun parse(input: String, source: Permissible?): T? = argumentType.parse(input, source)?.let { constrain(it) }
 

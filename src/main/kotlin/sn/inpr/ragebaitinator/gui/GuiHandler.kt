@@ -36,9 +36,9 @@ object GuiHandler : Listener {
         val placeholders = Placeholders("gui.messages.fieldPrompt", "%prefix% %c2%Please enter a value for %c1%%field%")
             .put("field", input.syntax.purpose)
         send(player, placeholders)
-        if (input.syntax.completions.isNotEmpty()) {
+        if (input.syntax.possibleValues.isNotEmpty()) {
             val placeholders = Placeholders("gui.messages.fieldCompletions", "%prefix% %c2%Possible values: %c1%%completions%")
-                .put("completions", input.syntax.completions.joinToString(", "))
+                .put("completions", input.syntax.possibleValues.joinToString(", "))
             send(player, placeholders)
         }
     }
@@ -85,9 +85,11 @@ object GuiHandler : Listener {
             event.isCancelled = true
 
             val syntax = input.syntax
-            if (syntax.strictCompletion
-                && syntax.completions.none { it.equals(event.message, true) }
-                && syntax.completionAliases.none { it.equals(event.message, true) })
+            // a type with a fixed set of values only takes those, whether the parameter said so
+            if ((syntax.strictCompletion || syntax.argumentType.values.isNotEmpty())
+                && syntax.possibleValues.none { it.equals(event.message, true) }
+                && syntax.completionAliases.none { it.equals(event.message, true) }
+                && syntax.argumentType.aliases.none { it.equals(event.message, true) })
             {
                 val placeholders = Placeholders("gui.messages.fieldInvalidCompletion", "%prefix% &cThis value must be one of the possible values listed above")
                 send(event.player, placeholders)

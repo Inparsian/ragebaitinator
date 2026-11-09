@@ -25,7 +25,10 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
-    private val type = param<String>("Type", "What is stuck in them: arrows, stingers or both.", default = "arrows", completions = listOf("arrows", "stingers", "both"), strictCompletion = true)
+    @Suppress("unused")
+    enum class Kind { ARROWS, STINGERS, BOTH }
+
+    private val type = param<Kind>("Type", "What is stuck in them: arrows, stingers or both.", default = Kind.ARROWS)
     private val count = param<Int>("Count", "How many of each (min 1, max 100).", default = 20, range = 1..100)
 
     override val syntax = withTarget(type, count)
@@ -43,8 +46,8 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
         val type = args[type]
         val count = args[count]
         stuck[target.entityId] = Stuck(
-            if (type == "stingers") 0 else count,
-            if (type == "stingers" || type == "both") count else 0
+            if (type == Kind.STINGERS) 0 else count,
+            if (type != Kind.ARROWS) count else 0
         )
         broadcast(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes", target)
