@@ -11,7 +11,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.database.SQLite
 import sn.inpr.ragebaitinator.gui.GuiHandler
-import sn.inpr.ragebaitinator.gui.Menu
+import sn.inpr.ragebaitinator.gui.def.Menu
 import sn.inpr.ragebaitinator.integrations.PAPI
 import sn.inpr.ragebaitinator.integrations.PAPIExpansion
 import sn.inpr.ragebaitinator.listeners.BukkitEventListener
@@ -43,9 +43,6 @@ class Main : JavaPlugin() {
 
         fun runTaskTimer(runnable: Runnable, delay: Long, period: Long)
         = instance().let { Bukkit.getScheduler().runTaskTimer(it, runnable, delay, period) }
-
-        fun runTaskTimerAsync(runnable: Runnable, delay: Long, period: Long)
-        = instance().let { Bukkit.getScheduler().runTaskTimerAsynchronously(it, runnable, delay, period) }
 
         fun runTaskRandomTimer(runnable: Runnable, delay: Long, minTicks: Long, maxTicks: Long)
         = RandomTimer(instance(), runnable, minTicks, maxTicks, delay)

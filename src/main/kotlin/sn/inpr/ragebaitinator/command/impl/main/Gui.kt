@@ -8,8 +8,9 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.Targets
+import sn.inpr.ragebaitinator.gui.def.Selection
 import sn.inpr.ragebaitinator.gui.impl.MainMenu
-import sn.inpr.ragebaitinator.gui.impl.PlayerMenu
+import sn.inpr.ragebaitinator.gui.impl.TargetMenu
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 
@@ -18,9 +19,9 @@ import sn.inpr.ragebaitinator.utility.ChatUtil.send
     description = "Opens the GUI.",
 )
 class Gui : BaseCommand() {
-    private val target = optional<Targets>("")
+    private val targets = optional<Targets>("")
 
-    override val syntax = listOf(target)
+    override val syntax = listOf(targets)
 
     override fun process(
         sender: CommandSender,
@@ -29,8 +30,8 @@ class Gui : BaseCommand() {
         args: Args
     ): Boolean {
         if (sender is Player) {
-            val target = args[target]?.first()?.bukkit
-            val menu = if (target != null) PlayerMenu(sender, target) else MainMenu(sender)
+            val targets = args[targets]?.map { it.name }.orEmpty()
+            val menu = if (targets.isNotEmpty()) TargetMenu(sender, Selection(targets)) else MainMenu(sender)
             menu.open()
         } else {
             send(sender, Placeholders(language.mustBeAPlayer))

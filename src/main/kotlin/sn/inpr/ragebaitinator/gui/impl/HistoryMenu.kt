@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.gui.CommandHistorySubscriber
 import sn.inpr.ragebaitinator.gui.GuiText
-import sn.inpr.ragebaitinator.gui.PaginationMenu
+import sn.inpr.ragebaitinator.gui.def.PaginationMenu
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import sn.inpr.ragebaitinator.utility.TimeUtil
@@ -35,15 +35,19 @@ class HistoryMenu(player: Player) : PaginationMenu(
         return item
     }
 
-    override fun getInventory(): Inventory {
-        val items = CommandHistory.getAllHistory()
-            .chunked(PAGE_SIZE)[page - 1]
-            .map { historyItem(it) }
-        pages = MathUtil.pages(CommandHistory.size, PAGE_SIZE)
+    override fun title() = GuiText.text("gui.history.title", "page" to page.toString(), "pages" to pages.toString())
 
-        val inv: Inventory = Bukkit.createInventory(this, 45, GuiText.text("gui.history.title", "page" to page.toString(), "pages" to pages.toString()))
+    override fun getInventory(): Inventory {
+        pages = maxOf(1, MathUtil.pages(CommandHistory.size, PAGE_SIZE))
+        page = page.coerceIn(1, pages)
+        val items = CommandHistory.getAllHistory()
+            .chunked(PAGE_SIZE).getOrElse(page - 1) { emptyList() }
+            .map { historyItem(it) }
+
+        val inv: Inventory = Bukkit.createInventory(this, 45, title())
         inv.contents = items.toTypedArray()
         addPaginationItems(inv)
+        frame(inv)
         return inv
     }
 }

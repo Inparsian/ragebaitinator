@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryDragEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.gui.Menu
+import sn.inpr.ragebaitinator.gui.def.Menu
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryDragSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer

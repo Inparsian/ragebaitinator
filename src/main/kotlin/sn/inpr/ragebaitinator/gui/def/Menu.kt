@@ -1,6 +1,6 @@
 @file:Suppress("UsePropertyAccessSyntax")
 
-package sn.inpr.ragebaitinator.gui
+package sn.inpr.ragebaitinator.gui.def
 
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -13,6 +13,8 @@ import org.bukkit.persistence.PersistentDataType
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.Main.Companion.runTaskIfNotPrimaryThread
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.gui.GuiHandler
+import sn.inpr.ragebaitinator.gui.GuiText
 import sn.inpr.ragebaitinator.utility.ItemUtil
 
 abstract class Menu(val player: Player) : InventoryHolder {
@@ -42,9 +44,20 @@ abstract class Menu(val player: Player) : InventoryHolder {
     }
 
     fun update() {
-        val top = player.openInventory.topInventory
-        if (top.holder == this)
+        val view = player.openInventory
+        val top = view.topInventory
+        if (top.holder == this) {
             top.contents = getInventory().contents
+            title()?.let { view.setTitle(it) }
+        }
+    }
+
+    open fun title(): String? = null
+
+    // someone who has left is still in the list of who is online for a moment,
+    // so what shows them has to wait
+    fun updateLater() {
+        runTaskLater({ update() }, 2)
     }
 
     fun open() {
@@ -77,6 +90,17 @@ abstract class Menu(val player: Player) : InventoryHolder {
     fun addItem(inventory: Inventory, slot: Int, item: ItemStack) {
         inventory.setItem(slot, item)
     }
+
+    fun frame(inventory: Inventory) {
+        val filler = ItemStack(Material.GRAY_STAINED_GLASS_PANE)
+        val meta = filler.itemMeta!!
+        meta.setDisplayName(" ")
+        ItemUtil.hideTooltips(meta)
+        filler.itemMeta = meta
+        for (slot in 0 until inventory.getSize())
+            if (inventory.getItem(slot) == null)
+                inventory.setItem(slot, filler)
+    }
 }
 
 abstract class PaginationMenu(
@@ -86,22 +110,29 @@ abstract class PaginationMenu(
     val previousMenu: Menu
 ) : Menu(player) {
     fun addPaginationItems(inventory: Inventory) {
-        val bottomRow = inventory.getSize() - 5
+        val row = inventory.getSize() - 9
 
-        addItem(inventory, bottomRow, Material.REDSTONE_BLOCK, GuiText.text("gui.common.back.name"), listOf(), false, BACK)
+        addItem(inventory, row, Material.REDSTONE_BLOCK, GuiText.text("gui.common.back.name"), listOf(), false, BACK)
 
         if (pages > 1) {
             if (page > 1) {
-                addItem(inventory, bottomRow - 3, Material.SPECTRAL_ARROW, GuiText.text("gui.common.firstPage.name"), listOf(), false, FIRST_PAGE)
-                addItem(inventory, bottomRow - 2, Material.ARROW, GuiText.text("gui.common.previousPage.name"), listOf(), false, PREVIOUS_PAGE)
+                addItem(inventory, row + 2, Material.SPECTRAL_ARROW, GuiText.text("gui.common.firstPage.name"), listOf(), false, FIRST_PAGE)
+                addItem(inventory, row + 3, Material.ARROW, GuiText.text("gui.common.previousPage.name"), listOf(), false, PREVIOUS_PAGE)
             }
 
+            addItem(
+                inventory, row + 4, Material.PAPER,
+                GuiText.text("gui.common.page.name", "page" to page.toString(), "pages" to pages.toString()), listOf(), false
+            )
+
             if (page < pages) {
-                addItem(inventory, bottomRow + 2, Material.ARROW, GuiText.text("gui.common.nextPage.name"), listOf(), false, NEXT_PAGE)
-                addItem(inventory, bottomRow + 3, Material.SPECTRAL_ARROW, GuiText.text("gui.common.lastPage.name"), listOf(), false, LAST_PAGE)
+                addItem(inventory, row + 5, Material.ARROW, GuiText.text("gui.common.nextPage.name"), listOf(), false, NEXT_PAGE)
+                addItem(inventory, row + 6, Material.SPECTRAL_ARROW, GuiText.text("gui.common.lastPage.name"), listOf(), false, LAST_PAGE)
             }
         }
     }
+
+    fun extraSlot(inventory: Inventory, index: Int): Int = inventory.getSize() - 2 + index
 
     fun setPage(newPage: Int, predicate: () -> Boolean = { true }) {
         if (predicate()) {
