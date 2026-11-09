@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.item.ItemStack
 import com.github.retrooper.packetevents.protocol.item.type.ItemTypes
@@ -23,6 +22,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -38,7 +38,6 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     private companion object {
         const val HELMET_MENU_SLOT = 5
         const val HELMET_INVENTORY_SLOT = 39
-        const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
     private val wearers = ConcurrentHashMap.newKeySet<Int>()
@@ -62,14 +61,10 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     }
 
     private fun show(player: RbPlayer, helmet: ItemStack) {
-        val api = PacketEvents.getAPI().playerManager
         player.sendPacket(WrapperPlayServerSetPlayerInventory(HELMET_INVENTORY_SLOT, helmet))
 
         val equipment = WrapperPlayServerEntityEquipment(player.entityId, listOf(Equipment(EquipmentSlot.HELMET, helmet)))
-        val location = player.location
-        for (viewer in player.world.players)
-            if (viewer.uniqueId != player.uuid && player.isVisibleTo(viewer) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
-                api.sendPacket(viewer, equipment)
+        player.viewers(includeSelf = false).sendPacket(equipment)
     }
 
     // the server doesn't know about the pumpkin, so every time it says what is on the player's head, it has to be

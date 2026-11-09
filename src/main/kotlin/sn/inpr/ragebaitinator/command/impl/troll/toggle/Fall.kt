@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -53,6 +52,6 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
 
     // prevent premature fall damage despite our best efforts to prevent it proactively
     override fun onEntityDamage(event: EntityDamageEvent) {
-        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && hasPlayer(event.entity as? Player ?: return))
+        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && hasPlayer(event.entity))
     }
 }

@@ -8,6 +8,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.damage.DamageSource
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
@@ -16,15 +17,30 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseTroll
+import sn.inpr.ragebaitinator.utility.LocationUtil
 import java.util.*
 
 /** Shorthand for converting a Bukkit player to a Ragebaitinator player */
 val Player.rb: RbPlayer get() = RbPlayer(this)
 
+/** The Ragebaitinator player this entity is, or null if it isn't a player */
+val Entity.asRb: RbPlayer? get() = (this as? Player)?.rb
+
+/** The Ragebaitinator player who shot this, or null if it wasn't shot by a player */
+val Projectile.shooterRb: RbPlayer? get() = (shooter as? Player)?.rb
+
+/** Everyone in this world */
+val World.rbPlayers: List<RbPlayer> get() = players.map { it.rb }
+
+fun Iterable<RbPlayer>.sendPacket(vararg packets: PacketWrapper<*>) = forEach { it.sendPacket(*packets) }
+
 /** A Ragebaitinator player */
 @JvmInline
 value class RbPlayer(val uuid: UUID) {
     companion object {
+        /** How far away somebody can be and still see a player, as far as anything sent to the ones who can goes */
+        const val VIEW_RANGE = 128.0
+
         val online: List<RbPlayer> get() = Bukkit.getOnlinePlayers().map { it.rb }
     }
 
@@ -166,6 +182,26 @@ value class RbPlayer(val uuid: UUID) {
     // Visibility
     /** Whether [viewer] is able to see this player */
     fun isVisibleTo(viewer: Player): Boolean = bukkit?.let { viewer.canSee(it) } == true
+    /**
+     * Everyone who can see this player: those in the same world who this player isn't hidden from and who are within
+     * [range] blocks. The player themself is one of them unless [includeSelf] is false.
+     */
+    fun viewers(includeSelf: Boolean = true, range: Double = VIEW_RANGE): List<RbPlayer> {
+        val location = location
+        val rangeSquared = range * range
+        return world.players.filter { viewer ->
+            if (viewer.uniqueId == uuid) includeSelf
+            else isVisibleTo(viewer) && viewer.location.distanceSquared(location) <= rangeSquared
+        }.map { it.rb }
+    }
+
+    /** Everything within [radius] blocks of this player, except for the player (and what they were transformed into) */
+    fun nearbyEntities(radius: Double): List<Entity> {
+        val own = bukkit
+        val transformed = entity
+        return LocationUtil.getEntitiesWithinRadius(location, radius).filter { it != own && it != transformed }
+    }
+
     /** Hides [other] from this player */
     fun hidePlayer(other: RbPlayer) {
         other.bukkit?.let { bukkit?.hidePlayer(Main.instance(), it) }

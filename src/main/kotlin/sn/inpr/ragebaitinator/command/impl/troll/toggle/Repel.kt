@@ -23,9 +23,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 class Repel : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
-            val entities = LocationUtil.getEntitiesWithinRadius(target.location, 10.0)
-            for (entity in entities) {
-                if (entity == target.bukkit) continue
+            for (entity in target.nearbyEntities(10.0)) {
                 if (entity is Player || entity is Animals) {
                     val distance = target.location.distance(entity.location)
                     val velocity = entity.location.toVector().subtract(target.location.toVector())

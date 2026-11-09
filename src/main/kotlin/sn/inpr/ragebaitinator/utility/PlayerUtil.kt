@@ -21,6 +21,8 @@ import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
+import sn.inpr.ragebaitinator.type.rbPlayers
+import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
 
 object PlayerUtil {
@@ -132,9 +134,7 @@ object PlayerUtil {
 
             if (local)
                 rbPlayer.sendPacket(damageEventPacket)
-            else player.world.players.forEach { p ->
-                p.rb.sendPacket(damageEventPacket)
-            }
+            else player.world.rbPlayers.sendPacket(damageEventPacket)
         } else {
             // the notchian server sends both animation & entity status packets
             val animationPacket = WrapperPlayServerEntityAnimation(player.entityId, WrapperPlayServerEntityAnimation.EntityAnimationType.HURT)
@@ -155,7 +155,7 @@ object PlayerUtil {
             if (local)
                 rbPlayer.sendPacket(animationPacket, statusPacket)
             else
-                player.world.players.forEach { p -> p.rb.sendPacket(statusPacket, animationPacket) }
+                player.world.rbPlayers.sendPacket(statusPacket, animationPacket)
         }
     }
 }

@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
 import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose
@@ -9,7 +8,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
@@ -21,7 +19,8 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.type.rb
+import sn.inpr.ragebaitinator.type.asRb
+import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 
@@ -44,7 +43,6 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         const val MAX_AWAKE = 900L
         const val MIN_ASLEEP = 60L
         const val MAX_ASLEEP = 140L
-        const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
@@ -113,16 +111,11 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
             WrapperPlayServerEntityAnimation.EntityAnimationType.WAKE_UP
         )
 
-        val viewers = player.world.players.filter {
-            it.uniqueId == player.uuid
-                || (player.isVisibleTo(it) && it.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
-        }
-        for (viewer in viewers) {
-            PacketEvents.getAPI().playerManager.sendPacket(viewer, metadata)
-            // clearing the bed position is enough to make an entity stand up, but this is how the game itself does it
-            if (!sleeping)
-                PacketEvents.getAPI().playerManager.sendPacket(viewer, wakeUp)
-        }
+        val viewers = player.viewers()
+        viewers.sendPacket(metadata)
+        // clearing the bed position is enough to make an entity stand up, but this is how the game itself does it
+        if (!sleeping)
+            viewers.sendPacket(wakeUp)
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
@@ -139,8 +132,8 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
 
     // getting hurt wakes anyone up
     override fun onEntityDamage(event: EntityDamageEvent) {
-        val player = event.entity as? Player ?: return
-        if (!event.isCancelled && wake(player.rb))
-            scheduleSleep(player.rb)
+        val player = event.entity.asRb ?: return
+        if (!event.isCancelled && wake(player))
+            scheduleSleep(player)
     }
 }

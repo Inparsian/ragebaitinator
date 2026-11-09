@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityRegainHealthEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -28,7 +27,5 @@ class NoHeal : BaseToggleTroll(), EntityRegainHealthSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now regenerate health again", target)
             .toString()
 
-    override fun onEntityRegainHealth(event: EntityRegainHealthEvent) {
-        event.cancelIf(hasPlayer(event.entity as? Player ?: return))
-    }
+    override fun onEntityRegainHealth(event: EntityRegainHealthEvent) = event.cancelIf(hasPlayer(event.entity))
 }

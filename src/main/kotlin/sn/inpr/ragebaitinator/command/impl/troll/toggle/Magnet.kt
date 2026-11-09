@@ -8,7 +8,6 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "magnet",
@@ -22,9 +21,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 class Magnet : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
-            val entities = LocationUtil.getEntitiesWithinRadius(target.location, 30.0)
-            for (entity in entities) {
-                if (entity == target.bukkit) continue
+            for (entity in target.nearbyEntities(30.0)) {
                 if (entity is Enemy || entity is TNTPrimed) {
                     val distance = target.location.distance(entity.location)
                     val velocity = target.location.toVector().subtract(entity.location.toVector())

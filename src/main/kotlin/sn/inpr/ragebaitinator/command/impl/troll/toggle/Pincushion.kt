@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
@@ -13,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -36,7 +36,6 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
     private companion object {
         const val ARROW_COUNT_INDEX = 12
         const val STINGER_COUNT_INDEX = 13
-        const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
     private data class Stuck(val arrows: Int, val stingers: Int)
@@ -74,11 +73,7 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
             player.entityId,
             metadata(stuck[player.entityId] ?: Stuck(0, 0))
         )
-        val location = player.location
-        for (viewer in player.world.players) {
-            if (viewer.uniqueId == player.uuid || (player.isVisibleTo(viewer) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED))
-                PacketEvents.getAPI().playerManager.sendPacket(viewer, packet)
-        }
+        player.viewers().sendPacket(packet)
     }
 
     override fun onPacketSend(event: PacketSendEvent) {

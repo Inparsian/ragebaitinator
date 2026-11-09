@@ -15,7 +15,6 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
@@ -31,6 +30,7 @@ import sn.inpr.ragebaitinator.listeners.*
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
+import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
@@ -119,7 +119,7 @@ class Potato : BaseToggleTroll(),
 
         // destroy this player entity for others
         val destroy = WrapperPlayServerDestroyEntities(player.entityId)
-        target.others.forEach { it.sendPacket(destroy) }
+        target.others.sendPacket(destroy)
 
         // prevent interactions (and self-interaction kicks) by setting spectator mode client-side
         sendFakeGameMode(target, GameMode.SPECTATOR)
@@ -183,17 +183,10 @@ class Potato : BaseToggleTroll(),
             potato.teleport(to)
     }
 
-    override fun onPlayerInteract(event: PlayerInteractEvent) {
-        event.cancelIf(hasPlayer(event.player))
-    }
-
-    override fun onEntityDamage(event: EntityDamageEvent) {
-        event.cancelIf(event.entity is Player && hasPlayer(event.entity as Player))
-    }
-
-    override fun onEntityPickupItem(event: EntityPickupItemEvent) {
-        event.cancelIf(fieldValues<Pair<Item, PlayerSnapshot>>("potato").any { it.first == event.item } || event.entity is Player && hasPlayer(event.entity as Player))
-    }
+    override fun onPlayerInteract(event: PlayerInteractEvent) = event.cancelIf(hasPlayer(event.player))
+    override fun onEntityDamage(event: EntityDamageEvent) = event.cancelIf(hasPlayer(event.entity))
+    override fun onEntityPickupItem(event: EntityPickupItemEvent)
+        = event.cancelIf(fieldValues<Pair<Item, PlayerSnapshot>>("potato").any { it.first == event.item } || hasPlayer(event.entity))
 
     // cancel some actions at the packet level that potatoes would not be able to do
     override fun onPacketReceive(event: PacketReceiveEvent) {

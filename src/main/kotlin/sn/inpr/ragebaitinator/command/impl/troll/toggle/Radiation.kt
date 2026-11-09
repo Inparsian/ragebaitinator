@@ -90,8 +90,8 @@ class Radiation : BaseToggleTroll() {
             }
 
             if (hasFlag(target, "players") || hasFlag(target, "animals")) {
-                for (entity in LocationUtil.getEntitiesWithinRadius(target.location, 5.0)) {
-                    if (entity == target.bukkit || entity !is LivingEntity)
+                for (entity in target.nearbyEntities(5.0)) {
+                    if (entity !is LivingEntity)
                         continue
 
                     val damage = MathUtil.random(1.0, 2.0)

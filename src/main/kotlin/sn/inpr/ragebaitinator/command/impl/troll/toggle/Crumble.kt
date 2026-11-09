@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -55,7 +56,7 @@ class Crumble : BaseToggleTroll() {
                 if (hasFlag(target, "local"))
                     target.sendPacket(packet)
                 else
-                    RbPlayer.online.forEach { it.sendPacket(packet) }
+                    RbPlayer.online.sendPacket(packet)
 
                 val state = CrumbleState(entityId, stage, vector)
                 getField<MutableSet<CrumbleState>>(target, "blocks")?.add(state)
@@ -73,7 +74,7 @@ class Crumble : BaseToggleTroll() {
             if (hasFlag(target, "local"))
                 target.sendPacket(packet)
             else
-                RbPlayer.online.forEach { it.sendPacket(packet) }
+                RbPlayer.online.sendPacket(packet)
         }
 
         return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)

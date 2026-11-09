@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -30,7 +29,7 @@ class Harmless : BaseToggleTroll(), EntityDamageByEntitySubscriber {
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
-        if (hasPlayer(event.damager as? Player ?: return))
+        if (hasPlayer(event.damager))
             event.setDamage(0.0)
     }
 }

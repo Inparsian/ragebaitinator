@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.util.Vector
@@ -13,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.shooterRb
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -42,12 +42,12 @@ class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchS
     }
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
-        if (hasPlayer(event.entity as? Player ?: return))
+        if (hasPlayer(event.entity))
             drunkenVelocity(event.projectile)
     }
 
     override fun onProjectileLaunch(event: ProjectileLaunchEvent) {
-        if (hasPlayer(event.entity.shooter as? Player ?: return))
+        if (hasPlayer(event.entity.shooterRb ?: return))
             drunkenVelocity(event.entity)
     }
 }

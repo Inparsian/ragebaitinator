@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityResurrectEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -28,7 +27,5 @@ class NoTotem : BaseToggleTroll(), EntityResurrectSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s totems will now work as advertised", target)
             .toString()
 
-    override fun onEntityResurrect(event: EntityResurrectEvent) {
-        event.cancelIf(hasPlayer(event.entity as? Player ?: return))
-    }
+    override fun onEntityResurrect(event: EntityResurrectEvent) = event.cancelIf(hasPlayer(event.entity))
 }

@@ -16,6 +16,7 @@ import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.gui.TrollToggleSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.asRb
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.PlayerUtil
@@ -269,6 +270,8 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun hasPlayer(player: RbPlayer): Boolean = players.containsKey(player)
     fun hasPlayer(player: Player): Boolean = hasPlayer(player.rb)
     fun hasPlayer(uuid: UUID): Boolean = hasPlayer(RbPlayer(uuid))
+    /** Whether this is a player this troll is toggled on. It's not if it isn't a player, or isn't anybody */
+    fun hasPlayer(entity: Entity?): Boolean = entity?.asRb?.let { hasPlayer(it) } == true
 
     private fun fieldsOf(player: RbPlayer): MutableMap<String, Any>? = players[player] ?: detached[player]
 

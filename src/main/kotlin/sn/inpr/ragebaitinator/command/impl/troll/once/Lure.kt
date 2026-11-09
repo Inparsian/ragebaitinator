@@ -7,7 +7,6 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "lure",
@@ -17,9 +16,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 )
 class Lure : BaseTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        LocationUtil.getEntitiesWithinRadius(target.location, 100.0)
-            .filterIsInstance<Creature>()
-            .forEach { it.target = target.bukkit }
+        target.nearbyEntities(100.0).filterIsInstance<Creature>().forEach { it.target = target.bukkit }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now universally hated", target)
             .toString()
     }

@@ -15,7 +15,6 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
-import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -36,8 +35,8 @@ class Exorcist : BaseToggleTroll() {
         if (args[local]) addFlag(target, "local")
 
         addTaskRandomTimer(target, {
-            for (entity in LocationUtil.getEntitiesWithinRadius(target.location, 64.0)) {
-                if (entity == target.bukkit || entity !is LivingEntity || entity is ArmorStand)
+            for (entity in target.nearbyEntities(64.0)) {
+                if (entity !is LivingEntity || entity is ArmorStand)
                     continue
 
                 val status: Int? = when(entity) {

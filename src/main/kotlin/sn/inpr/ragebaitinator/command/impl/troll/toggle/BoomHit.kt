@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import sn.inpr.ragebaitinator.command.def.Args
@@ -10,6 +9,8 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.asRb
+import sn.inpr.ragebaitinator.type.shooterRb
 
 @CommandInfo(
     name = "boomhit",
@@ -41,11 +42,9 @@ class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
-        val damager = event.damager
-        val player = damager as? Player ?: (damager as? Projectile)?.shooter as? Player ?: return
+        val player = event.damager.asRb ?: (event.damager as? Projectile)?.shooterRb ?: return
         if (event.isCancelled)
             return
-
         kaboom(event, player, event.entity.location, false)
     }
 }

@@ -2,13 +2,13 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.asRb
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
@@ -30,7 +30,7 @@ class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        if (removePlayer(event.entity as? Player ?: return))
+        if (removePlayer(event.entity.asRb ?: return))
             event.damage = PlayerUtil.MAX_POSSIBLE_DAMAGE
     }
 }
