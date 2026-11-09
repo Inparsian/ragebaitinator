@@ -108,7 +108,7 @@ class PlayersMenu(player: Player, selected: Collection<String> = emptyList()) : 
         return inventory
     }
 
-    override fun onClickItem(event: InventoryClickEvent) {
+    override fun onClick(event: InventoryClickEvent) {
         val action = actionOf(event.currentItem) ?: return
         when {
             action.startsWith(PLAYER) -> {

@@ -72,8 +72,11 @@ abstract class Menu(val player: Player) : InventoryHolder {
 
     open fun setbackMenu(): Menu? = null
     open fun setbackCondition(): Boolean = false
-
-    open fun onClick(event: InventoryClickEvent) {}
+    protected open fun onClickPre(event: InventoryClickEvent): Boolean = true
+    protected open fun onClick(event: InventoryClickEvent) {}
+    fun handleClick(event: InventoryClickEvent) {
+        if (onClickPre(event)) onClick(event)
+    }
 
     fun addItem(inventory: Inventory, slot: Int, material: Material, name: String, lore: List<String>, glowing: Boolean, action: String? = null) {
         val item = ItemStack(material)
@@ -146,7 +149,7 @@ abstract class PaginationMenu(
     fun firstPage() = setPage(1) { page > 1 }
     fun lastPage() = setPage(pages) { page < pages }
 
-    final override fun onClick(event: InventoryClickEvent) {
+    final override fun onClickPre(event: InventoryClickEvent): Boolean {
         when (actionOf(event.currentItem)) {
             BACK -> previousMenu.open()
             REFRESH -> update()
@@ -154,9 +157,8 @@ abstract class PaginationMenu(
             PREVIOUS_PAGE -> previousPage()
             NEXT_PAGE -> nextPage()
             LAST_PAGE -> lastPage()
-            else -> onClickItem(event)
+            else -> return true
         }
+        return false
     }
-
-    open fun onClickItem(event: InventoryClickEvent) {}
 }

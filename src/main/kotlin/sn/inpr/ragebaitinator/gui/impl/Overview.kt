@@ -72,7 +72,7 @@ class OverviewMenu(player: Player) : PaginationMenu(
         return inventory
     }
 
-    override fun onClickItem(event: InventoryClickEvent) {
+    override fun onClick(event: InventoryClickEvent) {
         val action = actionOf(event.currentItem) ?: return
         when {
             action.startsWith(PLAYER) -> Bukkit.getPlayerExact(action.removePrefix(PLAYER))?.let {

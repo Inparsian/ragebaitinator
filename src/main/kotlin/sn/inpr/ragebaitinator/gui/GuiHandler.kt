@@ -64,13 +64,12 @@ object GuiHandler : Listener {
                 event.isCancelled = true
 
                 if (event.currentItem != null && !event.currentItem!!.type.isAir)
-                    topHolder.onClick(event)
+                    topHolder.handleClick(event)
             }
 
             // shift clicks would move the item into this menu and get it destroyed
-            else if(event.action == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+            else if(event.action == InventoryAction.MOVE_TO_OTHER_INVENTORY)
                 event.isCancelled = true
-            }
         }
     }
 
