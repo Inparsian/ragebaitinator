@@ -1,15 +1,14 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerAbilities
 import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -25,37 +24,33 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Quake : BaseToggleTroll() {
-    fun sendAbilities(target: Player, fovModifier: Float) {
-        val abilities = WrapperPlayServerPlayerAbilities(
-            target.isInvulnerable,
-            target.isFlying,
-            target.allowFlight,
-            target.gameMode == GameMode.CREATIVE,
-            target.flySpeed / 2f,
-            fovModifier,
-        )
+    fun abilities(target: RbPlayer, fovModifier: Float) = WrapperPlayServerPlayerAbilities(
+        target.isInvulnerable,
+        target.isFlying,
+        target.allowFlight,
+        target.gameMode == GameMode.CREATIVE,
+        target.flySpeed / 2f,
+        fovModifier
+    )
 
-        PacketEvents.getAPI().playerManager.sendPacket(target, abilities)
-    }
-
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         addTaskTimer(target, {
             val rand = MathUtil.random(0.8f, 1.0f)
             val signed = if (MathUtil.randomBool()) -rand else rand
             val fovModifier = if (MathUtil.randomBool()) 0f else signed
-            sendAbilities(target, fovModifier)
+            target.sendPacket(abilities(target, fovModifier))
         }, 0, 1, true)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s field of view is now shaking")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s field of view is now stable")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        runTaskLater({ sendAbilities(player, player.walkSpeed / 2f) }, 1)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        runTaskLater({ player.sendPacket(abilities(player, player.walkSpeed / 2f)) }, 1)
     }
 }

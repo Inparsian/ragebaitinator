@@ -1,21 +1,19 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.player.GameMode
 import com.github.retrooper.packetevents.protocol.player.TextureProperty
 import com.github.retrooper.packetevents.protocol.player.UserProfile
 import com.github.retrooper.packetevents.protocol.util.LegacyComponent
-import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import com.github.retrooper.packetevents.wrapper.play.server.*
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.*
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
@@ -84,36 +82,30 @@ class FromTheFog : BaseToggleTroll() {
     private val figures = ConcurrentHashMap<UUID, Figure>()
     private val intervals = ConcurrentHashMap<UUID, Int>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        intervals[target.uniqueId] = (args.getOrNull(2)?.toIntOrNull() ?: 90).coerceIn(5, 3600)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        intervals[target.uuid] = (args.getOrNull(2)?.toIntOrNull() ?: 90).coerceIn(5, 3600)
         scheduleAppearance(target)
         return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Whatever was watching %c1%%player% %c2%has gone")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        intervals.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        intervals.remove(player.uuid)
         despawn(player, reason != "logout")
     }
 
-    private fun send(player: Player, vararg packets: PacketWrapper<*>) {
-        // silently, so nothing else that's listening sees a player that doesn't exist
-        val user = PacketEvents.getAPI().playerManager.getUser(player) ?: return
-        packets.forEach { user.sendPacketSilently(it) }
-    }
-
-    private fun scheduleAppearance(player: Player, delay: Long? = null) {
-        val interval = (intervals[player.uniqueId] ?: 90) * 20.0
+    private fun scheduleAppearance(player: RbPlayer, delay: Long? = null) {
+        val interval = (intervals[player.uuid] ?: 90) * 20.0
         addTask(player, { appear(player) }, delay ?: MathUtil.random(interval * 0.5, interval * 1.5).toLong())
     }
 
-    private fun findSpot(player: Player): Location? {
+    private fun findSpot(player: RbPlayer): Location? {
         val world = player.world
         val eye = player.eyeLocation
         repeat(12) {
@@ -145,7 +137,7 @@ class FromTheFog : BaseToggleTroll() {
         return null
     }
 
-    private fun lookAt(figure: Location, player: Player): Pair<Float, Float> {
+    private fun lookAt(figure: Location, player: RbPlayer): Pair<Float, Float> {
         val eye = player.eyeLocation
         val dx = eye.x - figure.x
         val dy = eye.y - (figure.y + EYE_HEIGHT)
@@ -155,8 +147,8 @@ class FromTheFog : BaseToggleTroll() {
         return yaw to pitch
     }
 
-    private fun appear(player: Player) {
-        val spot = if (!player.isOnline || player.isDead) null else findSpot(player)
+    private fun appear(player: RbPlayer) {
+        val spot = if (player.isDead) null else findSpot(player)
         if (spot == null) {
             scheduleAppearance(player, 200)
             return
@@ -172,9 +164,8 @@ class FromTheFog : BaseToggleTroll() {
             NamedTextColor.WHITE, WrapperPlayServerTeams.OptionData.NONE
         )
 
-        figures[player.uniqueId] = figure
-        send(
-            player,
+        figures[player.uuid] = figure
+        player.sendPacketSilently(
             // the client won't spawn a player it hasn't been told about, but the entry doesn't have to be listed
             WrapperPlayServerPlayerInfoUpdate(
                 EnumSet.of(WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER, WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED),
@@ -191,7 +182,7 @@ class FromTheFog : BaseToggleTroll() {
         addTaskTimer(player, { watch(player) }, CHECK_PERIOD, CHECK_PERIOD)
     }
 
-    private fun isLookedAt(player: Player, figure: Figure): Boolean {
+    private fun isLookedAt(player: RbPlayer, figure: Figure): Boolean {
         val eye = player.eyeLocation
         val head = figure.location.clone().add(0.0, EYE_HEIGHT, 0.0)
         val toHead = head.toVector().subtract(eye.toVector())
@@ -200,8 +191,8 @@ class FromTheFog : BaseToggleTroll() {
             && player.world.rayTraceBlocks(eye, direction, toHead.length(), FluidCollisionMode.NEVER, true) == null
     }
 
-    private fun watch(player: Player) {
-        val figure = figures[player.uniqueId]
+    private fun watch(player: RbPlayer) {
+        val figure = figures[player.uuid]
         if (figure == null || !player.isOnline) {
             scheduleAppearance(player)
             return
@@ -227,7 +218,10 @@ class FromTheFog : BaseToggleTroll() {
 
         if (figure.age % 10 == 0) {
             val [yaw, pitch] = lookAt(figure.location, player)
-            send(player, WrapperPlayServerEntityRotation(figure.entityId, yaw, pitch, true), WrapperPlayServerEntityHeadLook(figure.entityId, yaw))
+            player.sendPacketSilently(
+                WrapperPlayServerEntityRotation(figure.entityId, yaw, pitch, true),
+                WrapperPlayServerEntityHeadLook(figure.entityId, yaw)
+            )
         }
     }
 
@@ -245,7 +239,7 @@ class FromTheFog : BaseToggleTroll() {
         }?.toDouble()
     }
 
-    private fun walk(player: Player, figure: Figure): Boolean {
+    private fun walk(player: RbPlayer, figure: Figure): Boolean {
         val here = figure.location
         val world = here.world ?: return false
         val dx = player.location.x - here.x
@@ -259,8 +253,7 @@ class FromTheFog : BaseToggleTroll() {
             val z = here.z + sin(heading + turn) * STEP_DISTANCE
             val y = floorAt(world, x, z, here.y) ?: continue
             val [yaw, pitch] = lookAt(Location(world, x, y, z), player)
-            send(
-                player,
+            player.sendPacketSilently(
                 WrapperPlayServerEntityRelativeMoveAndRotation(figure.entityId, x - here.x, y - here.y, z - here.z, yaw, pitch, true),
                 WrapperPlayServerEntityHeadLook(figure.entityId, yaw)
             )
@@ -282,17 +275,16 @@ class FromTheFog : BaseToggleTroll() {
         return true
     }
 
-    private fun footstep(player: Player, at: Location) {
+    private fun footstep(player: RbPlayer, at: Location) {
         val ground = at.world?.getBlockAt(at.blockX, at.blockY - 1, at.blockZ) ?: return
         val sound = ground.blockData.soundGroup.stepSound
         player.playSound(at, sound, SoundCategory.PLAYERS, FOOTSTEP_VOLUME, MathUtil.random(0.7f, 0.9f))
     }
 
-    private fun despawn(player: Player, notify: Boolean) {
-        val figure = figures.remove(player.uniqueId) ?: return
+    private fun despawn(player: RbPlayer, notify: Boolean) {
+        val figure = figures.remove(player.uuid) ?: return
         if (notify && player.isOnline)
-            send(
-                player,
+            player.sendPacketSilently(
                 WrapperPlayServerDestroyEntities(figure.entityId),
                 WrapperPlayServerPlayerInfoRemove(figure.uuid),
                 WrapperPlayServerTeams(figure.team, WrapperPlayServerTeams.TeamMode.REMOVE, null as WrapperPlayServerTeams.ScoreBoardTeamInfo?)

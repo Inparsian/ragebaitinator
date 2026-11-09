@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -44,21 +45,21 @@ class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSub
     private val chances = ConcurrentHashMap<UUID, Double>()
     private val lastRoll = ConcurrentHashMap<UUID, Long>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        chances[target.uniqueId] = (args.getOrNull(2)?.toDoubleOrNull() ?: 0.1).coerceIn(0.0, 1.0)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        chances[target.uuid] = (args.getOrNull(2)?.toDoubleOrNull() ?: 0.1).coerceIn(0.0, 1.0)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a firm grip again")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        chances.remove(player.uniqueId)
-        lastRoll.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        chances.remove(player.uuid)
+        lastRoll.remove(player.uuid)
     }
 
     private fun roll(player: Player) {

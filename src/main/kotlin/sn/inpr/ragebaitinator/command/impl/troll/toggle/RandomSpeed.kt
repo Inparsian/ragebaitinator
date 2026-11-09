@@ -2,10 +2,10 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -34,28 +34,28 @@ class RandomSpeed : BaseToggleTroll() {
     // the walking and flying speeds they had before
     private val originals = ConcurrentHashMap<UUID, Pair<Float, Float>>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        originals[target.uniqueId] = target.walkSpeed to target.flySpeed
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        originals[target.uuid] = target.walkSpeed to target.flySpeed
         addTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s speed will now change at random")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s speed is back to normal")
             .put("player", target.name)
             .toString()
 
     // the speeds are saved with the player, so they have to be put back even when they're leaving
-    override fun onRemovePlayer(player: Player, reason: String) {
-        originals.remove(player.uniqueId)?.let { [walk, fly] ->
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        originals.remove(player.uuid)?.let { [walk, fly] ->
             player.walkSpeed = walk
             player.flySpeed = fly
         }
     }
 
-    private fun randomize(player: Player) {
+    private fun randomize(player: RbPlayer) {
         player.walkSpeed = MathUtil.random(MIN_WALK, MAX_WALK)
         player.flySpeed = MathUtil.random(MIN_FLY, MAX_FLY)
     }

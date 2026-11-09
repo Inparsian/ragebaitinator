@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -32,20 +33,20 @@ import java.util.concurrent.ConcurrentHashMap
 class Uwu : BaseChatTroll() {
     private val chances = ConcurrentHashMap<UUID, Double>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        chances[target.uniqueId] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        chances[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in UwUspeak")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can speak like a normal person again")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        chances.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        chances.remove(player.uuid)
     }
 
     override fun transform(player: Player, message: String): String

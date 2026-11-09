@@ -9,7 +9,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDa
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
@@ -18,10 +17,10 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
-import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.impl.troll.toggle.Potato
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
 
 object PlayerUtil {
@@ -29,10 +28,12 @@ object PlayerUtil {
     // that nullifies player damage until the server is restarted.
     const val MAX_POSSIBLE_DAMAGE: Double = 170_141_173_319_264_430_000_000_000_000_000_000_000.0
 
-    fun inVoid(player: Player, offset: Double): Boolean = player.location.y <= downHeightLimit + offset
-    fun inVoid(player: Player): Boolean = player.location.y <= downHeightLimit
+    fun inVoid(player: Player, offset: Double = 0.0): Boolean = inVoid(player.rb, offset)
+    fun inVoid(player: RbPlayer, offset: Double = 0.0): Boolean = player.location.y <= downHeightLimit + offset
 
-    fun getEnabledTrolls(player: Player): MutableList<String> {
+    fun getEnabledTrolls(player: Player): MutableList<String> = getEnabledTrolls(player.rb)
+
+    fun getEnabledTrolls(player: RbPlayer): MutableList<String> {
         val enabled: MutableList<String> = mutableListOf()
         for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
@@ -40,30 +41,6 @@ object PlayerUtil {
                 enabled.add(info.name)
         }
         return enabled
-    }
-
-    // using these methods will work even with active trolls that transform the
-    // player into, say, a potato
-    fun getVelocity(player: Player): Vector {
-        val potato = CommandManager.getCommand("potato") as? Potato
-        if (potato != null && potato.potatoes.containsKey(player.uniqueId))
-            return potato.potatoes[player.uniqueId]!!.first.velocity
-        return player.velocity
-    }
-
-    fun setVelocity(player: Player, velocity: Vector) {
-        val potato = CommandManager.getCommand("potato") as? Potato
-        if (potato != null && potato.potatoes.containsKey(player.uniqueId)) {
-            potato.potatoes[player.uniqueId]!!.first.velocity = velocity
-            return
-        }
-        player.setVelocity(velocity)
-    }
-
-    fun teleportRetainVelocity(player: Player, location: Location) {
-        val velocity = getVelocity(player)
-        player.teleport(location)
-        setVelocity(player, velocity)
     }
 
     fun getHead(name: String): ItemStack {
@@ -137,7 +114,8 @@ object PlayerUtil {
     }
 
     // my method of "damaging" players that bypasses creative, godmode, etc. and has only a one-tick cooldown
-    fun packetDamage(player: Player, damage: Double, local: Boolean) {
+    fun packetDamage(rbPlayer: RbPlayer, damage: Double, local: Boolean) {
+        val player = rbPlayer.bukkit ?: return
         if (player.health <= 0)
             return
         val fatal = player.health - damage <= 0
@@ -153,9 +131,9 @@ object PlayerUtil {
             )
 
             if (local)
-                PacketEvents.getAPI().playerManager.sendPacket(player, damageEventPacket)
+                rbPlayer.sendPacket(damageEventPacket)
             else player.world.players.forEach { p ->
-                PacketEvents.getAPI().playerManager.sendPacket(p, damageEventPacket)
+                p.rb.sendPacket(damageEventPacket)
             }
         } else {
             // the notchian server sends both animation & entity status packets
@@ -169,18 +147,15 @@ object PlayerUtil {
             // entity status 2 & 3 do play the hurt/death sounds, but only for the player being damaged
             if (!local)
                 for (p in Bukkit.getOnlinePlayers()) {
-                    if (p == player) continue
+                    if (p.uniqueId == rbPlayer.uuid) continue
 
                     p.playSound(player.location, "entity.player.${if (fatal) "death" else "hurt"}", 1f, 1f)
                 }
 
-            if (local) {
-                PacketEvents.getAPI().getPlayerManager().sendPacket(player, animationPacket)
-                PacketEvents.getAPI().getPlayerManager().sendPacket(player, statusPacket)
-            } else player.world.players.forEach { p ->
-                PacketEvents.getAPI().getPlayerManager().sendPacket(p, statusPacket)
-                PacketEvents.getAPI().getPlayerManager().sendPacket(p, animationPacket)
-            }
+            if (local)
+                rbPlayer.sendPacket(animationPacket, statusPacket)
+            else
+                player.world.players.forEach { p -> p.rb.sendPacket(statusPacket, animationPacket) }
         }
     }
 }

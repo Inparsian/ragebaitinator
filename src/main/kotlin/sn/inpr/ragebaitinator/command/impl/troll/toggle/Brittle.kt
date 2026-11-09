@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
@@ -23,12 +24,12 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     ]
 )
 class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now die next time they take damage")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer die next time they take damage")
             .put("player", target.name)
             .toString()

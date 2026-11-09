@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation.EntityAnimationType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityHeadLook
@@ -11,10 +10,11 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.IronGolem
 import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -37,13 +37,13 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Exorcist : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
             addFlag(target, "local")
 
         addTaskRandomTimer(target, {
             for (entity in LocationUtil.getEntitiesWithinRadius(target.location, 64.0)) {
-                if (entity == target || entity !is LivingEntity || entity is ArmorStand)
+                if (entity == target.bukkit || entity !is LivingEntity || entity is ArmorStand)
                     continue
 
                 val status: Int? = when(entity) {
@@ -55,22 +55,16 @@ class Exorcist : BaseToggleTroll() {
                     WrapperPlayServerEntityStatus(entity.entityId, status)
                 else
                     WrapperPlayServerEntityAnimation(entity.entityId, EntityAnimationType.SWING_MAIN_ARM)
-
                 val look = WrapperPlayServerEntityRotation(entity.entityId, MathUtil.random(0f, 255f), MathUtil.random(0f, 255f), entity.isOnGround)
                 val head = WrapperPlayServerEntityHeadLook(entity.entityId, MathUtil.random(0f, 255f))
 
                 if (hasFlag(target, "local")) {
-                    PacketEvents.getAPI().playerManager.sendPacket(target, animation)
-                    PacketEvents.getAPI().playerManager.sendPacket(target, look)
-                    PacketEvents.getAPI().playerManager.sendPacket(target, head)
+                    target.sendPacket(animation, look, head)
                 } else for (player in target.world.players) {
                     // This entity should be within 64 blocks from *this* player
                     if (entity.location.distanceSquared(player.location) > 64.0 * 64.0)
                         continue
-
-                    PacketEvents.getAPI().playerManager.sendPacket(player, animation)
-                    PacketEvents.getAPI().playerManager.sendPacket(player, look)
-                    PacketEvents.getAPI().playerManager.sendPacket(player, head)
+                    player.rb.sendPacket(animation, look, head)
                 }
             }
         }, 0, 1, 3, true)
@@ -80,7 +74,7 @@ class Exorcist : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
         return placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out")
             .put("player", target.name)
             .toString()

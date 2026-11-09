@@ -7,8 +7,9 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "repel",
@@ -23,11 +24,11 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     ]
 )
 class Repel : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         addTaskTimer(target, {
             val entities = LocationUtil.getEntitiesWithinRadius(target.location, 10.0)
             for (entity in entities) {
-                if (entity == target) continue
+                if (entity == target.bukkit) continue
                 if (entity is Player || entity is Animals) {
                     val distance = target.location.distance(entity.location)
                     val velocity = entity.location.toVector().subtract(target.location.toVector())
@@ -39,7 +40,7 @@ class Repel : BaseToggleTroll() {
                     velocity.z = velocity.z.coerceAtMost(5.0)
                     if (distance < 6 && LocationUtil.isFinite(velocity)) {
                         if (entity is Player)
-                            PlayerUtil.setVelocity(entity, velocity)
+                            entity.rb.velocity = velocity
                         else
                             entity.velocity = velocity
                     }
@@ -52,7 +53,7 @@ class Repel : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%")
             .put("player", target.name)
             .toString()

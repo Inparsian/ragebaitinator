@@ -2,12 +2,12 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerExpChangeEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerExpChangeSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -32,22 +32,22 @@ import java.util.concurrent.ConcurrentHashMap
 class Taxman : BaseToggleTroll(), PlayerExpChangeSubscriber {
     private val rates = ConcurrentHashMap<UUID, Double>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val rate = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
-        rates[target.uniqueId] = rate
+        rates[target.uuid] = rate
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now pays %c1%%rate% %c2%income tax on all XP")
             .put("player", target.name)
             .put("rate", "${(rate * 100).toInt()}%")
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been audited and no longer pays XP tax")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        rates.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        rates.remove(player.uuid)
     }
 
     override fun onPlayerExpChange(event: PlayerExpChangeEvent) {

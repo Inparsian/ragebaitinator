@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "snowballfight",
@@ -23,12 +24,12 @@ import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
     ]
 )
 class SnowballFight : BaseToggleTroll(), EntityShootBowSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now reminiscing about their Christmas childhood")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to shoot arrows again")
             .put("player", target.name)
             .toString()

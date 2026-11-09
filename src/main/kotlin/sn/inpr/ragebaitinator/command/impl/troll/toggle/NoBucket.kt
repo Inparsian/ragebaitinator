@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerBucketFillEvent
 import sn.inpr.ragebaitinator.Main.Companion.language
@@ -12,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerBucketEmptySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerBucketFillSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "nobucket",
@@ -38,7 +38,7 @@ import sn.inpr.ragebaitinator.type.Placeholders
     ]
 )
 class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFillSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val empty = args.getOrNull(2)?.toBooleanStrictOrNull() ?: true
         val fill = args.getOrNull(3)?.toBooleanStrictOrNull() ?: true
 
@@ -46,24 +46,24 @@ class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFil
             removePlayer(target)
             Placeholders(language.bothFalse).toString()
         } else {
-            if (empty) addFlag(target.uniqueId, "empty")
-            if (fill) addFlag(target.uniqueId, "fill")
+            if (empty) addFlag(target, "empty")
+            if (fill) addFlag(target, "fill")
             placeholdersOr("init", "%prefix% %c1%%player% %c2%is no longer able to use buckets")
                 .put("player", target.name)
                 .toString()
         }
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to use buckets")
             .put("player", target.name)
             .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) {
-        event.cancelIf(hasFlag(event.player.uniqueId, "empty"))
+        event.cancelIf(hasFlag(event.player, "empty"))
     }
 
     override fun onPlayerBucketFill(event: PlayerBucketFillEvent) {
-        event.cancelIf(hasFlag(event.player.uniqueId, "fill"))
+        event.cancelIf(hasFlag(event.player, "fill"))
     }
 }

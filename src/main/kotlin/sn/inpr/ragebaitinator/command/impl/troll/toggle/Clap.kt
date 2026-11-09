@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
 
 @CommandInfo(
@@ -22,12 +23,12 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     incompatible = [ "haxorman", "uwu", "oink", "garble", "mock", "leet", "backwards", "yell", "censor" ]
 )
 class Clap : BaseChatTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%now gets applause between every word")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%no longer gets applause between words")
             .put("player", target.name)
             .toString()

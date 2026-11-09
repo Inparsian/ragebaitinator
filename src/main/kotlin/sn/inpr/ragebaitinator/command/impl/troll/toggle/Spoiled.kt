@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
@@ -10,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "spoiled",
@@ -30,7 +30,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
     ]
 )
 class Spoiled : BaseToggleTroll(), PlayerItemConsumeSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         if (persistent)
             addFlag(target, "persistent")
@@ -42,7 +42,7 @@ class Spoiled : BaseToggleTroll(), PlayerItemConsumeSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The next food %c1%%player% %c2%eats will no longer be spoiled")
             .put("player", target.name)
             .toString()

@@ -6,6 +6,7 @@ import org.bukkit.entity.*
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 
@@ -38,14 +39,14 @@ class Bomb : BaseToggleTroll() {
     )
     val carpetBombOperations: MutableMap<UUID, Class<out Projectile>> = mutableMapOf()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val type: Class<out Projectile> = if (args.size > 2) {
             types.firstOrNull { it.simpleName.equals(args[2], ignoreCase = true) } ?: types.first()
         } else {
             Arrow::class.java
         }
 
-        carpetBombOperations[target.uniqueId] = type
+        carpetBombOperations[target.uuid] = type
 
         addTaskTimer(target, {
             val yaw = MathUtil.random(0.0, 360.0)
@@ -68,9 +69,9 @@ class Bomb : BaseToggleTroll() {
         }
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
         val fallback = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being carpet bombed").put("player", target.name).toString()
-        val type = carpetBombOperations.remove(target.uniqueId) ?: return fallback
+        val type = carpetBombOperations.remove(target.uuid) ?: return fallback
         return when(type) {
             Arrow::class.java -> placeholdersOr("deinitArrow", "%prefix% %c1%%player% %c2%is no longer a pincushion").put("player", target.name).toString()
             Snowball::class.java -> placeholdersOr("deinitSnowball", "%prefix% %c1%%player% %c2%is no longer in a snow storm").put("player", target.name).toString()
@@ -79,7 +80,7 @@ class Bomb : BaseToggleTroll() {
         }
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        carpetBombOperations.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        carpetBombOperations.remove(player.uuid)
     }
 }

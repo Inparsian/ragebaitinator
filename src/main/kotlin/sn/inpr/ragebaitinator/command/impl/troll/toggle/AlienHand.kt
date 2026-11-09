@@ -6,10 +6,11 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -31,22 +32,21 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class AlienHand : BaseToggleTroll() {
-    fun swing(target: Player, showFor: Player) {
+    fun swing(target: RbPlayer, showFor: RbPlayer) {
         // dual wielding was introduced in 1.9. get if the player has an item in their offhand
         // if they do, swing their offhand too
         val offHand = PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_9)
-                && target.inventory.itemInOffHand.type != Material.AIR
+                && target.itemInOffHand.type != Material.AIR
 
         val animation = if (offHand && MathUtil.randomBool())
             WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_OFF_HAND
         else
             WrapperPlayServerEntityAnimation.EntityAnimationType.SWING_MAIN_ARM
 
-        val packet = WrapperPlayServerEntityAnimation(target.entityId, animation)
-        PacketEvents.getAPI().playerManager.sendPacket(showFor, packet)
+        showFor.sendPacket(WrapperPlayServerEntityAnimation(target.entityId, animation))
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
             addFlag(target, "local")
 
@@ -54,7 +54,7 @@ class AlienHand : BaseToggleTroll() {
             if (hasFlag(target, "local"))
                 swing(target, target)
             else
-                Bukkit.getOnlinePlayers().forEach { player -> swing(target, player) }
+                Bukkit.getOnlinePlayers().forEach { player -> swing(target, player.rb) }
         }, MathUtil.random(40L, 60L), 120, 160, true)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has Alien Hand Syndrome")
@@ -62,7 +62,7 @@ class AlienHand : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
         return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of Alien Hand Syndrome")
             .put("player", target.name)
             .toString()

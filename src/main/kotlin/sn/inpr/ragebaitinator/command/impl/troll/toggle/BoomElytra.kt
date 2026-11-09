@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "boomelytra",
@@ -34,7 +35,7 @@ import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
     ]
 )
 class BoomElytra : BaseBoomTroll(), EntityToggleGlideSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         addBoomFlags(target, args)
 
@@ -45,7 +46,7 @@ class BoomElytra : BaseBoomTroll(), EntityToggleGlideSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they start gliding")
             .put("player", target.name)
             .toString()

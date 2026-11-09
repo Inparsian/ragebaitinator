@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDeathEvent
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
@@ -10,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDeathSubscriber
 import sn.inpr.ragebaitinator.type.EntitySnapshot
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "hydra",
@@ -24,12 +24,12 @@ import sn.inpr.ragebaitinator.type.EntitySnapshot
     ]
 )
 class Hydra : BaseToggleTroll(), EntityDeathSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt now split into two")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Any mob %c1%%player% %c2%kills shalt no longer split into two")
             .put("player", target.name)
             .toString()

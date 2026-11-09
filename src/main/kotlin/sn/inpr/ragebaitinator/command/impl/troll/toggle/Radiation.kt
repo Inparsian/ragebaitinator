@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.database.Blocks
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.Reflection
@@ -78,9 +79,9 @@ class Radiation : BaseToggleTroll() {
         val leaves = Material.entries.filter { it.name.endsWith("LEAVES") }
     }
 
-    private fun rollbackOwner(player: Player) = "radiation:${player.uniqueId}"
+    private fun rollbackOwner(player: RbPlayer) = "radiation:${player.uuid}"
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBoolean() ?: true)
             addFlag(target, "players")
         if (args.getOrNull(3)?.toBoolean() ?: true)
@@ -108,7 +109,7 @@ class Radiation : BaseToggleTroll() {
 
             if (hasFlag(target, "players") || hasFlag(target, "animals")) {
                 for (entity in LocationUtil.getEntitiesWithinRadius(target.location, 5.0)) {
-                    if (entity == target || entity !is LivingEntity)
+                    if (entity == target.bukkit || entity !is LivingEntity)
                         continue
 
                     val damage = MathUtil.random(1.0, 2.0)
@@ -126,10 +127,10 @@ class Radiation : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) = Blocks.release(rollbackOwner(player))
+    override fun onRemovePlayer(player: RbPlayer, reason: String) = Blocks.release(rollbackOwner(player))
 }

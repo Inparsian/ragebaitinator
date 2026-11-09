@@ -10,6 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.ProjectileHitSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -31,9 +32,9 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
-    private val bludgers: MutableMap<Player, Projectile> = mutableMapOf()
+    private val bludgers: MutableMap<RbPlayer, Projectile> = mutableMapOf()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val fromShooter = args.getOrNull(2)?.toBoolean() ?: true
         val bludgerLocation = if (sender is Player && fromShooter)
             sender.eyeLocation.clone().add(sender.eyeLocation.direction.multiply(2))
@@ -69,7 +70,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
                 if (bludger.location.distance(plusOne) <= 0.3)
                     kaboom(target, bludger)
             } else {
-                removeTask(target.uniqueId)
+                removeTask(target)
             }
         }, 0, 1, true)
 
@@ -78,16 +79,16 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         bludgers.remove(player)?.remove()
     }
 
-    fun kaboom(target: Player, projectile: Projectile) {
+    fun kaboom(target: RbPlayer, projectile: Projectile) {
         LocationUtil.createSafeExplosion(projectile.location, 4.0f)
         removePlayer(target)
     }

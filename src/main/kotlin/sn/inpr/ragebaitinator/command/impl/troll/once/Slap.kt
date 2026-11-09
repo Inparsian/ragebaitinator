@@ -7,9 +7,9 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil.vectorRelativeYaw
 import sn.inpr.ragebaitinator.utility.MathUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
 
 @CommandInfo(
     name = "slap",
@@ -48,7 +48,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
     ]
 )
 class Slap : BaseTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val power: Double = (args.getOrNull(2)?.toDoubleOrNull() ?: 2.0).coerceIn(0.0, 5.0)
         val direction = args.getOrNull(3) ?: "backward"
         val slapVector: Vector = when (direction) {
@@ -63,7 +63,7 @@ class Slap : BaseTroll() {
             "forward", "f" -> vectorRelativeYaw(target, 0, power)
             "left", "l" -> vectorRelativeYaw(target, -90, power)
             "right", "r" -> vectorRelativeYaw(target, 90, power)
-            "sender", "me" -> vectorRelativeYaw(sender as? Player ?: target, if (sender is Player) 0 else 180, power)
+            "sender", "me" -> if (sender is Player) vectorRelativeYaw(sender, 0, power) else vectorRelativeYaw(target, 180, power)
             "crosshair", "cross", "ch", "c" -> if (sender is Player) {
                 val block = sender.getTargetBlock(null, 100).location.toVector()
                 block.subtract(target.location.toVector()).normalize().multiply(power)
@@ -83,7 +83,7 @@ class Slap : BaseTroll() {
             else -> vectorRelativeYaw(target, 180, power)
         }
 
-        setVelocity(target, slapVector.setY(power * 0.4))
+        target.velocity = slapVector.setY(power * 0.4)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been slapped by some vengeful spirit")
             .put("player", target.name)

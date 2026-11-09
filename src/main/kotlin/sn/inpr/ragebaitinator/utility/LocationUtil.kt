@@ -5,6 +5,7 @@ import com.github.retrooper.packetevents.manager.server.ServerVersion
 import org.bukkit.Location
 import org.bukkit.entity.Entity
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil.rcos
 import sn.inpr.ragebaitinator.utility.MathUtil.rsin
 import kotlin.math.floor
@@ -16,10 +17,19 @@ object LocationUtil {
     // The max altitude a player can be teleported to. Any higher than this will cause them to be rubber-banded back
     const val MAX_PLAYER_ALTITUDE = 20_000_000.0
 
-    fun vectorRelativeYaw(entity: Entity, radians: Int, distance: Double): Vector {
-        val yaw: Double = entity.location.yaw.toDouble() + radians
+    fun vectorRelativeYaw(player: RbPlayer, radians: Int, distance: Double): Vector
+        = vectorRelativeYaw(player.location.yaw, radians, distance)
+
+    fun vectorRelativeYaw(entity: Entity, radians: Int, distance: Double): Vector
+        = vectorRelativeYaw(entity.location.yaw, radians, distance)
+
+    private fun vectorRelativeYaw(baseYaw: Float, radians: Int, distance: Double): Vector {
+        val yaw: Double = baseYaw.toDouble() + radians
         return Vector(-rsin(yaw) * distance, 0.0, rcos(yaw) * distance)
     }
+
+    fun locationRelativeYaw(player: RbPlayer, radians: Int, distance: Double): Location
+        = vectorRelativeYaw(player, radians, distance).toLocation(player.world).add(player.location)
 
     fun locationRelativeYaw(entity: Entity, radians: Int, distance: Double): Location
         = vectorRelativeYaw(entity, radians, distance).toLocation(entity.world).add(entity.location)

@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
@@ -8,14 +7,13 @@ import com.github.retrooper.packetevents.wrapper.play.server.*
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "deserted",
@@ -30,12 +28,11 @@ import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
     ]
 )
 class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val others = Bukkit.getOnlinePlayers().filter { it != target }
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        val others = target.others
         if (others.isNotEmpty()) {
-            val api = PacketEvents.getAPI().playerManager
-            api.sendPacket(target, WrapperPlayServerDestroyEntities(*others.map { it.entityId }.toIntArray()))
-            api.sendPacket(target, WrapperPlayServerPlayerInfoRemove(others.map { it.uniqueId }))
+            target.sendPacket(WrapperPlayServerDestroyEntities(*others.mapNotNull { it.bukkit?.entityId }.toIntArray()))
+            target.sendPacket(WrapperPlayServerPlayerInfoRemove(others.map { it.uuid }))
         }
 
         return placeholdersOr("init", "%prefix% %c2%Everyone has vanished from %c1%%player%%c2%'s world")
@@ -43,19 +40,18 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Everyone is back in %c1%%player%%c2%'s world")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         if (reason == "logout" || !player.isOnline)
             return
 
-        val plugin = Main.instance()
-        for (other in Bukkit.getOnlinePlayers().filter { it != player }) {
-            player.hidePlayer(plugin, other)
-            player.showPlayer(plugin, other)
+        for (other in player.others) {
+            player.hidePlayer(other)
+            player.showPlayer(other)
         }
     }
 

@@ -3,7 +3,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.entity.Squid
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.persistence.PersistentDataType
@@ -13,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -35,7 +35,7 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
     fun mark(entity: Entity) = entity.persistentDataContainer.set( markKey, PersistentDataType.BYTE, 1)
     fun isMarked(entity: Entity) = entity.persistentDataContainer.has(markKey, PersistentDataType.BYTE)
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         addTaskTimer(target, {
             val distance = MathUtil.random(3.0, 5.0)
             val yaw = MathUtil.random(0.0, 360.0)
@@ -50,7 +50,7 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer in squid rain")
             .put("player", target.name)
             .toString()

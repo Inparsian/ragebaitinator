@@ -7,6 +7,8 @@ import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.database.Blocks
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 
 /**
  * A toggle troll that turns a block into lava whenever a certain event happens. The lava is rolled back after a
@@ -17,9 +19,9 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
         const val LAVA_LIFETIME_TICKS = 200L
     }
 
-    private fun rollbackOwner(player: Player) = "${info.name}:${player.uniqueId}"
+    private fun rollbackOwner(player: RbPlayer) = "${info.name}:${player.uuid}"
 
-    fun addPersistentFlag(target: Player, args: Array<out String>) {
+    fun addPersistentFlag(target: RbPlayer, args: Array<out String>) {
         if (args.getOrNull(2).toBoolean())
             addFlag(target, "persistent")
     }
@@ -28,7 +30,9 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
      * Turns [block] into lava once the event that's being handled is over, so that the block it replaces is the one
      * that's actually there by then.
      */
-    fun lavafy(player: Player, block: Block) {
+    fun lavafy(player: Player, block: Block): Unit = lavafy(player.rb, block)
+
+    fun lavafy(player: RbPlayer, block: Block) {
         if (!hasPlayer(player))
             return
 
@@ -44,7 +48,7 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
 
     // anything still lava when they leave or the plugin stops goes back right away. the rest has its own timer, which
     // is why turning this off doesn't touch it
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         if (reason == "logout" || reason == "cleared")
             Blocks.release(rollbackOwner(player))
     }

@@ -4,12 +4,13 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -44,25 +45,25 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
 
     private val fakes = ConcurrentHashMap<UUID, LinkedHashSet<Block>>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        fakes[target.uniqueId] = linkedSetOf()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        fakes[target.uuid] = linkedSetOf()
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now find fake diamonds while mining")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer find fake diamonds")
             .put("player", target.name)
             .toString()
 
-    private fun restore(player: Player, block: Block) {
+    private fun restore(player: RbPlayer, block: Block) {
         if (player.isOnline && player.world == block.world)
             player.sendBlockChange(block.location, block.blockData)
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        fakes.remove(player.uniqueId)?.forEach { restore(player, it) }
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        fakes.remove(player.uuid)?.forEach { restore(player, it) }
     }
 
     private fun vein(center: Block): List<Block> {
@@ -110,7 +111,7 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
             while (tracked.size > MAX_TRACKED) {
                 val oldest = tracked.first()
                 tracked.remove(oldest)
-                restore(player, oldest)
+                restore(player.rb, oldest)
             }
             return
         }

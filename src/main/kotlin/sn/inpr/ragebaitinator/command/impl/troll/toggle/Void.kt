@@ -12,6 +12,8 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
 import java.util.*
 
@@ -31,29 +33,29 @@ import java.util.*
 class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
     private val locations = mutableMapOf<UUID, Location>()
 
-    fun get65536(player: Player): Location {
+    fun get65536(player: RbPlayer): Location {
         val location = player.location.clone()
         location.y = -65536.0
         return location
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        locations[target.uniqueId] = target.location
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        locations[target.uuid] = target.location
         target.teleport(get65536(target))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
         return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned from the void")
             .put("player", target.name)
             .toString()
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         player.fallDistance = 0f // prevents an oopsie
-        locations.remove(player.uniqueId)?.let { player.teleport(it) }
+        locations.remove(player.uuid)?.let { player.teleport(it) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
@@ -65,6 +67,6 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
         if (event is PlayerTeleportEvent)
             event.cancelIf(hasPlayer(event.player) && inVoid(event.player, -2.0))
         else if (hasPlayer(event.player) && !inVoid(event.player, -2.0))
-            event.player.teleport(get65536(event.player))
+            event.player.teleport(get65536(event.player.rb))
     }
 }

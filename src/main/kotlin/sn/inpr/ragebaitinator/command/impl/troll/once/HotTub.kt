@@ -6,7 +6,6 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import sn.inpr.ragebaitinator.command.def.BaseTroll
@@ -16,6 +15,8 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
 
@@ -41,9 +42,9 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             Material.LAVA
     }
 
-    private fun rollbackOwner(player: Player) = "hottub:${player.uniqueId}"
+    private fun rollbackOwner(player: RbPlayer) = "hottub:${player.uuid}"
 
-    override fun getConditions(target: Player)
+    override fun getConditions(target: RbPlayer)
         = Conditions().notDead(target).notInVoid(target)
 
     fun getBowl(location: Location): List<Block> {
@@ -68,7 +69,7 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return by3
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val feet = target.location.add(0.0, -1.0, 0.0)
         val bowl = getBowl(feet)
         val lava = get3x3(feet)
@@ -84,6 +85,6 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             .toString()
     }
 
-    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))
-    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity))
+    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player.rb))
+    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity.rb))
 }

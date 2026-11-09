@@ -16,6 +16,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -53,10 +54,10 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
 
     private val pending = ConcurrentHashMap<UUID, ArrayDeque<Change>>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val interval = (args.getOrNull(2)?.toIntOrNull() ?: 40).coerceIn(1, 1200).toLong()
         val queue = ArrayDeque<Change>()
-        pending[target.uniqueId] = queue
+        pending[target.uuid] = queue
 
         addTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone")
@@ -64,15 +65,15 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone")
             .put("player", target.name)
             .toString()
 
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they
     // get what those blocks would have dropped instead
-    override fun onRemovePlayer(player: Player, reason: String) {
-        val queue = pending.remove(player.uniqueId) ?: return
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        val queue = pending.remove(player.uuid) ?: return
         for (change in queue)
             release(change)
     }

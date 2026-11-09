@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerToggleSneakSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -40,20 +41,20 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
 
     private val powers = ConcurrentHashMap<UUID, Double>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        powers[target.uniqueId] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.6
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        powers[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.6
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        powers.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        powers.remove(player.uuid)
     }
 
     // finds the closest column nearby that's lava, or a drop of at least HOLE_DEPTH blocks, and returns the direction to it

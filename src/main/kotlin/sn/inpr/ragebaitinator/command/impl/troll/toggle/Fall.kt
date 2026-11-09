@@ -9,7 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
-import sn.inpr.ragebaitinator.utility.PlayerUtil
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 
 @CommandInfo(
@@ -36,17 +36,17 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
         return location.clone().apply { y = highestY.toDouble() }
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val highest = getHighestLocation(target.location) ?: return "&cCould not find a location to fall from"
-        locations[target.uniqueId] = highest.add(0.0, 20.0, 0.0)
+        locations[target.uuid] = highest.add(0.0, 20.0, 0.0)
         addTaskTimer(target, {
-            val newLocation = locations[target.uniqueId] ?: return@addTaskTimer
+            val newLocation = locations[target.uuid] ?: return@addTaskTimer
             val currentLocation = target.location
             if (currentLocation.world != newLocation.world || currentLocation.y < newLocation.y - 15 || target.isOnGround) {
                 val highest = getHighestLocation(currentLocation) ?: return@addTaskTimer
                 val destination = highest.add(0.0, 20.0, 0.0).setDirection(currentLocation.direction)
-                locations[target.uniqueId] = destination
-                PlayerUtil.teleportRetainVelocity(target, destination)
+                locations[target.uuid] = destination
+                target.teleportRetainVelocity(destination)
             }
         }, 0, 1, true)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever")
@@ -54,11 +54,11 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        locations.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        locations.remove(player.uuid)
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been freed from the falling curse")
             .put("player", target.name)
             .toString()

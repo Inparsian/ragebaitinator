@@ -1,13 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.once
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChangeGameState
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "spook",
@@ -19,9 +18,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
     ]
 )
 class Spook : BaseTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val packet = WrapperPlayServerChangeGameState(10, 0f)
-        PacketEvents.getAPI().playerManager.sendPacket(target, packet)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        target.sendPacket(WrapperPlayServerChangeGameState(WrapperPlayServerChangeGameState.Reason.PLAY_ELDER_GUARDIAN_MOB_APPEARANCE, 0f))
         return placeholdersOr("init", "%prefix% %c2%Spooked %c1%%player%")
             .put("player", target.name)
             .toString()

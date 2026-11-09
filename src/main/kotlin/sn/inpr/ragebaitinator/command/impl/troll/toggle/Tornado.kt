@@ -4,15 +4,13 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
 import kotlin.math.pow
 
@@ -37,7 +35,7 @@ import kotlin.math.pow
 class Tornado : BaseToggleTroll() {
     private val twisters: MutableMap<UUID, Twister> = mutableMapOf()
 
-    private class Twister(val chase: Entity, var location: Location, val strength: Int) {
+    private class Twister(val chase: RbPlayer, var location: Location, val strength: Int) {
         var axis: Int = 0
         val pickupPoint: Location get() = location.clone().add(0.0, strength.toDouble() * 2, 0.0)
 
@@ -95,10 +93,7 @@ class Tornado : BaseToggleTroll() {
                 velocity.y = velocity.y.coerceIn(-5.0, 5.0)
                 velocity.z = velocity.z.coerceIn(-5.0, 5.0)
 
-                if (chase is Player)
-                    PlayerUtil.setVelocity(chase, velocity)
-                else
-                    chase.velocity = velocity
+                chase.velocity = velocity
             }
         }
 
@@ -110,28 +105,28 @@ class Tornado : BaseToggleTroll() {
         }
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val strength = (args.getOrNull(2)?.toIntOrNull() ?: 3).coerceIn(1, 10)
         val yaw = MathUtil.random(0.0, 360.0)
-        twisters[target.uniqueId] = Twister(target, target.location.clone().add(
+        twisters[target.uuid] = Twister(target, target.location.clone().add(
             MathUtil.rcos(yaw) * 10,
             0.0,
             MathUtil.rsin(yaw) * 10,
         ), strength)
 
-        addTaskTimer(target, { twisters[target.uniqueId]?.tick() }, 0, 1, true)
+        addTaskTimer(target, { twisters[target.uuid]?.tick() }, 0, 1, true)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        twisters.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        twisters.remove(player.uuid)
     }
 }

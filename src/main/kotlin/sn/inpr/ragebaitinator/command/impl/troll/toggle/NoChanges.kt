@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import sn.inpr.ragebaitinator.Main.Companion.language
@@ -12,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "nochanges",
@@ -38,7 +38,7 @@ import sn.inpr.ragebaitinator.type.Placeholders
     ]
 )
 class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val mine = args.getOrNull(2)?.toBooleanStrictOrNull() ?: true // literally screw the 'break' keyword
         val place = args.getOrNull(3)?.toBooleanStrictOrNull() ?: true
 
@@ -46,24 +46,24 @@ class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber 
             removePlayer(target)
             Placeholders(language.bothFalse).toString()
         } else {
-            if (mine) addFlag(target.uniqueId, "mine")
-            if (place) addFlag(target.uniqueId, "place")
+            if (mine) addFlag(target, "mine")
+            if (place) addFlag(target, "place")
             placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer make block changes")
                 .put("player", target.name)
                 .toString()
         }
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to make block changes")
             .put("player", target.name)
             .toString()
 
     override fun onBlockBreak(event: BlockBreakEvent) {
-        event.cancelIf(hasFlag(event.player.uniqueId, "mine"))
+        event.cancelIf(hasFlag(event.player, "mine"))
     }
     
     override fun onBlockPlace(event: BlockPlaceEvent) {
-        event.cancelIf(hasFlag(event.player.uniqueId, "place"))
+        event.cancelIf(hasFlag(event.player, "place"))
     }
 }

@@ -20,6 +20,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 
@@ -50,35 +52,35 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
 
     private val asleep: MutableSet<UUID> = Collections.newSetFromMap(java.util.concurrent.ConcurrentHashMap())
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         scheduleSleep(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now randomly fall asleep")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now wide awake")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         wake(player)
     }
 
-    private fun scheduleSleep(player: Player, delay: Long = MathUtil.random(MIN_AWAKE, MAX_AWAKE)) {
+    private fun scheduleSleep(player: RbPlayer, delay: Long = MathUtil.random(MIN_AWAKE, MAX_AWAKE)) {
         addTask(player, { fallAsleep(player) }, delay)
     }
 
-    private fun fallAsleep(player: Player) {
+    private fun fallAsleep(player: RbPlayer) {
         val ground = player.location.subtract(0.0, 0.1, 0.0).block.type.isSolid
         // lying down midair or on a horse wouldn't look right
-        if (!player.isOnline || !ground || player.isDead || player.isInsideVehicle || player.isGliding || player.isSwimming) {
+        if (player.isDead || !ground || player.isInsideVehicle || player.isGliding || player.isSwimming) {
             scheduleSleep(player, 20)
             return
         }
 
-        asleep.add(player.uniqueId)
+        asleep.add(player.uuid)
         broadcast(player, true)
         addTask(player, {
             wake(player)
@@ -86,15 +88,15 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         }, MathUtil.random(MIN_ASLEEP, MAX_ASLEEP))
     }
 
-    private fun wake(player: Player): Boolean {
-        if (!asleep.remove(player.uniqueId))
+    private fun wake(player: RbPlayer): Boolean {
+        if (!asleep.remove(player.uuid))
             return false
 
         broadcast(player, false)
         return true
     }
 
-    private fun currentPose(player: Player): EntityPose = when {
+    private fun currentPose(player: RbPlayer): EntityPose = when {
         player.isGliding -> EntityPose.FALL_FLYING
         player.isSwimming -> EntityPose.SWIMMING
         player.isSneaking -> EntityPose.CROUCHING
@@ -103,7 +105,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
 
     // the player is only asleep as far as clients are concerned, the server never puts them in a bed. a client works
     // out whether an entity is sleeping from the position of its bed, and the entity doesn't need a bed block there
-    private fun broadcast(player: Player, sleeping: Boolean) {
+    private fun broadcast(player: RbPlayer, sleeping: Boolean) {
         val location = player.location
         val bed = if (sleeping)
             Optional.of(Vector3i(location.blockX, location.blockY, location.blockZ))
@@ -119,7 +121,8 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         )
 
         val viewers = player.world.players.filter {
-            it == player || (it.canSee(player) && it.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
+            it.uniqueId == player.uuid
+                || (player.isVisibleTo(it) && it.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
         }
         for (viewer in viewers) {
             PacketEvents.getAPI().playerManager.sendPacket(viewer, metadata)
@@ -144,7 +147,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
     // getting hurt wakes anyone up
     override fun onEntityDamage(event: EntityDamageEvent) {
         val player = event.entity as? Player ?: return
-        if (!event.isCancelled && wake(player))
-            scheduleSleep(player)
+        if (!event.isCancelled && wake(player.rb))
+            scheduleSleep(player.rb)
     }
 }

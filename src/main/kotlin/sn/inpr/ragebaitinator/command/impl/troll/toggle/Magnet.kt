@@ -3,11 +3,11 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Enemy
-import org.bukkit.entity.Player
 import org.bukkit.entity.TNTPrimed
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -23,11 +23,11 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Magnet : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         addTaskTimer(target, {
             val entities = LocationUtil.getEntitiesWithinRadius(target.location, 30.0)
             for (entity in entities) {
-                if (entity == target) continue
+                if (entity == target.bukkit) continue
                 if (entity is Enemy || entity is TNTPrimed) {
                     val distance = target.location.distance(entity.location)
                     val velocity = target.location.toVector().subtract(entity.location.toVector())
@@ -46,7 +46,7 @@ class Magnet : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Unpleasant entities are no longer attracted to %c1%%player%")
             .put("player", target.name)
             .toString()

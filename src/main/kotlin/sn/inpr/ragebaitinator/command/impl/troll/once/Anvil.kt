@@ -5,7 +5,6 @@ import org.bukkit.Material
 import org.bukkit.Sound
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.FallingBlock
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.material.MaterialData
@@ -16,6 +15,8 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.EntityChangeBlockSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 
@@ -29,9 +30,9 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     ]
 )
 class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
-    private val anvils = mutableMapOf<FallingBlock, Player>()
+    private val anvils = mutableMapOf<FallingBlock, RbPlayer>()
 
-    fun pathObstructed(target: Player): Boolean {
+    fun pathObstructed(target: RbPlayer): Boolean {
         if (!Bukkit.isPrimaryThread() && !target.location.chunk.isLoaded)
             return true
         val anvilLocation = target.location.clone().add(0.0, 12.0, 0.0)
@@ -44,7 +45,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         return false
     }
 
-    override fun getConditions(target: Player) = Conditions()
+    override fun getConditions(target: RbPlayer) = Conditions()
         .notDead(target)
         .notInVoid(target)
         .put("An anvil must not already be falling on this player.", "anvilExists", anvils.containsValue(target))
@@ -57,7 +58,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         anvil.remove()
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val anvilLocation = LocationUtil.blockify(target.location.clone().add(0.0, 12.0, 0.0), true)
         @Suppress("DEPRECATION")
         val anvil: FallingBlock = target.world.getBlockAt(anvilLocation).world.spawnFallingBlock(anvilLocation, MaterialData(Material.ANVIL))
@@ -70,7 +71,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        event.cancelIf(anvils.containsValue(event.player) && event.from.distance(event.to ?: event.from) > 0)
+        event.cancelIf(anvils.containsValue(event.player.rb) && event.from.distance(event.to ?: event.from) > 0)
     }
 
     override fun onEntityChangeBlock(event: EntityChangeBlockEvent) {

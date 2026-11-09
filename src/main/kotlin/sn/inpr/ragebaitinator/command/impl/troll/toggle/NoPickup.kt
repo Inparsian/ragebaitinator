@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "nopickup",
@@ -22,12 +23,12 @@ import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
     ]
 )
 class NoPickup : BaseToggleTroll(), EntityPickupItemSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer pick up items")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now pick up items again")
             .put("player", target.name)
             .toString()

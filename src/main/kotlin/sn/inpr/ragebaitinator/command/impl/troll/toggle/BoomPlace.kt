@@ -2,12 +2,12 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockPlaceEvent
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "boomplace",
@@ -34,7 +34,7 @@ import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
     ]
 )
 class BoomPlace : BaseBoomTroll(), BlockPlaceSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         addBoomFlags(target, args)
 
@@ -45,7 +45,7 @@ class BoomPlace : BaseBoomTroll(), BlockPlaceSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The next block %c1%%player% %c2%places will no longer explode")
             .put("player", target.name)
             .toString()

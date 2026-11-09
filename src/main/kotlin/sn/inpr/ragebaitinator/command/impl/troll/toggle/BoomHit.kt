@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "boomhit",
@@ -35,7 +36,7 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
     ]
 )
 class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         addBoomFlags(target, args)
 
@@ -46,7 +47,7 @@ class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The next entity %c1%%player% %c2%hits will no longer explode")
             .put("player", target.name)
             .toString()

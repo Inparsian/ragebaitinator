@@ -1,13 +1,12 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerRotation
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -29,7 +28,7 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Derp : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val seconds = (args.getOrNull(2)?.toDoubleOrNull() ?: 2.0).coerceIn(0.1, 10.0)
         val period = (seconds * 20).toLong()
         addTaskTimer(target, { spasm(target) }, period, period)
@@ -38,15 +37,15 @@ class Derp : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s head has stopped spasming")
             .put("player", target.name)
             .toString()
 
-    private fun spasm(player: Player) {
+    private fun spasm(player: RbPlayer) {
         val yaw = MathUtil.random(0.0, 360.0)
         val pitch = MathUtil.random(-90.0, 90.0)
         // only their view moves, so it doesn't interfere with anything they're in the middle of
-        PacketEvents.getAPI().playerManager.sendPacket(player, WrapperPlayServerPlayerRotation(yaw.toFloat(), pitch.toFloat()))
+        player.sendPacket(WrapperPlayServerPlayerRotation(yaw.toFloat(), pitch.toFloat()))
     }
 }

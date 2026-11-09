@@ -22,6 +22,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -46,7 +47,7 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     private val wearers = ConcurrentHashMap.newKeySet<Int>()
     private fun pumpkin(): ItemStack = ItemStack.builder().type(ItemTypes.CARVED_PUMPKIN).amount(1).build()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         wearers.add(target.entityId)
         show(target, pumpkin())
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head")
@@ -54,25 +55,25 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         wearers.remove(player.entityId)
         if (player.isOnline && reason != "logout")
-            show(player, SpigotConversionUtil.fromBukkitItemStack(player.inventory.helmet ?: org.bukkit.inventory.ItemStack(Material.AIR)))
+            show(player, SpigotConversionUtil.fromBukkitItemStack(player.helmet ?: org.bukkit.inventory.ItemStack(Material.AIR)))
     }
 
-    private fun show(player: Player, helmet: ItemStack) {
+    private fun show(player: RbPlayer, helmet: ItemStack) {
         val api = PacketEvents.getAPI().playerManager
-        api.sendPacket(player, WrapperPlayServerSetPlayerInventory(HELMET_INVENTORY_SLOT, helmet))
+        player.sendPacket(WrapperPlayServerSetPlayerInventory(HELMET_INVENTORY_SLOT, helmet))
 
         val equipment = WrapperPlayServerEntityEquipment(player.entityId, listOf(Equipment(EquipmentSlot.HELMET, helmet)))
         val location = player.location
         for (viewer in player.world.players)
-            if (viewer != player && viewer.canSee(player) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
+            if (viewer.uniqueId != player.uuid && player.isVisibleTo(viewer) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
                 api.sendPacket(viewer, equipment)
     }
 

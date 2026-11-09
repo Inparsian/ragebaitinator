@@ -29,9 +29,8 @@ class Pardon : BaseCommand() {
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 var pardoned = 0
-                for (command in CommandManager.toggleTrolls) {
+                for (command in CommandManager.toggleTrolls)
                     if (command.removePlayer(target, "pardoned")) pardoned++
-                }
                 val placeholders = placeholdersOr("success", "%prefix% %c1%%amount% %c2%persistent troll(s) disabled for %c1%%player%")
                     .put("amount", pardoned.toString())
                     .put("player", target.name)

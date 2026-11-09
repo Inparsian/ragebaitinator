@@ -2,12 +2,12 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "boomeat",
@@ -34,7 +34,7 @@ import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
     ]
 )
 class BoomEat : BaseBoomTroll(), PlayerItemConsumeSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         addBoomFlags(target, args)
 
@@ -45,7 +45,7 @@ class BoomEat : BaseBoomTroll(), PlayerItemConsumeSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they eat something")
             .put("player", target.name)
             .toString()

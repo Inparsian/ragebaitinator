@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.FurnaceStartSmeltSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -38,20 +39,20 @@ class SlowCooker : BaseToggleTroll(), InventoryClickSubscriber, FurnaceStartSmel
     // how long each furnace that's been slowed down was supposed to take, for when it's let go
     private val originals = ConcurrentHashMap<Block, Int>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c2%The furnaces %c1%%player% %c2%uses will now take forever to cook")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The furnaces %c1%%player% %c2%uses cook normally again")
             .put("player", target.name)
             .toString()
 
     // whatever they were cooking carries on from where it got to
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         for ([block, owner] in owners.entries.toList()) {
-            if (owner != player.uniqueId)
+            if (owner != player.uuid)
                 continue
 
             owners.remove(block)

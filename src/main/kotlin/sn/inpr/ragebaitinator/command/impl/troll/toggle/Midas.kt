@@ -4,12 +4,12 @@ import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.TileState
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerMoveEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.floor
@@ -42,17 +42,17 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
     private val trails = ConcurrentHashMap<UUID, LinkedHashSet<Block>>()
     private val lastChecked = ConcurrentHashMap<UUID, Block>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
             addFlag(target, "local")
 
-        trails[target.uniqueId] = linkedSetOf()
+        trails[target.uuid] = linkedSetOf()
         return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold")
             .put("player", target.name)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The ground beneath %c1%%player% %c2%is no longer turning to gold")
             .put("player", target.name)
             .toString()
@@ -63,9 +63,9 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
         block.world.players.forEach { it.sendBlockChange(block.location, data) }
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        lastChecked.remove(player.uniqueId)
-        trails.remove(player.uniqueId)?.forEach(::restore)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        lastChecked.remove(player.uuid)
+        trails.remove(player.uuid)?.forEach(::restore)
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {

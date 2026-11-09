@@ -1,14 +1,13 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTimeUpdate
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -35,13 +34,13 @@ class Rewind : BaseToggleTroll() {
 
     private val times: MutableMap<UUID, RewindEntry> = mutableMapOf()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val originalOffset = target.playerTimeOffset
         val speed = args.getOrNull(2)?.toIntOrNull()?.coerceIn(-1500..1500) ?: 15
-        times[target.uniqueId] = RewindEntry(originalOffset, originalOffset, speed)
+        times[target.uuid] = RewindEntry(originalOffset, originalOffset, speed)
 
         addTaskTimer(target, {
-            val entry = times[target.uniqueId] ?: return@addTaskTimer
+            val entry = times[target.uuid] ?: return@addTaskTimer
             val dayOffset = if (entry.currentTime <= -target.world.fullTime) 24000 else 0
             val deducted = entry.currentTime + dayOffset - entry.speed
 
@@ -49,9 +48,8 @@ class Rewind : BaseToggleTroll() {
             // PlayOutUpdateTime packets update in the next client tick, but it's reverted after 20 ticks
             // so we use both to ensure that changes are swift and retained
             target.setPlayerTime(deducted, true)
-            val packet = WrapperPlayServerTimeUpdate(target.world.time, target.playerTime)
-            PacketEvents.getAPI().playerManager.sendPacket(target, packet)
-            times[target.uniqueId] = RewindEntry(entry.originalTime, deducted, speed)
+            target.sendPacket(WrapperPlayServerTimeUpdate(target.world.time, target.playerTime))
+            times[target.uuid] = RewindEntry(entry.originalTime, deducted, speed)
         }, 0, 1, true)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick")
@@ -62,20 +60,19 @@ class Rewind : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now back in the present")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        val entry = times.remove(player.uniqueId) ?: return
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        val entry = times.remove(player.uuid) ?: return
         if (entry.originalTime == 0L)
             player.resetPlayerTime()
         else
             player.setPlayerTime(entry.originalTime, true)
         runTaskLater({
-            val packet = WrapperPlayServerTimeUpdate(player.world.time, player.playerTime)
-            PacketEvents.getAPI().playerManager.sendPacket(player, packet)
+            player.sendPacket(WrapperPlayServerTimeUpdate(player.world.time, player.playerTime))
         }, 1)
     }
 }

@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -27,12 +28,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now mysteriously hit their targets... fluke?")
             .put("player", target.name)
             .toString()

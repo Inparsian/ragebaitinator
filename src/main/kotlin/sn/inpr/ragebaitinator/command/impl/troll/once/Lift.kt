@@ -2,12 +2,11 @@ package sn.inpr.ragebaitinator.command.impl.troll.once
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "lift",
@@ -25,9 +24,9 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.setVelocity
     ]
 )
 class Lift : BaseTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val power = (args.getOrNull(2)?.toDoubleOrNull() ?: 3.0).coerceIn(0.1, 5.0)
-        setVelocity(target, target.velocity.add(Vector(0.0, power, 0.0)))
+        target.velocity = target.velocity.add(Vector(0.0, power, 0.0))
         return placeholdersOr("init", "%prefix% %c2%Launched %c1%%player%")
             .put("player", target.name)
             .toString()

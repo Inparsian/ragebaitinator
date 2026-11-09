@@ -2,12 +2,12 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemDamageEvent
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -37,22 +37,22 @@ class Fragile : BaseToggleTroll(), PlayerItemDamageSubscriber {
 
     private val multipliers = ConcurrentHashMap<UUID, Int>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val multiplier = (args.getOrNull(2)?.toIntOrNull() ?: 10).coerceIn(0, 1000)
-        multipliers[target.uniqueId] = multiplier
+        multipliers[target.uuid] = multiplier
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s items will now %effect%")
             .put("player", target.name)
             .put("effect", if (multiplier == 0) "break instantly" else "wear out ${multiplier}x faster")
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s items now wear out normally")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        multipliers.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        multipliers.remove(player.uuid)
     }
 
     override fun onPlayerItemDamage(event: PlayerItemDamageEvent) {

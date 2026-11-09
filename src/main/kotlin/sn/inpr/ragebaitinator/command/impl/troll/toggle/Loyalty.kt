@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 
 @CommandInfo(
@@ -28,12 +29,12 @@ import java.util.*
 class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
     val homing: MutableMap<UUID, MutableSet<Entity>> = mutableMapOf()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        homing[target.uniqueId] = mutableSetOf()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+        homing[target.uuid] = mutableSetOf()
         addTaskTimer(target, {
-            if (!homing.containsKey(target.uniqueId)) return@addTaskTimer
+            if (!homing.containsKey(target.uuid)) return@addTaskTimer
 
-            val projectiles = homing[target.uniqueId]?.iterator() ?: return@addTaskTimer
+            val projectiles = homing[target.uuid]?.iterator() ?: return@addTaskTimer
             while (projectiles.hasNext()) {
                 val projectile = projectiles.next()
                 if (projectile.isOnGround || projectile.isDead) {
@@ -57,7 +58,7 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will no longer home in on them")
             .put("player", target.name)
             .toString()
@@ -80,7 +81,7 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
         }
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        homing.remove(player.uniqueId)
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        homing.remove(player.uuid)
     }
 }

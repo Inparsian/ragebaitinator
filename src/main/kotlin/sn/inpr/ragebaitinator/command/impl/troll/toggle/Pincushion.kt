@@ -8,11 +8,11 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -51,7 +51,7 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
     private data class Stuck(val arrows: Int, val stingers: Int)
     private val stuck = ConcurrentHashMap<Int, Stuck>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val type = args.getOrNull(2)?.lowercase() ?: "arrows"
         val count = (args.getOrNull(3)?.toIntOrNull() ?: 20).coerceIn(1, 100)
         stuck[target.entityId] = Stuck(
@@ -64,12 +64,12 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
         stuck.remove(player.entityId)
         if (player.isOnline && reason != "logout")
             broadcast(player)
@@ -80,14 +80,14 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
         EntityData(STINGER_COUNT_INDEX, EntityDataTypes.INT, stuck.stingers)
     )
 
-    private fun broadcast(player: Player) {
+    private fun broadcast(player: RbPlayer) {
         val packet = WrapperPlayServerEntityMetadata(
             player.entityId,
             metadata(stuck[player.entityId] ?: Stuck(0, 0))
         )
         val location = player.location
         for (viewer in player.world.players) {
-            if (viewer == player || (viewer.canSee(player) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED))
+            if (viewer.uniqueId == player.uuid || (player.isVisibleTo(viewer) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED))
                 PacketEvents.getAPI().playerManager.sendPacket(viewer, packet)
         }
     }

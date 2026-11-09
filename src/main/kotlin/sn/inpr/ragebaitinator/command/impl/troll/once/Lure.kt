@@ -3,10 +3,10 @@ package sn.inpr.ragebaitinator.command.impl.troll.once
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Creature
-import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -19,10 +19,10 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Lure : BaseTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         LocationUtil.getEntitiesWithinRadius(target.location, 100.0)
             .filterIsInstance<Creature>()
-            .forEach { it.target = target }
+            .forEach { it.target = target.bukkit }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now universally hated")
             .put("player", target.name)
             .toString()

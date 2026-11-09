@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "boompickup",
@@ -34,7 +35,7 @@ import sn.inpr.ragebaitinator.listeners.EntityPickupItemSubscriber
     ]
 )
 class BoomPickup : BaseBoomTroll(), EntityPickupItemSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val persistent = args.getOrNull(2).toBoolean()
         addBoomFlags(target, args)
 
@@ -45,7 +46,7 @@ class BoomPickup : BaseBoomTroll(), EntityPickupItemSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c2%The next item %c1%%player% %c2%picks up will no longer explode")
             .put("player", target.name)
             .toString()

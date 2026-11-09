@@ -2,7 +2,6 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.entity.Silverfish
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.util.Vector
@@ -10,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerFishSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -25,12 +25,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class BadLoot : BaseToggleTroll(), PlayerFishSubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an extremely unlucky fisher(wo)man")
             .put("player", target.name)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%now has regular fishing luck")
             .put("player", target.name)
             .toString()
@@ -40,7 +40,7 @@ class BadLoot : BaseToggleTroll(), PlayerFishSubscriber {
             val caught = event.caught ?: return
             caught.remove()
 
-            for (i in 0 until MathUtil.random(1, 3)) {
+            repeat(MathUtil.random(1, 3)) {
                 val silverfish = event.player.world.spawn(caught.location, Silverfish::class.java)
                 val velocity = event.player.location.toVector().subtract(caught.location.toVector())
                     .normalize()

@@ -20,12 +20,30 @@ import java.util.stream.Collectors
 object CommandManager : CommandExecutor, TabCompleter {
     val commands: List<BaseCommand>
         field = mutableListOf()
-    val trolls: List<BaseTroll> get() = commands.filterIsInstance<BaseTroll>()
-    val toggleTrolls: List<BaseToggleTroll> get() = commands.filterIsInstance<BaseToggleTroll>()
-    val onceTrolls: List<BaseTroll> get() = trolls.filterNot { it is BaseToggleTroll }
+
+    // These are derived from `commands`, which only changes in registerCommands, so they are built
+    // once there instead of on every access
+    // RbPlayer.entity reads `transformers` on nearly every call, from any thread
+    @Volatile var trolls: List<BaseTroll> = emptyList()
+        private set
+    @Volatile var toggleTrolls: List<BaseToggleTroll> = emptyList()
+        private set
+    @Volatile var onceTrolls: List<BaseTroll> = emptyList()
+        private set
+    /** The toggle trolls that can transform a player into another entity */
+    @Volatile var transformers: List<TransformsPlayer> = emptyList()
+        private set
+
+    private fun refreshCaches() {
+        trolls = commands.filterIsInstance<BaseTroll>()
+        toggleTrolls = commands.filterIsInstance<BaseToggleTroll>()
+        onceTrolls = trolls.filterNot { it is BaseToggleTroll }
+        transformers = toggleTrolls.filterIsInstance<TransformsPlayer>()
+    }
 
     fun registerCommands() {
         commands.clear()
+        refreshCaches()
         ClassGraph()
             .acceptPackages("sn.inpr.ragebaitinator.command.impl")
             .enableClassInfo()
@@ -43,6 +61,7 @@ object CommandManager : CommandExecutor, TabCompleter {
                     }
             }
 
+        refreshCaches()
         info("Registered ${commands.size} commands")
     }
 

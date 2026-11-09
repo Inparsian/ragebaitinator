@@ -1,8 +1,8 @@
 package sn.inpr.ragebaitinator.command.def
 
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
@@ -15,6 +15,8 @@ import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.gui.TrollToggleSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
@@ -86,11 +88,10 @@ abstract class BaseCommand {
 }
 
 abstract class BaseTroll : BaseCommand() {
-    open fun getConditions(target: Player): Conditions? {
-        return null
-    }
+    open fun getConditions(target: RbPlayer): Conditions? = null
+    fun getConditions(target: Player): Conditions? = getConditions(target.rb)
 
-    open fun init(sender: CommandSender, target: Player, args: Array<out String>): String? = null
+    open fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String? = null
 
     override fun process(
         sender: CommandSender,
@@ -101,15 +102,15 @@ abstract class BaseTroll : BaseCommand() {
         val playerArguments = info.syntax.indices
             .filter { info.syntax[it].type == CommandSyntax.Type.PLAYER }
             .map { args.getOrNull(it + 1)?.let { input -> targetPlayers(sender, input) } ?: return false }
-        val targets = playerArguments.firstOrNull() ?: return false
+        val targets = playerArguments.firstOrNull()?.map { it.rb } ?: return false
         if (playerArguments.all { it.isNotEmpty() }) {
-            val allTargets = playerArguments.flatten().distinctBy { it.uniqueId }
+            val allTargets = playerArguments.flatten().map { it.rb }.distinctBy { it.uuid }
             for (target in allTargets) {
-                if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
+                if (target.isImmune(this)) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
                         .put("player", target.name)
                         .put("command", this.info.name)
-                    send(sender, target, placeholders)
+                    send(sender, target.bukkit, placeholders)
                     return true
                 }
 
@@ -117,7 +118,7 @@ abstract class BaseTroll : BaseCommand() {
                 if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
-                    send(sender, target, placeholders)
+                    send(sender, target.bukkit, placeholders)
                     return true
                 }
             }
@@ -125,7 +126,7 @@ abstract class BaseTroll : BaseCommand() {
             targets.forEach { target ->
                 val message = init(sender, target, args)
                 if (message != null)
-                    send(sender, target, message)
+                    send(sender, target.bukkit, message)
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
@@ -135,11 +136,18 @@ abstract class BaseTroll : BaseCommand() {
     }
 }
 
+/**
+ * This troll transforms a player into another entity.
+ */
+fun interface TransformsPlayer {
+    fun transformation(player: RbPlayer): Entity?
+}
+
 abstract class BaseToggleTroll : BaseTroll() {
-    internal val players: Map<UUID, MutableSet<String>>
+    internal val players: Map<RbPlayer, MutableSet<String>>
         field = ConcurrentHashMap()
 
-    internal val tasks: Map<UUID, BukkitTask>
+    internal val tasks: Map<RbPlayer, BukkitTask>
         field = mutableMapOf()
 
     fun broadcastGuiUpdate() {
@@ -148,7 +156,7 @@ abstract class BaseToggleTroll : BaseTroll() {
             .forEach { it.update() }
     }
 
-    open fun deinit(sender: CommandSender, target: Player): String? = null
+    open fun deinit(sender: CommandSender, target: RbPlayer): String? = null
 
     override fun process(
         sender: CommandSender,
@@ -156,15 +164,16 @@ abstract class BaseToggleTroll : BaseTroll() {
         label: String,
         args: Array<out String>
     ): Boolean {
-        val targets: List<Player> = targetPlayers(sender, args.getOrNull(1) ?: return false)
+        val targets: List<RbPlayer> = targetPlayers(sender, args.getOrNull(1) ?: return false)
+            .map { it.rb }
         if (targets.isNotEmpty()) {
             targets.forEach { target ->
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!")
                         .put("player", target.name)
                         .put("command", this.info.name)
-                    send(sender, target, placeholders)
-                    removePlayer(target, "Player is immune")
+                    send(sender, target.bukkit, placeholders)
+                    removePlayer(target, "immune")
                     return true
                 }
 
@@ -172,7 +181,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                 if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
-                    send(sender, target, placeholders)
+                    send(sender, target.bukkit, placeholders)
                     return true
                 }
 
@@ -186,14 +195,14 @@ abstract class BaseToggleTroll : BaseTroll() {
                 }
 
                 val had = this.hasPlayer(target)
-                if (!had) players[target.uniqueId] = mutableSetOf()
+                if (!had) players[target] = mutableSetOf()
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had)
                     removePlayer(target, "")
                 else
                     broadcastGuiUpdate()
                 if (message != null)
-                    send(sender, target, message)
+                    send(sender, target.bukkit, message)
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
@@ -202,73 +211,78 @@ abstract class BaseToggleTroll : BaseTroll() {
         return true
     }
 
-    fun hasPlayer(uuid: UUID): Boolean = players.containsKey(uuid)
-    fun hasPlayer(player: Player): Boolean = hasPlayer(player.uniqueId)
+    fun hasPlayer(player: RbPlayer): Boolean = players.containsKey(player)
+    fun hasPlayer(player: Player): Boolean = hasPlayer(player.rb)
+    fun hasPlayer(uuid: UUID): Boolean = hasPlayer(RbPlayer(uuid))
 
-    fun addFlag(uuid: UUID, flag: String) = players[uuid]?.add(flag)
-    fun addFlag(player: Player, flag: String) = addFlag(player.uniqueId, flag)
-    fun hasFlag(uuid: UUID, flag: String): Boolean = players[uuid]?.contains(flag) ?: false
-    fun hasFlag(player: Player, flag: String): Boolean = hasFlag(player.uniqueId, flag)
-    fun removeFlag(uuid: UUID, flag: String): Boolean = players[uuid]?.remove(flag) ?: false
+    fun addFlag(player: RbPlayer, flag: String): Boolean? = players[player]?.add(flag)
+    fun addFlag(uuid: UUID, flag: String): Boolean? = addFlag(RbPlayer(uuid), flag)
+    fun hasFlag(player: RbPlayer, flag: String): Boolean = players[player]?.contains(flag) ?: false
+    fun hasFlag(player: Player, flag: String): Boolean = hasFlag(player.rb, flag)
+    fun hasFlag(uuid: UUID, flag: String): Boolean = hasFlag(RbPlayer(uuid), flag)
+    fun removeFlag(player: RbPlayer, flag: String): Boolean = players[player]?.remove(flag) ?: false
+    fun removeFlag(uuid: UUID, flag: String): Boolean = removeFlag(RbPlayer(uuid), flag)
 
-    open fun onRemovePlayer(player: Player, reason: String) {}
+    open fun onRemovePlayer(player: RbPlayer, reason: String) {}
 
-    fun removeTask(uuid: UUID) = tasks.remove(uuid)?.cancel()
-    fun removePlayer(player: Player, reason: String): Boolean {
-        val uuid = player.uniqueId
-        if (players.remove(uuid) != null) {
-            removeTask(uuid)
+    fun removeTask(player: RbPlayer): Unit? = tasks.remove(player)?.cancel()
+    fun removeTask(uuid: UUID): Unit? = removeTask(RbPlayer(uuid))
+    fun removePlayer(player: RbPlayer, reason: String): Boolean {
+        if (players.remove(player) != null) {
+            removeTask(player)
             onRemovePlayer(player, reason)
             broadcastGuiUpdate()
             return true
         }
         return false
     }
-    fun removePlayer(player: Player): Boolean = removePlayer(player, "")
+    fun removePlayer(player: RbPlayer): Boolean = removePlayer(player, "")
+    fun removePlayer(player: Player, reason: String): Boolean = removePlayer(player.rb, reason)
+    fun removePlayer(player: Player): Boolean = removePlayer(player.rb)
+    fun removePlayer(uuid: UUID, reason: String): Boolean = removePlayer(RbPlayer(uuid), reason)
+    fun removePlayer(uuid: UUID): Boolean = removePlayer(RbPlayer(uuid))
 
     fun clearPlayers(): Boolean {
-        for (uuid in players.keys) {
-            if (players.remove(uuid) == null)
+        for (player in players.keys) {
+            if (players.remove(player) == null)
                 return false
             else {
-                removeTask(uuid)
+                removeTask(player)
                 broadcastGuiUpdate()
-                val player = Bukkit.getPlayer(uuid)
-                if (player != null)
-                    onRemovePlayer(player, "cleared")
+                onRemovePlayer(player, "cleared")
             }
         }
         return true
     }
 
-    fun addTask(uuid: UUID, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(uuid))
+    fun addTask(player: RbPlayer, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
+        if (!ignorePlayerCheck && !hasPlayer(player))
             return null
-        removeTask(uuid)
+        removeTask(player)
         val t = runTaskLater(runnable, delay)
-        this.tasks[uuid] = t
+        this.tasks[player] = t
         return t
     }
 
-    fun addTask(player: Player, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        return addTask(player.uniqueId, runnable, delay, ignorePlayerCheck)
+    fun addTask(uuid: UUID, runnable: Runnable, delay: Long): BukkitTask? {
+        return addTask(RbPlayer(uuid), runnable, delay)
     }
 
-    fun addTaskTimer(player: Player, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(player.uniqueId))
+    fun addTaskTimer(player: RbPlayer, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
+        if (!ignorePlayerCheck && !hasPlayer(player))
             return null
-        removeTask(player.uniqueId)
+        removeTask(player)
         val t = runTaskTimer(runnable, delay, period)
-        this.tasks[player.uniqueId] = t
+        this.tasks[player] = t
         return t
     }
 
-    fun addTaskRandomTimer(player: Player, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(player.uniqueId))
+    fun addTaskRandomTimer(player: RbPlayer, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
+        if (!ignorePlayerCheck && !hasPlayer(player))
             return null
-        removeTask(player.uniqueId)
+        removeTask(player)
         val t = runTaskRandomTimer(runnable, delay, minPeriod, maxPeriod)
-        this.tasks[player.uniqueId] = t
+        this.tasks[player] = t
         return t
     }
 }

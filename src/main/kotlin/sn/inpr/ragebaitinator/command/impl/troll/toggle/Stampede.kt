@@ -15,6 +15,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
 import java.util.*
 
@@ -66,7 +67,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
     val herds: MutableMap<UUID, MutableSet<Creature>> = mutableMapOf()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val fromShooter = args.getOrNull(2)?.toBoolean() ?: false
         val herdLocation = if (sender is Player && fromShooter && sender.world == target.world)
             sender.location.clone()
@@ -81,7 +82,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         val herd = mutableSetOf<Creature>()
         val navigators = mutableMapOf<Creature, CowNavigation>()
-        herds[target.uniqueId] = herd
+        herds[target.uuid] = herd
         try {
             for (position in positions) {
                 val cow = position.world!!.spawn(position, Cow::class.java)
@@ -95,7 +96,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         var ticks = 0
         addTaskTimer(target, {
-            val herd = herds[target.uniqueId] ?: return@addTaskTimer
+            val herd = herds[target.uuid] ?: return@addTaskTimer
             val refreshRoute = ticks++ % 10 == 0
             try {
                 for (cow in herd.toList()) {
@@ -111,7 +112,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                     }
 
                     // damage
-                    if (cow.location.distanceSquared(target.location) <= 1.0) {
+                    val bukkitTarget = target.bukkit
+                    if (bukkitTarget != null && cow.location.distanceSquared(target.location) <= 1.0) {
                         val damageSource = DamageSource.builder(DamageType.MOB_ATTACK)
                             .withCausingEntity(cow)
                             .withDirectEntity(cow)
@@ -119,7 +121,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                             .build()
                         val event = EntityDamageByEntityEvent(
                             cow,
-                            target,
+                            bukkitTarget,
                             EntityDamageEvent.DamageCause.ENTITY_ATTACK,
                             damageSource,
                             1.0
@@ -144,13 +146,13 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows")
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        herds.remove(player.uniqueId)?.forEach { it.remove() }
+    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+        herds.remove(player.uuid)?.forEach { it.remove() }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
@@ -174,7 +176,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                     val bz = origin.blockZ + z
                     if (by <= world.minHeight || by + 1 >= world.maxHeight) continue
                     val support = world.getBlockAt(bx, by - 1, bz)
-                    if (!support.type.isOccluding || support.type == org.bukkit.Material.MAGMA_BLOCK) continue
+                    if (!support.type.isOccluding || support.type == Material.MAGMA_BLOCK) continue
                     if (!world.getBlockAt(bx, by, bz).isEmpty || !world.getBlockAt(bx, by + 1, bz).isEmpty) continue
                     positions.add(Location(world, bx + 0.5, by.toDouble(), bz + 0.5))
                     if (positions.size == 6) return positions
