@@ -2,10 +2,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import sn.inpr.ragebaitinator.command.def.Args
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -36,7 +33,7 @@ class Starve : BaseToggleTroll() {
                 if (target.foodLevel > 0 && target.health > 0)
                     target.foodLevel--
                 else
-                    removePlayer(target, "done")
+                    removePlayer(target, RemoveReason.DONE)
             }, 0, ticks, true)
             placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hunger is now decreasing every %c1%%ticks% %c2%tick(s)")
                 .put("player", target.name)

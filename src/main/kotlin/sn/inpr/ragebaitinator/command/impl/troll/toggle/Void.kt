@@ -10,6 +10,7 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -45,7 +46,7 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
             .toString()
     }
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         player.fallDistance = 0f // prevents an oopsie
         takeField<Location>(player, "location")?.let { player.teleport(it) }
     }

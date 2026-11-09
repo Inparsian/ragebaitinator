@@ -22,10 +22,7 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
-import sn.inpr.ragebaitinator.command.def.Args
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.TransformsPlayer
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.listeners.*
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -118,7 +115,7 @@ class Potato : BaseToggleTroll(),
         target.allowFlight = true
 
         // destroy this player entity for others
-        val destroy = WrapperPlayServerDestroyEntities(player.entityId)
+        val destroy = WrapperPlayServerDestroyEntities(target.bodyEntityId)
         target.others.sendPacket(destroy)
 
         // prevent interactions (and self-interaction kicks) by setting spectator mode client-side
@@ -151,7 +148,7 @@ class Potato : BaseToggleTroll(),
             .toString()
     }
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         // taking the potato is what turns them back into a player, so this has to come before anything uses their entity
         val [potato, snapshot] = takeField<Pair<Item, PlayerSnapshot>>(player, "potato") ?: return
         snapshot.restore()
@@ -165,7 +162,7 @@ class Potato : BaseToggleTroll(),
                 player.teleport(destination.setDirection(player.location.direction))
                 player.velocity = velocity
             }
-            player.sendPacket(WrapperPlayServerCamera(player.entityId))
+            player.sendPacket(WrapperPlayServerCamera(player.bodyEntityId))
             player.others.forEach {
                 it.hidePlayer(player)
                 it.showPlayer(player)
@@ -235,10 +232,10 @@ class Potato : BaseToggleTroll(),
 
         if (event.packetType == PacketType.Play.Server.SPAWN_PLAYER) { // <=1.20.1
             val id = WrapperPlayServerSpawnPlayer(event).entityId
-            if (players.keys.any { it.bukkit?.entityId == id }) event.isCancelled = true
+            if (players.keys.any { it.bodyEntityId == id }) event.isCancelled = true
         } else if (event.packetType == PacketType.Play.Server.SPAWN_ENTITY) { // >=1.20.2
             val id = WrapperPlayServerSpawnEntity(event).entityId
-            if (players.keys.any { it.bukkit?.entityId == id }) event.isCancelled = true
+            if (players.keys.any { it.bodyEntityId == id }) event.isCancelled = true
         }
 
         if (hasPlayer(uuid))

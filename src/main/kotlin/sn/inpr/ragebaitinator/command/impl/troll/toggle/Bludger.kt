@@ -9,6 +9,7 @@ import org.bukkit.event.entity.ProjectileHitEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.ProjectileHitSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -75,7 +76,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<Projectile>(player, "bludger")?.remove()
     }
 

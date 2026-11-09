@@ -8,10 +8,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
-import sn.inpr.ragebaitinator.command.def.Args
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerRespawnSubscriber
@@ -19,7 +16,6 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.Structure
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import java.util.*
 
 @CommandInfo(
     name = "cage",
@@ -73,8 +69,6 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         .add(Material.GLASS_PANE, -1, 2, -1)
     private val maxY = LocationUtil.upHeightLimit - (cage.height + 1)
 
-    private fun rollbackOwner(uuid: UUID) = "cage:$uuid"
-
     fun getViableLocation(player: RbPlayer): Location? {
         val blockified = LocationUtil.blockify(player.location, true)
         if (blockified.y >= maxY) {
@@ -121,7 +115,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             getViableLocation(target) ?: return "&cThe cage would hit something!"
         }
 
-        cage.build(rollbackOwner(target.uuid), cageLocation)
+        cage.build(rollbackOwner(target), cageLocation)
         setField(target, "cage", cageLocation)
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
@@ -160,8 +154,8 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         }
     }
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (hasField(player, "cage"))
-            cage.rollback(rollbackOwner(player.uuid))
+            cage.rollback(rollbackOwner(player))
     }
 }

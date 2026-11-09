@@ -23,15 +23,13 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.type.rbPlayers
 import sn.inpr.ragebaitinator.type.sendPacket
-import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
 
 object PlayerUtil {
     // the maximum double that you can damage a player (i think). any higher will cause a weird glitch
     // that nullifies player damage until the server is restarted.
     const val MAX_POSSIBLE_DAMAGE: Double = 170_141_173_319_264_430_000_000_000_000_000_000_000.0
 
-    fun inVoid(player: Player, offset: Double = 0.0): Boolean = inVoid(player.rb, offset)
-    fun inVoid(player: RbPlayer, offset: Double = 0.0): Boolean = player.location.y <= downHeightLimit + offset
+    fun inVoid(player: Player, offset: Double = 0.0): Boolean = player.rb.isInVoid(offset)
 
     fun getEnabledTrolls(player: Player): MutableList<String> = getEnabledTrolls(player.rb)
 

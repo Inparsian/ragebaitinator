@@ -16,7 +16,6 @@ import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
 
@@ -38,8 +37,6 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         else
             Material.LAVA
     }
-
-    private fun rollbackOwner(player: RbPlayer) = "hottub:${player.uuid}"
 
     override fun getConditions(target: RbPlayer)
         = Conditions().notDead(target).notInVoid(target)
@@ -81,6 +78,6 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             .toString()
     }
 
-    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player.rb))
-    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity.rb))
+    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))
+    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity))
 }

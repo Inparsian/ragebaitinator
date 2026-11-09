@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import kotlin.math.absoluteValue
 
@@ -55,7 +56,7 @@ class Rewind : BaseToggleTroll() {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now back in the present", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         val entry = takeField<RewindEntry>(player, "entry") ?: return
         if (entry.originalTime == 0L)
             player.resetPlayerTime()

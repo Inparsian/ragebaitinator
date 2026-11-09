@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -64,8 +65,6 @@ class Radiation : BaseToggleTroll() {
         val leaves = Material.entries.filter { it.name.endsWith("LEAVES") }
     }
 
-    private fun rollbackOwner(player: RbPlayer) = "radiation:${player.uuid}"
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         if (args[playersParam]) addFlag(target, "players")
         if (args[animals]) addFlag(target, "animals")
@@ -112,5 +111,5 @@ class Radiation : BaseToggleTroll() {
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) = Blocks.release(rollbackOwner(player))
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) = Blocks.release(rollbackOwner(player))
 }

@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -45,7 +46,7 @@ class Quake : BaseToggleTroll() {
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s field of view is now stable", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         runTaskLater({ player.sendPacket(abilities(player, player.walkSpeed / 2f)) }, 1)
     }
 }

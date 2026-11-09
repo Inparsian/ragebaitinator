@@ -11,6 +11,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -28,7 +29,7 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val others = target.others
         if (others.isNotEmpty()) {
-            target.sendPacket(WrapperPlayServerDestroyEntities(*others.mapNotNull { it.bukkit?.entityId }.toIntArray()))
+            target.sendPacket(WrapperPlayServerDestroyEntities(*others.map { it.bodyEntityId }.toIntArray()))
             target.sendPacket(WrapperPlayServerPlayerInfoRemove(others.map { it.uuid }))
         }
 
@@ -40,8 +41,8 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
         = placeholdersOr("deinit", "%prefix% %c2%Everyone is back in %c1%%player%%c2%'s world", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (reason == "logout" || !player.isOnline)
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (reason == RemoveReason.LOGOUT || !player.isOnline)
             return
 
         for (other in player.others) {

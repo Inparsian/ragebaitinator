@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
@@ -55,7 +56,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now wide awake", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         wake(player)
     }
 

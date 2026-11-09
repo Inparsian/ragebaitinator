@@ -79,6 +79,8 @@ value class RbPlayer(val uuid: UUID) {
     // Bukkit helpers
     val name: String get() = bukkit?.name ?: "Unknown"
     val entityId: Int get() = entity?.entityId ?: -1
+    /** The id of the player's own entity. That is not [entityId] while they are transformed into something else. */
+    val bodyEntityId: Int get() = bukkit?.entityId ?: -1
     val world: World get() = entity?.world ?: Bukkit.getWorlds().first()
     val location: Location get() = entity?.location ?: Location(world, 0.0, 0.0, 0.0)
     var velocity: Vector
@@ -210,6 +212,9 @@ value class RbPlayer(val uuid: UUID) {
     fun showPlayer(other: RbPlayer) {
         other.bukkit?.let { bukkit?.showPlayer(Main.instance(), it) }
     }
+
+    /** Whether this player is at the bottom of the world or lower, [offset] blocks aside */
+    fun isInVoid(offset: Double = 0.0): Boolean = location.y <= LocationUtil.downHeightLimit + offset
 
     fun hasPermission(permission: String) = bukkit?.hasPermission(permission) == true
     fun isImmune(troll: BaseTroll) = hasPermission("ragebaitinator.immune.${troll.info.name}")

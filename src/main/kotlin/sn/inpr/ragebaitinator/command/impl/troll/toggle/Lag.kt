@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
@@ -144,7 +145,7 @@ class Lag : BaseToggleTroll() {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<Session>(player, "session")?.let { session ->
             session.inbound.close()
             session.outbound.close()

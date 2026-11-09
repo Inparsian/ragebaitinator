@@ -15,7 +15,6 @@ import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -25,8 +24,6 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     description = "Buries a player alive.",
 )
 class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
-    private fun rollbackOwner(player: RbPlayer) = "bury:${player.uuid}"
-
     private fun is3x3(location: Location): Boolean {
         val block = location.block.location
         var xInRow = 0
@@ -86,6 +83,6 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             .toString()
     }
 
-    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player.rb))
-    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity.rb))
+    override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))
+    override fun onPlayerDeath(event: PlayerDeathEvent) = Blocks.release(rollbackOwner(event.entity))
 }

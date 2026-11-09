@@ -19,6 +19,7 @@ import org.bukkit.event.inventory.InventoryType
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -54,9 +55,9 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         wearers.remove(player.entityId)
-        if (player.isOnline && reason != "logout")
+        if (player.isOnline && reason != RemoveReason.LOGOUT)
             show(player, SpigotConversionUtil.fromBukkitItemStack(player.helmet ?: org.bukkit.inventory.ItemStack(Material.AIR)))
     }
 

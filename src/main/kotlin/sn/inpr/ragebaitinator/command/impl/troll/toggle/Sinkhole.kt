@@ -8,15 +8,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
-import sn.inpr.ragebaitinator.command.def.Args
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -79,8 +75,8 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
 
         addTaskTimer(target, {
             if (hasField(target, "sinkhole")) {
-                if (PlayerUtil.inVoid(target) || !floorBelowPlayer(target)) {
-                    removePlayer(target, "done")
+                if (target.isInVoid() || !floorBelowPlayer(target)) {
+                    removePlayer(target, RemoveReason.DONE)
                     return@addTaskTimer
                 }
 
@@ -114,8 +110,8 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned back to the surface", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (!arrayOf("done", "death").contains(reason)) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (reason != RemoveReason.DONE && reason != RemoveReason.DEATH) {
             player.fallDistance = 0f
             player.teleport(getField<SinkholeState>(player, "sinkhole")?.startLocation ?: player.location)
         }

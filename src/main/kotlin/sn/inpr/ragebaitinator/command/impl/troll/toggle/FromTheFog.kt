@@ -13,6 +13,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -84,8 +85,8 @@ class FromTheFog : BaseToggleTroll() {
         = placeholdersOr("deinit", "%prefix% %c2%Whatever was watching %c1%%player% %c2%has gone", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        despawn(player, reason != "logout")
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        despawn(player, reason != RemoveReason.LOGOUT)
     }
 
     private fun scheduleAppearance(player: RbPlayer, delay: Long? = null) {

@@ -3,10 +3,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.util.Vector
-import sn.inpr.ragebaitinator.command.def.Args
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -28,7 +25,7 @@ class DiveBomb : BaseToggleTroll() {
             if (target.isGliding)
                 target.velocity = Vector(0.0, -5.0, 0.0)
             else
-                removePlayer(target, "done")
+                removePlayer(target, RemoveReason.DONE)
         }, 0, 1, true)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now dive-bombing", target)
             .toString()

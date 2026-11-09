@@ -10,6 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.FurnaceStartSmeltSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -45,7 +46,7 @@ class SlowCooker : BaseToggleTroll(), InventoryClickSubscriber, FurnaceStartSmel
             .toString()
 
     // whatever they were cooking carries on from where it got to
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         for ([block, owner] in owners.entries.toList()) {
             if (owner != player.uuid)
                 continue

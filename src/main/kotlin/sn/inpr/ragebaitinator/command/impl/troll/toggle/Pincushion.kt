@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.sendPacket
@@ -57,9 +58,9 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         stuck.remove(player.entityId)
-        if (player.isOnline && reason != "logout")
+        if (player.isOnline && reason != RemoveReason.LOGOUT)
             broadcast(player)
     }
 

@@ -8,6 +8,7 @@ import org.bukkit.event.block.BlockBreakEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -53,7 +54,7 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
             player.sendBlockChange(block.location, block.blockData)
     }
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         takeField<LinkedHashSet<Block>>(player, "fakes")?.forEach { restore(player, it) }
     }
 

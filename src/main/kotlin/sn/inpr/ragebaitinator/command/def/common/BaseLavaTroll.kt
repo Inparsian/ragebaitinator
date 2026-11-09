@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -18,8 +19,6 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
     private companion object {
         const val LAVA_LIFETIME_TICKS = 200L
     }
-
-    private fun rollbackOwner(player: RbPlayer) = "${info.name}:${player.uuid}"
 
     fun addPersistentFlag(target: RbPlayer, persistent: Boolean) {
         if (persistent)
@@ -48,8 +47,8 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
 
     // anything still lava when they leave or the plugin stops goes back right away. the rest has its own timer, which
     // is why turning this off doesn't touch it
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (reason == "logout" || reason == "cleared")
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (reason == RemoveReason.LOGOUT || reason == RemoveReason.CLEARED)
             Blocks.release(rollbackOwner(player))
     }
 }

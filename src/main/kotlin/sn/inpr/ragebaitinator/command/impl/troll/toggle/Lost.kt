@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -35,7 +36,7 @@ class Lost : BaseToggleTroll() {
         placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s compass is now back to normal", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         runTaskLater({
             val vector = player.compassTarget.toVector()
             val compassTarget = Vector3i(vector.x.toInt(), vector.y.toInt(), vector.z.toInt())

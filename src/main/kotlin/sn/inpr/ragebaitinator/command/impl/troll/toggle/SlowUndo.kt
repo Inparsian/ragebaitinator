@@ -14,6 +14,7 @@ import org.bukkit.inventory.ItemStack
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -62,7 +63,7 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
 
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they
     // get what those blocks would have dropped instead
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         val queue = takeField<ArrayDeque<Change>>(player, "pending") ?: return
         for (change in queue)
             release(change)

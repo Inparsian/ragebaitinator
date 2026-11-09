@@ -115,6 +115,10 @@ abstract class BaseCommand {
         send(sender, placeholders)
     }
 
+    /** What the blocks that this command changes for a player are recorded under, so they can be put back for them alone */
+    fun rollbackOwner(player: RbPlayer): String = "${info.name}:${player.uuid}"
+    fun rollbackOwner(player: Player): String = rollbackOwner(player.rb)
+
     fun languageOr(key: String, default: String) = language.getString("commands.${info.name}.$key") ?: default
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
@@ -160,7 +164,7 @@ abstract class BaseTroll : BaseCommand() {
                 if (target.isImmune(this)) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
-                    send(sender, target.bukkit, placeholders)
+                    send(sender, target, placeholders)
                     return true
                 }
 
@@ -168,7 +172,7 @@ abstract class BaseTroll : BaseCommand() {
                 if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
-                    send(sender, target.bukkit, placeholders)
+                    send(sender, target, placeholders)
                     return true
                 }
             }
@@ -176,7 +180,7 @@ abstract class BaseTroll : BaseCommand() {
             targets.forEach { target ->
                 val message = init(sender, target, args)
                 if (message != null)
-                    send(sender, target.bukkit, message)
+                    send(sender, target, message)
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
@@ -228,8 +232,8 @@ abstract class BaseToggleTroll : BaseTroll() {
                 if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
-                    send(sender, target.bukkit, placeholders)
-                    removePlayer(target, "immune")
+                    send(sender, target, placeholders)
+                    removePlayer(target, RemoveReason.IMMUNE)
                     return true
                 }
 
@@ -237,7 +241,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                 if (firstHitCondition != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
-                    send(sender, target.bukkit, placeholders)
+                    send(sender, target, placeholders)
                     return true
                 }
 
@@ -247,18 +251,18 @@ abstract class BaseToggleTroll : BaseTroll() {
 
                     val instance = CommandManager.getCommand(incompatibleTroll)
                     if (instance is BaseToggleTroll)
-                        instance.removePlayer(target, "incompatible")
+                        instance.removePlayer(target, RemoveReason.INCOMPATIBLE)
                 }
 
                 val had = this.hasPlayer(target)
                 if (!had) players[target] = ConcurrentHashMap()
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had)
-                    removePlayer(target, "")
+                    removePlayer(target, RemoveReason.TOGGLED)
                 else
                     broadcastGuiUpdate()
                 if (message != null)
-                    send(sender, target.bukkit, message)
+                    send(sender, target, message)
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))
@@ -318,11 +322,11 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun removeFlag(player: RbPlayer, flag: String): Boolean = removeField(player, flag)
     fun removeFlag(uuid: UUID, flag: String): Boolean = removeField(uuid, flag)
 
-    open fun onRemovePlayer(player: RbPlayer, reason: String) {}
+    open fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {}
 
     fun removeTask(player: RbPlayer): Unit? = tasks.remove(player)?.cancel()
     fun removeTask(uuid: UUID): Unit? = removeTask(RbPlayer(uuid))
-    fun removePlayer(player: RbPlayer, reason: String): Boolean {
+    fun removePlayer(player: RbPlayer, reason: RemoveReason): Boolean {
         // the player stops counting as toggled before onRemovePlayer runs, which relies on that, but the fields stay
         // readable until it's done
         val fields = players.remove(player) ?: return false
@@ -336,15 +340,15 @@ abstract class BaseToggleTroll : BaseTroll() {
         broadcastGuiUpdate()
         return true
     }
-    fun removePlayer(player: RbPlayer): Boolean = removePlayer(player, "")
-    fun removePlayer(player: Player, reason: String): Boolean = removePlayer(player.rb, reason)
+    fun removePlayer(player: RbPlayer): Boolean = removePlayer(player, RemoveReason.DONE)
+    fun removePlayer(player: Player, reason: RemoveReason): Boolean = removePlayer(player.rb, reason)
     fun removePlayer(player: Player): Boolean = removePlayer(player.rb)
-    fun removePlayer(uuid: UUID, reason: String): Boolean = removePlayer(RbPlayer(uuid), reason)
+    fun removePlayer(uuid: UUID, reason: RemoveReason): Boolean = removePlayer(RbPlayer(uuid), reason)
     fun removePlayer(uuid: UUID): Boolean = removePlayer(RbPlayer(uuid))
 
     fun clearPlayers(): Boolean {
         for (player in players.keys.toList())
-            removePlayer(player, "cleared")
+            removePlayer(player, RemoveReason.CLEARED)
         return true
     }
 

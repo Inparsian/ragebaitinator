@@ -14,6 +14,7 @@ import org.bukkit.event.entity.EntityDamageEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
@@ -68,7 +69,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         val positions = safePositions(herdLocation, target.location)
         if (positions.size < 6) {
-            removePlayer(target, "No safe herd spawn")
+            removePlayer(target, RemoveReason.FAILED)
             return "&cCould not find enough safe ground for the herd."
         }
 
@@ -82,7 +83,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 navigators[cow] = CowNavigation(cow)
             }
         } catch (_: Exception) {
-            removePlayer(target, "Herd spawning failed")
+            removePlayer(target, RemoveReason.FAILED)
             return "&cCould not spawn the herd or initialize cow navigation on this server."
         }
 
@@ -125,10 +126,10 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
                     if (refreshRoute) navigators[cow]?.moveTo(target.location)
                 }
-                if (herd.isEmpty()) removePlayer(target, "Herd is gone")
+                if (herd.isEmpty()) removePlayer(target, RemoveReason.DONE)
             } catch (exception: Exception) {
                 Bukkit.getLogger().warning("Stampede navigation failed for ${target.name}: $exception")
-                removePlayer(target, "Herd navigation failed")
+                removePlayer(target, RemoveReason.FAILED)
                 sender.sendMessage("Stampede stopped because cow navigation failed.")
             }
         }, 0, 1, true)
@@ -141,7 +142,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<MutableSet<Creature>>(player, "herd")?.forEach { it.remove() }
     }
 

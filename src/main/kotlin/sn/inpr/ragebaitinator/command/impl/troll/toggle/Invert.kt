@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -29,7 +30,7 @@ class Invert : BaseToggleTroll() {
         placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (player.flySpeed < 0) player.flySpeed *= -1
     }
 }

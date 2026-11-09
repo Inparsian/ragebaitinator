@@ -16,6 +16,7 @@ import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -51,8 +52,8 @@ class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s sky has cleared up", target)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (player.isOnline && reason != "logout")
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (player.isOnline && reason != RemoveReason.LOGOUT)
             clear(player)
     }
 

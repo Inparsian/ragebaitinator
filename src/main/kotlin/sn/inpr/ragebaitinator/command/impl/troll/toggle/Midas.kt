@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerMoveEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import kotlin.math.floor
@@ -51,7 +52,7 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
         block.world.players.forEach { it.sendBlockChange(block.location, data) }
     }
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         takeField<LinkedHashSet<Block>>(player, "trail")?.forEach(::restore)
     }
 

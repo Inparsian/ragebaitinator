@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.gui.GuiHandler
 
 fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
@@ -62,7 +63,7 @@ fun interface PlayerDropItemSubscriber { fun onPlayerDropItem(event: PlayerDropI
 fun interface EntityChangeBlockSubscriber { fun onEntityChangeBlock(event: EntityChangeBlockEvent) }
 
 object BukkitEventListener : Listener {
-    fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {
+    fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: RemoveReason) {
         CommandManager.toggleTrolls
             .filter { it.info.attributes.contains(attribute) }
             .forEach { it.removePlayer(player, reason) }
@@ -118,8 +119,8 @@ object BukkitEventListener : Listener {
 
         // remove corresponding attributes
         when (event) {
-            is PlayerQuitEvent -> removeToggleTrollsWithAttribute(event.player, CommandInfo.Attribute.LOGOUT, "logout")
-            is EntityDeathEvent -> removeToggleTrollsWithAttribute(event.entity as? Player ?: return, CommandInfo.Attribute.DEATH, "death")
+            is PlayerQuitEvent -> removeToggleTrollsWithAttribute(event.player, CommandInfo.Attribute.LOGOUT, RemoveReason.LOGOUT)
+            is EntityDeathEvent -> removeToggleTrollsWithAttribute(event.entity as? Player ?: return, CommandInfo.Attribute.DEATH, RemoveReason.DEATH)
         }
     }
 

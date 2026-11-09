@@ -1,7 +1,6 @@
 package sn.inpr.ragebaitinator.command.def
 
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 data class Condition(
     val humanReadable: String,
@@ -20,5 +19,5 @@ class Conditions {
     fun notDead(player: RbPlayer): Conditions
         = this.put("This player must not be dead.", "dead", player.health <= 0)
     fun notInVoid(player: RbPlayer, threshold: Double = -2.0)
-        = this.put("This player must not be in void.", "inVoid", PlayerUtil.inVoid(player, threshold))
+        = this.put("This player must not be in void.", "inVoid", player.isInVoid(threshold))
 }
