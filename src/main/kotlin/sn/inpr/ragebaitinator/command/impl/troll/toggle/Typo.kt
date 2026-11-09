@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerCommandPreprocessSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -17,22 +17,17 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     category = CommandInfo.Category.CHAT,
     icon = Material.NAME_TAG,
     description = "Fat-fingers a player's commands. Was that /hmoe or /home?",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Chance",
-            description = "The chance (0 to 1) of any given command getting a typo.",
-            default = "0.4"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        setField(target, "chance", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.4)
+    private val chance = param<Double>("Chance", "The chance (0 to 1) of any given command getting a typo.", default = 0.4, range = 0.0..1.0)
+
+    override val syntax = withTarget(chance)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has very clumsy fingers")
             .put("player", target.name)
             .toString()

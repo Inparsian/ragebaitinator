@@ -9,7 +9,8 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.Parameter
+import sn.inpr.ragebaitinator.command.def.Targets
 import sn.inpr.ragebaitinator.gui.impl.TrollMenu
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
@@ -19,7 +20,7 @@ interface CommandHistorySubscriber
 
 data class TrollGuiDataInput(
     val menu: TrollMenu,
-    val syntax: CommandSyntax,
+    val syntax: Parameter<*>,
     val id: Int,
 )
 
@@ -83,32 +84,30 @@ object GuiHandler : Listener {
         if (input != null) {
             event.isCancelled = true
 
-            var param: String
-            when (input.syntax.type) {
-                CommandSyntax.Type.STRING -> if (input.syntax.strictCompletion
-                    && input.syntax.completions.none { it.equals(event.message, true) }
-                    && input.syntax.completionAliases.none { it.equals(event.message, true) })
-                {
-                    val placeholders = Placeholders("gui.messages.fieldInvalidCompletion", "%prefix% &cThis value must be one of the possible values listed above")
-                    send(event.player, placeholders)
-                    input.menu.open()
-                    return
-                } else param = event.message
-
-                // we can catch everything else with CommandSyntax's isValid
-                else -> if (input.syntax.type.isValid(event.message, event.player))
-                    param = event.message
-                else {
-                    val placeholders = if (input.syntax.type == CommandSyntax.Type.PLAYER)
-                        Placeholders("gui.messages.fieldInvalidPlayer", "%prefix% &cPlayer(s) not found")
-                    else
-                        Placeholders("gui.messages.fieldInvalid", "%prefix% &cInvalid %type%")
-                            .put("type", input.syntax.type.toString().lowercase())
-                    send(event.player, placeholders)
-                    input.menu.open()
-                    return
-                }
+            val syntax = input.syntax
+            if (syntax.strictCompletion
+                && syntax.completions.none { it.equals(event.message, true) }
+                && syntax.completionAliases.none { it.equals(event.message, true) })
+            {
+                val placeholders = Placeholders("gui.messages.fieldInvalidCompletion", "%prefix% &cThis value must be one of the possible values listed above")
+                send(event.player, placeholders)
+                input.menu.open()
+                return
             }
+
+            // a value that can't be read isn't one the command would be able to use
+            if (syntax.parse(event.message, event.player) == null) {
+                val placeholders = if (syntax.type == Targets::class)
+                    Placeholders("gui.messages.fieldInvalidPlayer", "%prefix% &cPlayer(s) not found")
+                else
+                    Placeholders("gui.messages.fieldInvalid", "%prefix% &cInvalid %type%")
+                        .put("type", syntax.argumentType.key)
+                send(event.player, placeholders)
+                input.menu.open()
+                return
+            }
+
+            val param = event.message
 
             val placeholders = Placeholders("gui.messages.fieldSet", "%prefix% %c2%Set %c1%%field% %c2%to %c1%%value%")
                 .put("field", input.syntax.purpose)

@@ -5,9 +5,9 @@ import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.command.CommandSender
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -18,20 +18,15 @@ import kotlin.math.pow
     category = CommandInfo.Category.HAZARDS,
     icon = Material.WIND_CHARGE,
     description = "Sends a tornado after a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Strength",
-            description = "The strength of the tornado (min 1, max 10)",
-            default = "3"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Tornado : BaseToggleTroll() {
+    private val strength = param<Int>("Strength", "The strength of the tornado (min 1, max 10)", default = 3, range = 1..10)
+
+    override val syntax = withTarget(strength)
+
     private class Twister(val chase: RbPlayer, var location: Location, val strength: Int) {
         var axis: Int = 0
         val pickupPoint: Location get() = location.clone().add(0.0, strength.toDouble() * 2, 0.0)
@@ -102,8 +97,8 @@ class Tornado : BaseToggleTroll() {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val strength = (args.getOrNull(2)?.toIntOrNull() ?: 3).coerceIn(1, 10)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val strength = args[strength]
         val yaw = MathUtil.random(0.0, 360.0)
         setField(target, "twister", Twister(target, target.location.clone().add(
             MathUtil.rcos(yaw) * 10,

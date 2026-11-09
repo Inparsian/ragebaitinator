@@ -9,9 +9,9 @@ import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.EntityExplodeSubscriber
@@ -24,17 +24,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.EXPLOSIVES,
     icon = Material.CREEPER_HEAD,
     description = "Spawns a few charged creepers at the player's location",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Harmless",
-            description = "Whether the creepers shouldn't damage the world",
-            default = "true"
-        )
-    ]
 )
 class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
+    private val harmless = param<Boolean>("Harmless", "Whether the creepers shouldn't damage the world", default = true)
+
+    override val syntax = withTarget(harmless)
+
     val markKey = Main.makeKey("ragebaitinatorCreepTroll")
 
     fun mark(entity: Entity, harmless: Boolean)
@@ -45,10 +40,10 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
     override fun getConditions(target: RbPlayer)
         = Conditions().notDead(target).notInVoid(target)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         for (i in 1..4) {
             val creeper = target.world.spawn(target.location, Creeper::class.java)
-            mark(creeper, args.getOrNull(2)?.toBoolean() ?: true)
+            mark(creeper, args[harmless])
 
             val velocity = Vector(MathUtil.rcos(i * 90), 0.2, MathUtil.rsin(i * 90)).multiply(0.5)
             creeper.velocity = velocity

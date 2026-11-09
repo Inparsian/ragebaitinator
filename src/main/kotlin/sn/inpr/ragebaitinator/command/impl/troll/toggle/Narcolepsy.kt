@@ -14,9 +14,9 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
@@ -30,9 +30,6 @@ import java.util.*
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.BLACK_BED,
     description = "Zzz...",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -50,7 +47,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         scheduleSleep(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now randomly fall asleep")
             .put("player", target.name)

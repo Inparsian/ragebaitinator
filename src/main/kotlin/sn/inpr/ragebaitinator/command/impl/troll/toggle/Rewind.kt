@@ -4,9 +4,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTi
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import kotlin.math.absoluteValue
 
@@ -15,25 +15,20 @@ import kotlin.math.absoluteValue
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.RECOVERY_COMPASS,
     description = "Rewinds a player's time (specify a negative speed to move it forward)",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Speed",
-            description = "The amount to decrease the player's time by every tick.",
-            default = "15"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Rewind : BaseToggleTroll() {
+    private val speed = param<Int>("Speed", "The amount to decrease the player's time by every tick.", default = 15, range = -1500..1500)
+
+    override val syntax = withTarget(speed)
+
     data class RewindEntry(val originalTime: Long, val currentTime: Long, val speed: Int)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val originalOffset = target.playerTimeOffset
-        val speed = args.getOrNull(2)?.toIntOrNull()?.coerceIn(-1500..1500) ?: 15
+        val speed = args[speed]
         setField(target, "entry", RewindEntry(originalOffset, originalOffset, speed))
 
         addTaskTimer(target, {

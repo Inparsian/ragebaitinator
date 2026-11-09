@@ -8,9 +8,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Animals
 import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -22,32 +22,17 @@ import sn.inpr.ragebaitinator.utility.Reflection
     category = CommandInfo.Category.HAZARDS,
     icon = Material.GLOWSTONE_DUST,
     description = "Makes a player radioactive, slowly killing all players, animals, and plants around them.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Players",
-            description = "Whether or not to hurt players.",
-            default = "true"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Animals",
-            description = "Whether or not to hurt animals.",
-            default = "true"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Plants",
-            description = "Whether or not to hurt plants.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Radiation : BaseToggleTroll() {
+    private val playersParam = param<Boolean>("Players", "Whether or not to hurt players.", default = true)
+    private val animals = param<Boolean>("Animals", "Whether or not to hurt animals.", default = true)
+    private val plants = param<Boolean>("Plants", "Whether or not to hurt plants.", default = true)
+
+    override val syntax = withTarget(playersParam, animals, plants)
+
     companion object {
         val flowers = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_13))
             setOf(
@@ -81,13 +66,10 @@ class Radiation : BaseToggleTroll() {
 
     private fun rollbackOwner(player: RbPlayer) = "radiation:${player.uuid}"
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBoolean() ?: true)
-            addFlag(target, "players")
-        if (args.getOrNull(3)?.toBoolean() ?: true)
-            addFlag(target, "animals")
-        if (args.getOrNull(4)?.toBoolean() ?: true)
-            addFlag(target, "plants")
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[playersParam]) addFlag(target, "players")
+        if (args[animals]) addFlag(target, "animals")
+        if (args[plants]) addFlag(target, "plants")
 
         addTaskTimer(target, {
             if (hasFlag(target, "plants")) {

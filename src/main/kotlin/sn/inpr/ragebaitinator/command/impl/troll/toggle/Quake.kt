@@ -5,9 +5,9 @@ import org.bukkit.GameMode
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -16,9 +16,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.SPYGLASS,
     description = "Constantly changes the player's FOV.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -33,7 +30,7 @@ class Quake : BaseToggleTroll() {
         fovModifier
     )
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
             val rand = MathUtil.random(0.8f, 1.0f)
             val signed = if (MathUtil.randomBool()) -rand else rand

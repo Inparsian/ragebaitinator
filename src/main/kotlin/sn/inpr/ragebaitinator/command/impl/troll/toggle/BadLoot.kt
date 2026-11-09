@@ -5,9 +5,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Silverfish
 import org.bukkit.event.player.PlayerFishEvent
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerFishSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -17,15 +17,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.INVENTORY,
     icon = Material.FISHING_ROD,
     description = "Makes a player catch silverfish instead of fish.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class BadLoot : BaseToggleTroll(), PlayerFishSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an extremely unlucky fisher(wo)man")
             .put("player", target.name)
             .toString()

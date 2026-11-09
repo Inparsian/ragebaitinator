@@ -7,9 +7,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityShootBowEvent
 import org.bukkit.event.entity.ProjectileLaunchEvent
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -20,15 +20,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.COMBAT,
     icon = Material.BOW,
     description = "That's some amazing accuracy you've got there!",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot")
             .put("player", target.name)
             .toString()

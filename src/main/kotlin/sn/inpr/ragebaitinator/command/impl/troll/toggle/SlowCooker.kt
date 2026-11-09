@@ -7,9 +7,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.FurnaceStartSmeltEvent
 import org.bukkit.event.inventory.InventoryClickEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.FurnaceStartSmeltSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -21,9 +21,6 @@ import java.util.concurrent.ConcurrentHashMap
     category = CommandInfo.Category.WORLD,
     icon = Material.FURNACE,
     description = "A watched pot never boils. Makes the furnaces a player uses take forever to cook.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -39,7 +36,7 @@ class SlowCooker : BaseToggleTroll(), InventoryClickSubscriber, FurnaceStartSmel
     // how long each furnace that's been slowed down was supposed to take, for when it's let go
     private val originals = ConcurrentHashMap<Block, Int>()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c2%The furnaces %c1%%player% %c2%uses will now take forever to cook")
             .put("player", target.name)
             .toString()

@@ -8,9 +8,9 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.concurrent.ConcurrentHashMap
@@ -20,28 +20,16 @@ import java.util.concurrent.ConcurrentHashMap
     category = CommandInfo.Category.COMBAT,
     icon = Material.SWEET_BERRIES,
     description = "Looks like they lost a fight with a skeleton. Sticks fake arrows or bee stingers in a player, which everyone can see.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.STRING,
-            purpose = "Type",
-            description = "What is stuck in them: arrows, stingers or both.",
-            strictCompletion = true,
-            completions = ["arrows", "stingers", "both"],
-            default = "arrows"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Count",
-            description = "How many of each (min 1, max 100).",
-            default = "20"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
+    private val type = param<String>("Type", "What is stuck in them: arrows, stingers or both.", default = "arrows", completions = listOf("arrows", "stingers", "both"), strictCompletion = true)
+    private val count = param<Int>("Count", "How many of each (min 1, max 100).", default = 20, range = 1..100)
+
+    override val syntax = withTarget(type, count)
+
     private companion object {
         const val ARROW_COUNT_INDEX = 12
         const val STINGER_COUNT_INDEX = 13
@@ -51,9 +39,9 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
     private data class Stuck(val arrows: Int, val stingers: Int)
     private val stuck = ConcurrentHashMap<Int, Stuck>()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val type = args.getOrNull(2)?.lowercase() ?: "arrows"
-        val count = (args.getOrNull(3)?.toIntOrNull() ?: 20).coerceIn(1, 100)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val type = args[type]
+        val count = args[count]
         stuck[target.entityId] = Stuck(
             if (type == "stingers") 0 else count,
             if (type == "stingers" || type == "both") count else 0

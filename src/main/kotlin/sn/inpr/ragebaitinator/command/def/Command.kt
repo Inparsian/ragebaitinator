@@ -35,7 +35,7 @@ abstract class BaseCommand {
         }
     }
 
-    abstract fun process(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean
+    abstract fun process(sender: CommandSender, command: Command, label: String, args: Args): Boolean
     open fun onDisable() {}
     open fun onInstantiate() {}
     open fun onReload() {}
@@ -44,10 +44,50 @@ abstract class BaseCommand {
         get() = this::class.java.getAnnotation(CommandInfo::class.java)
             ?: error("${this::class.simpleName} is missing @CommandInfo")
 
+    /** The arguments this command takes, in the order they're typed. They are what [Args] is asked about. */
+    open val syntax: List<Parameter<*>> = emptyList()
+
+    /** An argument that has a value when it isn't given */
+    protected inline fun <reified T : Any> param(
+        purpose: String,
+        description: String = "",
+        default: T,
+        completions: List<String> = emptyList(),
+        strictCompletion: Boolean = false,
+        completionAliases: List<String> = emptyList(),
+    ): Param<T> = Param(T::class, purpose, description, true, completions, strictCompletion, completionAliases, default)
+
+    /** A number that is moved into [range] when it's outside of it */
+    protected inline fun <reified T> param(
+        purpose: String,
+        description: String = "",
+        default: T,
+        range: ClosedRange<T>,
+    ): Param<T> where T : Comparable<T>, T : Any =
+        Param(T::class, purpose, description, true, emptyList(), false, emptyList(), default, range)
+
+    /** An argument that is nothing when it isn't given */
+    protected inline fun <reified T : Any> optional(
+        purpose: String,
+        description: String = "",
+        completions: List<String> = emptyList(),
+        strictCompletion: Boolean = false,
+        completionAliases: List<String> = emptyList(),
+    ): OptionalParam<T> = OptionalParam(T::class, purpose, description, completions, strictCompletion, completionAliases)
+
+    /** An argument that has to be given */
+    protected inline fun <reified T : Any> required(
+        purpose: String,
+        description: String = "",
+        completions: List<String> = emptyList(),
+        strictCompletion: Boolean = false,
+        completionAliases: List<String> = emptyList(),
+    ): Param<T> = Param(T::class, purpose, description, false, completions, strictCompletion, completionAliases, null)
+
     fun stringifySyntax(): String =
-        info.syntax.mapNotNull { syntax ->
+        syntax.mapNotNull { syntax ->
             if (syntax.purpose.isEmpty()) {
-                return@mapNotNull if (syntax.type == CommandSyntax.Type.PLAYER) {
+                return@mapNotNull if (syntax.type == Targets::class) {
                     if (syntax.optional) "[player]" else "<player>"
                 } else null
             }
@@ -63,7 +103,7 @@ abstract class BaseCommand {
                 }
                 .joinToString("")
 
-            val inner = name + syntax.default.takeIf { it.isNotEmpty() }?.let { "=$it" }.orEmpty()
+            val inner = name + syntax.defaultText.takeIf { it.isNotEmpty() }?.let { "=$it" }.orEmpty()
             if (syntax.optional) "[$inner]" else "<$inner>"
         }.joinToString(" ")
 
@@ -78,30 +118,38 @@ abstract class BaseCommand {
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
 
-    // what a command and its parameters are described as can be changed in the language file, and are described by their
-    // annotations otherwise
+    // what a command and its parameters are described as can be changed in the language file, and are described by what
+    // they were declared with otherwise
     val description: String get() = languageOr("description", info.description)
-    fun parameterName(syntax: CommandSyntax): String = languageOr("parameters.${syntax.purpose}.name", syntax.purpose)
-    fun parameterDescription(syntax: CommandSyntax): String = languageOr("parameters.${syntax.purpose}.description", syntax.description)
+    fun parameterName(syntax: Parameter<*>): String = languageOr("parameters.${syntax.purpose}.name", syntax.purpose)
+    fun parameterDescription(syntax: Parameter<*>): String = languageOr("parameters.${syntax.purpose}.description", syntax.description)
 
     fun targetPlayers(sender: CommandSender, input: String): List<Player> = PlayerUtil.targetPlayers(input, sender)
 }
 
 abstract class BaseTroll : BaseCommand() {
+    /** The player (or players) a troll is used on. It's the first argument of every troll */
+    protected val targetParam = required<Targets>("")
+
+    override val syntax: List<Parameter<*>> = listOf(targetParam)
+
+    /** The syntax of a troll that takes more than its target */
+    protected fun withTarget(vararg parameters: Parameter<*>): List<Parameter<*>> = listOf(targetParam) + parameters
+
     open fun getConditions(target: RbPlayer): Conditions? = null
     fun getConditions(target: Player): Conditions? = getConditions(target.rb)
 
-    open fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String? = null
+    open fun init(sender: CommandSender, target: RbPlayer, args: Args): String? = null
 
     override fun process(
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
-        val playerArguments = info.syntax.indices
-            .filter { info.syntax[it].type == CommandSyntax.Type.PLAYER }
-            .map { args.getOrNull(it + 1)?.let { input -> targetPlayers(sender, input) } ?: return false }
+        val playerArguments = syntax
+            .filter { it.type == Targets::class }
+            .map { args.input(it)?.let { input -> targetPlayers(sender, input) } ?: return false }
         val targets = playerArguments.firstOrNull()?.map { it.rb } ?: return false
         if (playerArguments.all { it.isNotEmpty() }) {
             val allTargets = playerArguments.flatten().map { it.rb }.distinctBy { it.uuid }
@@ -169,9 +217,9 @@ abstract class BaseToggleTroll : BaseTroll() {
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
-        val targets: List<RbPlayer> = targetPlayers(sender, args.getOrNull(1) ?: return false)
+        val targets: List<RbPlayer> = targetPlayers(sender, args.input(targetParam) ?: return false)
             .map { it.rb }
         if (targets.isNotEmpty()) {
             targets.forEach { target ->

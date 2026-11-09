@@ -8,9 +8,9 @@ import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
@@ -25,9 +25,6 @@ import kotlin.math.absoluteValue
     category = CommandInfo.Category.WORLD,
     icon = Material.WATER_BUCKET,
     description = "It's not lava it's just lukewarm water",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ]
 )
 class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
     companion object {
@@ -69,7 +66,7 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return by3
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val feet = target.location.add(0.0, -1.0, 0.0)
         val bowl = getBowl(feet)
         val lava = get3x3(feet)

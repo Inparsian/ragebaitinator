@@ -8,9 +8,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
@@ -25,9 +25,6 @@ import kotlin.math.absoluteValue
     category = CommandInfo.Category.WORLD,
     icon = Material.SUSPICIOUS_SAND,
     description = "Conjures a sinkhole beneath a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -74,7 +71,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         runTaskLater({ Blocks.release(owner, blocks) }, 60L)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "sinkhole", SinkholeState(target.location, target.location))
 
         val initCylinder = LocationUtil.cylinder(target.location.toVector().add(Vector(0.0, -2.0, 0.0)), 2.0, 3)

@@ -10,9 +10,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.IronGolem
 import org.bukkit.entity.LivingEntity
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -23,23 +23,17 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.BELL,
     description = "Causes entities around a player to spaz out.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Local",
-            description = "Whether this should only be visible to the player.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Exorcist : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
-            addFlag(target, "local")
+    private val local = param<Boolean>("Local", "Whether this should only be visible to the player.", default = true)
+
+    override val syntax = withTarget(local)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[local]) addFlag(target, "local")
 
         addTaskRandomTimer(target, {
             for (entity in LocationUtil.getEntitiesWithinRadius(target.location, 64.0)) {

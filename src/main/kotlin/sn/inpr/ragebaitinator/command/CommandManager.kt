@@ -1,7 +1,6 @@
 package sn.inpr.ragebaitinator.command
 
 import io.github.classgraph.ClassGraph
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -72,7 +71,7 @@ object CommandManager : CommandExecutor, TabCompleter {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty() && commands.any { it.info.name == args.first() }) {
             val first = commands.first { it.info.name == args.first() }
-            if (!first.process(sender, command, label, args))
+            if (!first.process(sender, command, label, Args(args, first, sender)))
                 first.sendUsage(sender)
             else {
                 val everything = "${command.label} ${args.joinToString(" ")}"
@@ -99,22 +98,11 @@ object CommandManager : CommandExecutor, TabCompleter {
             list.addAll(commands.map { it.info.name })
         } else if (args.size > 1) {
             val command: BaseCommand? = getCommand(args[0])
-            val syntax: Array<CommandSyntax>? = command?.info?.syntax
-
-            if (syntax != null) {
-                for (i in syntax.indices) {
-                    if (i != args.size - 2)
-                        continue
-
-                    val syntaxArg: CommandSyntax = syntax[i]
-                    when (syntaxArg.type) {
-                        CommandSyntax.Type.PLAYER -> list.addAll(Bukkit.getOnlinePlayers().map { it.name })
-                        CommandSyntax.Type.BOOLEAN -> list.addAll(listOf("true", "false"))
-                        CommandSyntax.Type.STRING -> list.addAll(syntaxArg.completions)
-                        else -> {}
-                    }
-                    break
-                }
+            // the first argument after the name of the command is the first parameter
+            val parameter = command?.syntax?.getOrNull(args.size - 2)
+            if (parameter != null) {
+                list.addAll(parameter.argumentType.completions())
+                list.addAll(parameter.completions)
             }
         }
 

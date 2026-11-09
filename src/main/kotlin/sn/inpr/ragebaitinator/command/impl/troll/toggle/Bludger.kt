@@ -6,9 +6,9 @@ import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.entity.Snowball
 import org.bukkit.event.entity.ProjectileHitEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.ProjectileHitSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -18,22 +18,17 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.FIRE_CHARGE,
     description = "Sends a homing fireball after a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "From Shooter",
-            description = "Should the Bludger come from the shooter?",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val fromShooter = args.getOrNull(2)?.toBoolean() ?: true
+    private val fromShooter = param<Boolean>("From Shooter", "Should the Bludger come from the shooter?", default = true)
+
+    override val syntax = withTarget(fromShooter)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val fromShooter = args[fromShooter]
         val bludgerLocation = if (sender is Player && fromShooter)
             sender.eyeLocation.clone().add(sender.eyeLocation.direction.multiply(2))
         else {

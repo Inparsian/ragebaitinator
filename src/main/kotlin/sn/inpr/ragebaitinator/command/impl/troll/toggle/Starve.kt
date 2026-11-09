@@ -2,9 +2,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -13,26 +13,21 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.SURVIVAL,
     icon = Material.ROTTEN_FLESH,
     description = "Starves a player. Yeah.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.LONG,
-            purpose = "Ticks",
-            description = "The amount of ticks per second to decrease the food level by 1. Set to 0 to set hunger to 0 instantly.",
-            default = "0"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Starve : BaseToggleTroll() {
+    private val ticks = param<Long>("Ticks", "The amount of ticks per second to decrease the food level by 1. Set to 0 to set hunger to 0 instantly.", default = 0L, range = 0L..60L)
+
+    override val syntax = withTarget(ticks)
+
     override fun getConditions(target: RbPlayer) = Conditions()
         .notDead(target)
         .put("This player must not already being starving.", "hunger", target.foodLevel <= 0)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val ticks = args.getOrNull(2)?.toLongOrNull()?.coerceIn(0L..60L) ?: 0L
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val ticks = args[ticks]
         return if (ticks > 0) {
             addTaskTimer(target, {
                 if (target.saturation > 0)

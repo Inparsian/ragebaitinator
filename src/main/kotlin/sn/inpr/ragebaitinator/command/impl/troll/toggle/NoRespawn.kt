@@ -5,9 +5,9 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClientStatus
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventReceiveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -16,15 +16,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.SURVIVAL,
     icon = Material.RESPAWN_ANCHOR,
     description = "Prevents a player from respawning.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class NoRespawn : BaseToggleTroll(), PacketEventReceiveSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now STAY DEAD")
             .put("player", target.name)
             .toString()

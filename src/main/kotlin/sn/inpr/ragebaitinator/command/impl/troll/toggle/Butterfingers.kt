@@ -8,9 +8,9 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
@@ -22,26 +22,21 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.INVENTORY,
     icon = Material.SLIME_BALL,
     description = "Greasy hands. The item a player is holding sometimes flies out of their hand when they swing, mine or attack.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Chance",
-            description = "The chance that an action makes them drop their item (min 0, max 1).",
-            default = "0.1"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSubscriber, EntityDamageByEntitySubscriber {
+    private val chance = param<Double>("Chance", "The chance that an action makes them drop their item (min 0, max 1).", default = 0.1, range = 0.0..1.0)
+
+    override val syntax = withTarget(chance)
+
     private companion object {
         const val COOLDOWN_MILLIS = 250L
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        setField(target, "chance", (args.getOrNull(2)?.toDoubleOrNull() ?: 0.1).coerceIn(0.0, 1.0))
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers")
             .put("player", target.name)
             .toString()

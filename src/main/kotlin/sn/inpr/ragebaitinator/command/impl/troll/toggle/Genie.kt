@@ -9,9 +9,9 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -23,9 +23,6 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.CHAT,
     icon = Material.LANTERN,
     description = "Be careful what you wish for :)",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -80,7 +77,7 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String =
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String =
         placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition")
             .put("player", target.name)
             .toString()

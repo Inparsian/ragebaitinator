@@ -5,9 +5,9 @@ import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.command.CommandSender
 import org.bukkit.event.block.BlockBreakEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -18,9 +18,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.DIAMOND_ORE,
     description = "All that glitters is not diamond.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -41,7 +38,7 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
         val faces = listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "fakes", linkedSetOf<Block>())
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now find fake diamonds while mining")
             .put("player", target.name)

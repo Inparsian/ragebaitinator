@@ -7,9 +7,9 @@ import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
@@ -23,9 +23,6 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.WORLD,
     icon = Material.DIRT,
     description = "Buries a player alive.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ]
 )
 class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
     private fun rollbackOwner(player: RbPlayer) = "bury:${player.uuid}"
@@ -55,7 +52,7 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
                 .notInVoid(target)
                 .put("This player must not already be buried.", "alreadyBuried", alreadyBuried(target))
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val location = target.location.clone()
         var buryLocation: Location? = null
         var solidsInRow = 0

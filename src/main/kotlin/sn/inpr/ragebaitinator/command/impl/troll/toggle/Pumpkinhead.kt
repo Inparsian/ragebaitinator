@@ -17,9 +17,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -30,9 +30,6 @@ import java.util.concurrent.ConcurrentHashMap
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.CARVED_PUMPKIN,
     description = "Can't see a thing. Puts a (client-side) pumpkin on a player's head.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -47,7 +44,7 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     private val wearers = ConcurrentHashMap.newKeySet<Int>()
     private fun pumpkin(): ItemStack = ItemStack.builder().type(ItemTypes.CARVED_PUMPKIN).amount(1).build()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         wearers.add(target.entityId)
         show(target, pumpkin())
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head")

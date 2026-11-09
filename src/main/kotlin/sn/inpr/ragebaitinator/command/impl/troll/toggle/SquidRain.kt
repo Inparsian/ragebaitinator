@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.persistence.PersistentDataType
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -20,9 +20,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.INK_SAC,
     description = "Rains squids upon a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -35,7 +32,7 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
     fun mark(entity: Entity) = entity.persistentDataContainer.set( markKey, PersistentDataType.BYTE, 1)
     fun isMarked(entity: Entity) = entity.persistentDataContainer.has(markKey, PersistentDataType.BYTE)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
             val distance = MathUtil.random(3.0, 5.0)
             val yaw = MathUtil.random(0.0, 360.0)

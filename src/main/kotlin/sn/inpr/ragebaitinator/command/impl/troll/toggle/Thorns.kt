@@ -8,9 +8,9 @@ import org.bukkit.damage.DamageType
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -19,16 +19,13 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.COMBAT,
     icon = Material.CACTUS,
     description = "Makes any damage a player deals return to them.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "harmless" ]
 )
 class Thorns : BaseToggleTroll(), EntityDamageByEntitySubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now take damage when they hit someone")
             .put("player", target.name)
             .toString()

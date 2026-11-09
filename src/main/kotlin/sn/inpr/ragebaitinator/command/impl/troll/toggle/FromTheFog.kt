@@ -10,9 +10,9 @@ import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.*
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -25,20 +25,15 @@ import com.github.retrooper.packetevents.protocol.world.Location as PacketLocati
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.PLAYER_HEAD,
     description = "You can't see him, but I promise, he can see you.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Interval",
-            description = "The average amount of seconds between each appearance.",
-            default = "90"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class FromTheFog : BaseToggleTroll() {
+    private val interval = param<Int>("Interval", "The average amount of seconds between each appearance.", default = 90, range = 5..3600)
+
+    override val syntax = withTarget(interval)
+
     private companion object {
         // the account that actually owns the name "Herobrine" wears a different skin these days
         const val SKIN_VALUE = "ewogICJ0aW1lc3RhbXAiIDogMTc5MzkyMDQ5NzU5NSwKICAicHJvZmlsZUlkIiA6ICI2YTk0NGIzZmU1ZTg0NGYwOTRiODkxN2RlODNkNjZiZSIsCiAgInByb2ZpbGVOYW1lIiA6ICJIZXJvYnJpbmVfTUMiLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2VkN2VlYzQ0NmNjOWRlNzRjZmQ3NDI5ZGQ2MDZkOTc0ZDc2YmVhODk2MWIyYzgxMDUxYzY3OGQxMDA5NzFhYyIKICAgIH0KICB9Cn0="
@@ -78,8 +73,8 @@ class FromTheFog : BaseToggleTroll() {
         val team = "rb_fog_${name}"
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        setField(target, "interval", (args.getOrNull(2)?.toIntOrNull() ?: 90).coerceIn(5, 3600))
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "interval", args[interval])
         scheduleAppearance(target)
         return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog")
             .put("player", target.name)

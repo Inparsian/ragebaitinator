@@ -5,9 +5,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -16,22 +16,17 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.SURVIVAL,
     icon = Material.SPIDER_EYE,
     description = "Smells fine, looks fine... Poisons a player the next (or every) time they eat.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Persistent",
-            description = "Should this continue to be active after the player eats something?",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Spoiled : BaseToggleTroll(), PlayerItemConsumeSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val persistent = args.getOrNull(2).toBoolean()
+    private val persistent = param<Boolean>("Persistent", "Should this continue to be active after the player eats something?", default = false)
+
+    override val syntax = withTarget(persistent)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val persistent = args[persistent]
         if (persistent)
             addFlag(target, "persistent")
 

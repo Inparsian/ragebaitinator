@@ -6,9 +6,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -18,20 +18,15 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.ENDERMITE_SPAWN_EGG,
     description = "MY HAND IS INFECTED BY SOME ALIEN PARASITE",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Local",
-            description = "Whether this should only be visible to the player.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class AlienHand : BaseToggleTroll() {
+    private val local = param<Boolean>("Local", "Whether this should only be visible to the player.", default = true)
+
+    override val syntax = withTarget(local)
+
     fun swing(target: RbPlayer, showFor: RbPlayer) {
         // dual wielding was introduced in 1.9. get if the player has an item in their offhand
         // if they do, swing their offhand too
@@ -46,9 +41,8 @@ class AlienHand : BaseToggleTroll() {
         showFor.sendPacket(WrapperPlayServerEntityAnimation(target.entityId, animation))
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
-            addFlag(target, "local")
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[local]) addFlag(target, "local")
 
         addTaskRandomTimer(target, {
             if (hasFlag(target, "local"))

@@ -11,9 +11,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -24,20 +24,15 @@ import java.util.*
     category = CommandInfo.Category.WORLD,
     icon = Material.CLOCK,
     description = "Gradually undoes the block changes a player makes.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Interval",
-            description = "The amount of ticks between each undone block change.",
-            default = "40"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
+    private val interval = param<Int>("Interval", "The amount of ticks between each undone block change.", default = 40, range = 1..1200)
+
+    override val syntax = withTarget(interval)
+
     private companion object {
         // anything past this undoes the oldest change right away instead of letting the queue grow
         const val MAX_PENDING = 512
@@ -51,8 +46,8 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         val exp: Int = 0
     )
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val interval = (args.getOrNull(2)?.toIntOrNull() ?: 40).coerceIn(1, 1200).toLong()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val interval = args[interval].toLong()
         val queue = ArrayDeque<Change>()
         setField(target, "pending", queue)
 

@@ -3,9 +3,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerExpChangeEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerExpChangeSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -14,22 +14,17 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.SURVIVAL,
     icon = Material.EXPERIENCE_BOTTLE,
     description = "Death and taxes. Takes a cut out of every XP orb a player collects.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Rate",
-            description = "The fraction (0 to 1) of every XP gain that gets taxed.",
-            default = "0.5"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Taxman : BaseToggleTroll(), PlayerExpChangeSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val rate = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
+    private val rate = param<Double>("Rate", "The fraction (0 to 1) of every XP gain that gets taxed.", default = 0.5, range = 0.0..1.0)
+
+    override val syntax = withTarget(rate)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val rate = args[rate]
         setField(target, "rate", rate)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now pays %c1%%rate% %c2%income tax on all XP")
             .put("player", target.name)

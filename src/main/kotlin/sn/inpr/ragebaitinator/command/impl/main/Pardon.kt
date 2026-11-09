@@ -4,9 +4,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.Targets
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 
@@ -14,19 +15,23 @@ import sn.inpr.ragebaitinator.utility.ChatUtil.send
     name = "pardon",
     description = "Disables all persistent trolls for a player.",
     aliases = ["stop"],
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false)
-    ]
 )
 class Pardon : BaseCommand() {
+    private val target = required<Targets>("")
+
+    override val syntax = listOf(target)
+
     override fun process(
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
-        val targets = targetPlayers(sender, args.getOrNull(1) ?: return false)
-        if (targets.isNotEmpty()) {
+        if (args.input(target) == null)
+            return false
+
+        val targets = args.getOrNull(target)
+        if (targets != null) {
             targets.forEach { target ->
                 var pardoned = 0
                 for (command in CommandManager.toggleTrolls)
@@ -34,7 +39,7 @@ class Pardon : BaseCommand() {
                 val placeholders = placeholdersOr("success", "%prefix% %c1%%amount% %c2%persistent troll(s) disabled for %c1%%player%")
                     .put("amount", pardoned.toString())
                     .put("player", target.name)
-                send(sender, target, placeholders)
+                send(sender, target.bukkit, placeholders)
             }
         } else {
             send(sender, Placeholders(language.playerNotFound))

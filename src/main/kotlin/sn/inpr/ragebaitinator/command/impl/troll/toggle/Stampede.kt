@@ -11,9 +11,9 @@ import org.bukkit.entity.Creature
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
@@ -25,20 +25,15 @@ private const val PURSUIT_SPEED_MULTIPLIER = 2.4
     category = CommandInfo.Category.HAZARDS,
     icon = Material.COW_SPAWN_EGG,
     description = "Unleashes a herd of cows on a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "From Shooter",
-            description = "Should the cows be spawned from the shooter?",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
+    private val fromShooter = param<Boolean>("From Shooter", "Should the cows be spawned from the shooter?", default = false)
+
+    override val syntax = withTarget(fromShooter)
+
     class CowNavigation(cow: Cow) {
         private val navigation: Any
         private val moveTo: Method
@@ -64,8 +59,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val fromShooter = args.getOrNull(2)?.toBoolean() ?: false
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val fromShooter = args[fromShooter]
         val herdLocation = if (sender is Player && fromShooter && sender.world == target.world)
             sender.location.clone()
         else

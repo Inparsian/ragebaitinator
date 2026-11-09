@@ -8,9 +8,9 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.AsyncPlayerChatEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -20,15 +20,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.DEAD_BUSH,
     description = "Where did everyone go?",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val others = target.others
         if (others.isNotEmpty()) {
             target.sendPacket(WrapperPlayServerDestroyEntities(*others.mapNotNull { it.bukkit?.entityId }.toIntArray()))

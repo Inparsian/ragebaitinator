@@ -5,9 +5,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import sn.inpr.ragebaitinator.Main.Companion.language
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
@@ -18,29 +18,19 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.WORLD,
     icon = Material.BEDROCK,
     description = "Prevents a player from making block changes.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Break",
-            description = "Should the player be prevented from breaking blocks?",
-            default = "true"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Place",
-            description = "Should the player be prevented from placing blocks?",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val mine = args.getOrNull(2)?.toBooleanStrictOrNull() ?: true // literally screw the 'break' keyword
-        val place = args.getOrNull(3)?.toBooleanStrictOrNull() ?: true
+    private val breakParam = param<Boolean>("Break", "Should the player be prevented from breaking blocks?", default = true)
+    private val place = param<Boolean>("Place", "Should the player be prevented from placing blocks?", default = true)
+
+    override val syntax = withTarget(breakParam, place)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val mine = args[breakParam] // literally screw the 'break' keyword
+        val place = args[place]
 
         return if (!mine && !place) {
             removePlayer(target)

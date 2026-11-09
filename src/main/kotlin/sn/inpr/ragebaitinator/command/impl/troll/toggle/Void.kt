@@ -7,9 +7,9 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -21,9 +21,6 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.END_PORTAL_FRAME,
     description = "Banishes a player into the void.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
     ],
@@ -36,7 +33,7 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
         return location
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "location", target.location)
         target.teleport(get65536(target))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void")

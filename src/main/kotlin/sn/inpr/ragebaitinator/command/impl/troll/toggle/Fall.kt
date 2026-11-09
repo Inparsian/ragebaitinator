@@ -5,9 +5,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -16,9 +16,6 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.LEATHER_BOOTS,
     description = "Makes a player fall indefinitely.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -33,7 +30,7 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
         return location.clone().apply { y = highestY.toDouble() }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val highest = getHighestLocation(target.location) ?: return "&cCould not find a location to fall from"
         setField(target, "location", highest.add(0.0, 20.0, 0.0))
         addTaskTimer(target, {

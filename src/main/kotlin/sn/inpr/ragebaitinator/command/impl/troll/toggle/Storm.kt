@@ -13,9 +13,9 @@ import org.bukkit.Material
 import org.bukkit.World
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -27,22 +27,17 @@ import java.util.*
     category = CommandInfo.Category.WORLD,
     icon = Material.LIGHTNING_ROD,
     description = "The perfect weather for sulking.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Interval",
-            description = "About how many seconds are between lightning flashes (min 1, max 60). Set to 0 for no lightning.",
-            default = "8"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val seconds = (args.getOrNull(2)?.toDoubleOrNull() ?: 8.0)
+    private val interval = param<Double>("Interval", "About how many seconds are between lightning flashes (min 1, max 60). Set to 0 for no lightning.", default = 8.0)
+
+    override val syntax = withTarget(interval)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val seconds = args[interval]
         brew(target)
         if (seconds > 0) {
             val interval = (seconds.coerceIn(1.0, 60.0) * 20).toLong()

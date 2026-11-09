@@ -9,9 +9,9 @@ import org.bukkit.event.entity.EntityChangeBlockEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.material.MaterialData
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.EntityChangeBlockSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
@@ -25,9 +25,6 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.ANVIL,
     description = "X marks the spot.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ]
 )
 class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
     private val anvils = mutableMapOf<FallingBlock, RbPlayer>()
@@ -58,7 +55,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         anvil.remove()
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val anvilLocation = LocationUtil.blockify(target.location.clone().add(0.0, 12.0, 0.0), true)
         @Suppress("DEPRECATION")
         val anvil: FallingBlock = target.world.getBlockAt(anvilLocation).world.spawnFallingBlock(anvilLocation, MaterialData(Material.ANVIL))

@@ -3,8 +3,8 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
@@ -14,23 +14,18 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     category = CommandInfo.Category.CHAT,
     icon = Material.BLACK_DYE,
     description = "###############",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Chance",
-            description = "The chance (0 to 1) of each word being censored.",
-            default = "0.3"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "backwards", "yell" ]
 )
 class Censor : BaseChatTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        setField(target, "chance", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.3)
+    private val chance = param<Double>("Chance", "The chance (0 to 1) of each word being censored.", default = 0.3, range = 0.0..1.0)
+
+    override val syntax = withTarget(chance)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being censored")
             .put("player", target.name)
             .toString()

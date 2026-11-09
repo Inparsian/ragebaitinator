@@ -6,9 +6,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityVelocity
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
@@ -18,22 +18,17 @@ import java.util.*
     category = CommandInfo.Category.COMBAT,
     icon = Material.SPECTRAL_ARROW,
     description = "Magnifies a player's velocity when they take damage.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Multiplier",
-            description = "The multiplier to apply to the player's velocity",
-            default = "2"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val multiplier = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0..5.0) ?: 2.0
+    private val multiplier = param<Double>("Multiplier", "The multiplier to apply to the player's velocity", default = 2.0, range = 0.0..5.0)
+
+    override val syntax = withTarget(multiplier)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val multiplier = args[multiplier]
         setField(target, "multiplier", multiplier)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks")
             .put("player", target.name)

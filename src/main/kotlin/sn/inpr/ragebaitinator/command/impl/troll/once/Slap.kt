@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil.vectorRelativeYaw
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -16,41 +16,35 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.STICK,
     description = "Slaps the player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Power",
-            description = "The power of the slap.",
-            default = "2"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.STRING,
-            purpose = "Direction",
-            description = "The direction to slap the player (cardinal, ordinal, backward/forward/left/right, crosshair, sender, random)",
-            strictCompletion = true,
-            completions = [
-                "north", "northeast",
-                "east", "southeast",
-                "south", "southwest",
-                "west", "northwest",
-                "backward", "forward",
-                "left", "right",
-                "crosshair", "sender", "random"
-            ],
-            completionAliases = [
-                "n", "ne", "e", "se", "s", "sw", "w", "nw",
-                "b", "f", "l", "r", "me", "cross", "ch", "c",
-                "rand"
-            ],
-            default = "backward"
-        )
-    ]
 )
 class Slap : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val power: Double = (args.getOrNull(2)?.toDoubleOrNull() ?: 2.0).coerceIn(0.0, 5.0)
-        val direction = args.getOrNull(3) ?: "backward"
+    private val power = param<Double>("Power", "The power of the slap.", default = 2.0, range = 0.0..5.0)
+    private val direction = param<String>(
+        "Direction",
+        "The direction to slap the player (cardinal, ordinal, backward/forward/left/right, crosshair, sender, random)",
+        default = "backward",
+        completions = listOf(
+            "north", "northeast",
+            "east", "southeast",
+            "south", "southwest",
+            "west", "northwest",
+            "backward", "forward",
+            "left", "right",
+            "crosshair", "sender", "random"
+        ),
+        strictCompletion = true,
+        completionAliases = listOf(
+            "n", "ne", "e", "se", "s", "sw", "w", "nw",
+            "b", "f", "l", "r", "me", "cross", "ch", "c",
+            "rand"
+        ),
+    )
+
+    override val syntax = withTarget(power, direction)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val power: Double = args[power]
+        val direction = args[direction]
         val slapVector: Vector = when (direction) {
             "north", "n" -> Vector(0.0, 0.0, -power)
             "northeast", "ne" -> Vector(power, 0.0, -power)

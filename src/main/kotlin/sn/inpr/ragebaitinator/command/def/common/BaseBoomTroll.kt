@@ -14,11 +14,9 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
  * There are two flags for persistence and destructiveness.
  */
 abstract class BaseBoomTroll : BaseToggleTroll() {
-    fun addBoomFlags(target: RbPlayer, args: Array<out String>) {
-        if (args.getOrNull(2).toBoolean())
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+    fun addBoomFlags(target: RbPlayer, persistent: Boolean, destructive: Boolean) {
+        if (persistent) addFlag(target, "persistent")
+        if (destructive) addFlag(target, "destructive")
     }
 
     fun kaboom(event: Event, player: Player, sourceLocation: Location, cancel: Boolean = true): Unit =

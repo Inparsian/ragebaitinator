@@ -5,8 +5,8 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.event.entity.EntityDamageByEntityEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -16,29 +16,19 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.EXPLOSIVES,
     icon = Material.DIAMOND_SWORD,
     description = "Makes the next (or every) entity a player hits explode.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Persistent",
-            description = "Should this continue to be active after the player hits something?",
-            default = "false"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Destructive",
-            description = "Should explosions be destructive?",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val persistent = args.getOrNull(2).toBoolean()
-        addBoomFlags(target, args)
+    private val persistent = param<Boolean>("Persistent", "Should this continue to be active after the player hits something?", default = false)
+    private val destructive = param<Boolean>("Destructive", "Should explosions be destructive?", default = false)
+
+    override val syntax = withTarget(persistent, destructive)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val persistent = args[persistent]
+        addBoomFlags(target, persistent, args[destructive])
 
         return placeholdersOr("init", "%prefix% %c2%%^next% entity %c1%%player% %c2%hits will now explode")
             .put("player", target.name)

@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Animals
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -16,15 +16,12 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.POISONOUS_POTATO,
     description = "Why does everybody hate me? Is it because I'm ugly?",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Repel : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
             val entities = LocationUtil.getEntitiesWithinRadius(target.location, 10.0)
             for (entity in entities) {

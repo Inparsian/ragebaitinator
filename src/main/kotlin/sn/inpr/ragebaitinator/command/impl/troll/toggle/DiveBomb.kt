@@ -3,9 +3,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -14,9 +14,6 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.PHANTOM_MEMBRANE,
     description = "Mayday, mayday!",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -26,7 +23,7 @@ class DiveBomb : BaseToggleTroll() {
         return Conditions().put("This player must be gliding.", "gliding", !target.isGliding)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
             if (target.isGliding)
                 target.velocity = Vector(0.0, -5.0, 0.0)

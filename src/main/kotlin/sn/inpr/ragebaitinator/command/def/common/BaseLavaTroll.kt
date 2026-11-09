@@ -21,8 +21,8 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
 
     private fun rollbackOwner(player: RbPlayer) = "${info.name}:${player.uuid}"
 
-    fun addPersistentFlag(target: RbPlayer, args: Array<out String>) {
-        if (args.getOrNull(2).toBoolean())
+    fun addPersistentFlag(target: RbPlayer, persistent: Boolean) {
+        if (persistent)
             addFlag(target, "persistent")
     }
 

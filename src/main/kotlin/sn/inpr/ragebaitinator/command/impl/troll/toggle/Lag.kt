@@ -9,9 +9,9 @@ import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
@@ -35,26 +35,16 @@ import java.util.concurrent.*
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.REPEATER,
     description = "Makes a player \"lag\".",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.LONG,
-            purpose = "RTT",
-            description = "The round-trip time (RTT) in milliseconds (min 2, max 10000)",
-            default = "300"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.LONG,
-            purpose = "Jitter",
-            description = "The amount of randomness to add to the RTT (min 0, max 100)",
-            default = "5"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Lag : BaseToggleTroll() {
+    private val rtt = param<Long>("RTT", "The round-trip time (RTT) in milliseconds (min 2, max 10000)", default = 300L, range = 2L..10000L)
+    private val jitter = param<Long>("Jitter", "The amount of randomness to add to the RTT (min 0, max 100)", default = 5L, range = 0L..100L)
+
+    override val syntax = withTarget(rtt, jitter)
+
     // Shared scheduler for each duplex
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
@@ -141,9 +131,9 @@ class Lag : BaseToggleTroll() {
         scheduler.shutdownNow()
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val rtt = args.getOrNull(2)?.toLongOrNull()?.coerceIn(2L, 10000L) ?: 300L
-        val jitter = args.getOrNull(3)?.toLongOrNull()?.coerceIn(0L, 100L) ?: 5L
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val rtt = args[rtt]
+        val jitter = args[jitter]
         val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
         setField(target, "session", Session(rtt, jitter, inbound, outbound))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi")

@@ -31,7 +31,7 @@ private fun blocked(troll: BaseTroll, target: Player) = troll.getConditions(targ
 
 // the first parameter of a troll is always the player it's used on, so it's everything after that which has to be
 // filled in, if any of it is required. this is what lets a troll be run with all of its defaults in one click
-private fun runsWithDefaults(command: BaseCommand) = command.info.syntax.drop(1).all { it.optional }
+private fun runsWithDefaults(command: BaseCommand) = command.syntax.drop(1).all { it.optional }
 
 private fun trollName(troll: BaseTroll, enabled: Boolean) = GuiText.text(
     when {
@@ -56,7 +56,7 @@ private fun typeLine(troll: BaseTroll, enabled: Boolean) = if (troll is BaseTogg
 else
     GuiText.text("gui.troll.type.once")
 
-private fun typeName(type: CommandSyntax.Type) = GuiText.text("gui.types.${type.name.lowercase()}")
+private fun typeName(parameter: Parameter<*>) = GuiText.text("gui.types.${parameter.argumentType.key}")
 
 private fun conditionLines(troll: BaseTroll, target: Player): List<String> {
     val conditions = troll.getConditions(target)?.list
@@ -69,24 +69,24 @@ private fun conditionLines(troll: BaseTroll, target: Player): List<String> {
 }
 
 private fun parameterLines(troll: BaseTroll): List<String> {
-    val parameters = troll.info.syntax.filter { it.purpose.isNotEmpty() }
+    val parameters = troll.syntax.filter { it.purpose.isNotEmpty() }
     if (parameters.isEmpty())
         return listOf(GuiText.text("gui.troll.parameters.none"))
 
     return parameters.map { syntax ->
         val default = when {
-            syntax.default.isEmpty() -> ""
-            syntax.type == CommandSyntax.Type.BOOLEAN -> GuiText.text(
-                if (syntax.default.toBoolean()) "gui.troll.parameters.defaultTrue" else "gui.troll.parameters.defaultFalse",
-                "value" to syntax.default
+            syntax.defaultText.isEmpty() -> ""
+            syntax.type == Boolean::class -> GuiText.text(
+                if (syntax.defaultText.toBoolean()) "gui.troll.parameters.defaultTrue" else "gui.troll.parameters.defaultFalse",
+                "value" to syntax.defaultText
             )
-            else -> GuiText.text("gui.troll.parameters.default", "value" to syntax.default)
+            else -> GuiText.text("gui.troll.parameters.default", "value" to syntax.defaultText)
         }
 
         GuiText.text(
             "gui.troll.parameters.line",
             "name" to troll.parameterName(syntax),
-            "type" to typeName(syntax.type),
+            "type" to typeName(syntax),
             "default" to default,
             "required" to if (syntax.optional) "" else GuiText.text("gui.troll.parameters.required")
         )
@@ -206,7 +206,7 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
         val player = event.whoClicked as Player
         val command = CommandManager.getCommand(actionOf(event.currentItem)?.takeIf { it.startsWith(TROLL) }?.removePrefix(TROLL))
         if (command != null) {
-            if (command.info.syntax.any { it.purpose.isNotEmpty() }) {
+            if (command.syntax.any { it.purpose.isNotEmpty() }) {
                 if (event.click == ClickType.LEFT) {
                     TrollMenu(player, command as BaseTroll, target, category).open()
                 } else if (event.click == ClickType.RIGHT && runsWithDefaults(command)) {
@@ -227,12 +227,12 @@ class TrollsMenu(player: Player, val target: Player, val category: CommandInfo.C
 }
 
 class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val category: CommandInfo.Category?) : Menu(player), TrollToggleSubscriber, PlayerQuitSubscriber {
-    val syntax = troll.info.syntax.filter { it.purpose.isNotEmpty() }
+    val syntax = troll.syntax.filter { it.purpose.isNotEmpty() }
     val params: MutableMap<Int, String> = mutableMapOf()
 
     init {
         for ([i, syntax] in syntax.withIndex()) {
-            params[i] = syntax.default
+            params[i] = syntax.defaultText
         }
     }
 
@@ -286,13 +286,13 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
             val description = troll.parameterDescription(syntax)
             val lore = GuiText.lines(
                 "gui.parameters.item.lore",
-                "type" to typeName(syntax.type),
+                "type" to typeName(syntax),
                 "optional" to GuiText.text(if (syntax.optional) "gui.parameters.item.optional" else "gui.parameters.item.required"),
                 multiline = mapOf("description" to
                     if (description.isNotEmpty()) GuiText.wrap(description) else listOf(GuiText.text("gui.parameters.item.noDescription")))
             )
 
-            if (syntax.type == CommandSyntax.Type.BOOLEAN) {
+            if (syntax.type == Boolean::class) {
                 val isTrue = param.toBoolean()
                 if (isTrue) ItemUtil.makeGlow(meta)
                 meta.setDisplayName(GuiText.text(if (isTrue) "gui.parameters.item.nameTrue" else "gui.parameters.item.nameFalse", "name" to name))
@@ -332,7 +332,7 @@ class TrollMenu(player: Player, val troll: BaseTroll, val target: Player, val ca
             else -> {
                 val slotId = paramIndexFromSlot(event.slot) ?: return
                 val field = syntax[slotId]
-                if (field.type == CommandSyntax.Type.BOOLEAN) {
+                if (field.type == Boolean::class) {
                     params[slotId] = (!params.getOrDefault(slotId, "false").toBoolean()).toString()
                     update()
                 } else {

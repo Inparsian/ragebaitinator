@@ -8,9 +8,9 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
@@ -26,21 +26,16 @@ import java.util.*
     category = CommandInfo.Category.WORLD,
     icon = Material.IRON_BARS,
     description = "Puts a player in a cage.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "At Sender",
-            description = "Whether or not to put the cage at your feet/head.",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "void" ]
 )
 class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, BlockBreakSubscriber {
+    private val atSender = param<Boolean>("At Sender", "Whether or not to put the cage at your feet/head.", default = false)
+
+    override val syntax = withTarget(atSender)
+
     private val cage: Structure = Structure()
         .add(Material.COAL_BLOCK, 0, 0, 0)
         .add(Material.COAL_BLOCK, 0, 0, 1)
@@ -108,8 +103,8 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             .put("The cage shouldn't be in the way of anything.", "intersection", intersection)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val atSender = args.getOrNull(2)?.toBoolean() ?: false
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val atSender = args[atSender]
         val cageLocation = if (atSender && sender is Player) {
             val blockified = LocationUtil.blockify(sender.location, true)
             val feet = blockified.clone().add(0.0, -cage.height.toDouble(), 0.0)

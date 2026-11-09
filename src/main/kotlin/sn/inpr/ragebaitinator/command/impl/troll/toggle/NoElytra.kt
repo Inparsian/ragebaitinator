@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityToggleGlideEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityToggleGlideSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -15,15 +15,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.COBWEB,
     description = "Makes a player unable to glide with an elytra.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class NoElytra : BaseToggleTroll(), EntityToggleGlideSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         target.isGliding = false
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer glide with an elytra")
             .put("player", target.name)

@@ -5,9 +5,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSp
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -16,15 +16,12 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.COMPASS,
     description = "Makes a player's compass spaz out.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Lost : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskTimer(target, {
             val x = (target.location.x + MathUtil.random(-10.0, 10.0)).toInt()
             val z = (target.location.z + MathUtil.random(-10.0, 10.0)).toInt()

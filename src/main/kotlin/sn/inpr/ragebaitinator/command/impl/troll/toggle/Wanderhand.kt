@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerItemHeldEvent
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemHeldSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -16,22 +16,17 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.INVENTORY,
     icon = Material.LEAD,
     description = "The hand has a mind of its own. Changing the selected hotbar slot sometimes skips a slot, or jumps to a random one.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Chance",
-            description = "The chance that a slot change goes wrong (min 0, max 1).",
-            default = "0.25"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        setField(target, "chance", (args.getOrNull(2)?.toDoubleOrNull() ?: 0.25).coerceIn(0.0, 1.0))
+    private val chance = param<Double>("Chance", "The chance that a slot change goes wrong (min 0, max 1).", default = 0.25, range = 0.0..1.0)
+
+    override val syntax = withTarget(chance)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself")
             .put("player", target.name)
             .toString()

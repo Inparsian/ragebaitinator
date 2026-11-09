@@ -23,9 +23,9 @@ import org.bukkit.event.player.PlayerTeleportEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.TransformsPlayer
 import sn.inpr.ragebaitinator.listeners.*
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
@@ -40,9 +40,6 @@ import kotlin.math.absoluteValue
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.POTATO,
     description = "Oh hi, how are you holding up? Because I'M A POTATO.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
     ]
@@ -108,7 +105,7 @@ class Potato : BaseToggleTroll(),
             WrapperPlayServerChangeGameState.Reason.CHANGE_GAME_MODE, mode.id.toFloat()))
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         // once the potato is registered, target.entity (and everything derived from it) is the potato, so anything
         // meant for the player itself has to go through the Bukkit player
         val player = target.bukkit ?: error("${target.name} is not online")

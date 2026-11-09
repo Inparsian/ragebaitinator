@@ -2,9 +2,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -13,9 +13,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.SUGAR,
     description = "Gotta go fast. Or slow. I don't know.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -30,7 +27,7 @@ class RandomSpeed : BaseToggleTroll() {
     }
 
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         // the walking and flying speeds they had before
         setField(target, "originalSpeeds", target.walkSpeed to target.flySpeed)
         addTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)

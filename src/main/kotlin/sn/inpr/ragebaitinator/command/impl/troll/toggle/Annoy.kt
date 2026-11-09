@@ -2,9 +2,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -12,15 +12,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.VILLAGER_SPAWN_EGG,
     description = "Hrmm. Annoys a player with villager sounds.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Annoy : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         addTaskRandomTimer(target, {
             target.playSound(target.location, "entity.villager.ambient", 1f, 1f)
         }, 0, 100, 200, true)

@@ -4,9 +4,9 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityResurrectEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityResurrectSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 
@@ -15,15 +15,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.INVENTORY,
     icon = Material.TOTEM_OF_UNDYING,
     description = "Makes a player's totem(s) of undying not work.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class NoTotem : BaseToggleTroll(), EntityResurrectSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
         = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s totems are now chinese counterfeits")
             .put("player", target.name)
             .toString()

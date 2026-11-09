@@ -5,9 +5,9 @@ import org.bukkit.block.Block
 import org.bukkit.block.TileState
 import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerMoveEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import kotlin.math.floor
@@ -17,20 +17,15 @@ import kotlin.math.floor
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.GOLD_BLOCK,
     description = "Everything they touch turns to gold. Well, the floor does.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Local",
-            description = "Whether this should only be visible to the player.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
+    private val local = param<Boolean>("Local", "Whether this should only be visible to the player.", default = true)
+
+    override val syntax = withTarget(local)
+
     private companion object {
         // the gold only exists on clients, so past this the oldest blocks revert to keep the trail from growing forever
         const val MAX_TRAIL = 1024
@@ -38,9 +33,8 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
 
     private val gold = Material.GOLD_BLOCK.createBlockData()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
-            addFlag(target, "local")
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[local]) addFlag(target, "local")
 
         setField(target, "trail", linkedSetOf<Block>())
         return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold")

@@ -5,9 +5,9 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBl
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -17,25 +17,19 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.WORLD,
     icon = Material.CRACKED_STONE_BRICKS,
     description = "Naturally \"breaks\" blocks around a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Local",
-            description = "Whether this should only be visible to the player.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Crumble : BaseToggleTroll() {
+    private val local = param<Boolean>("Local", "Whether this should only be visible to the player.", default = true)
+
+    override val syntax = withTarget(local)
+
     data class CrumbleState(val entityId: Int, val stage: Byte, val vector: Vector)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
-            addFlag(target, "local")
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[local]) addFlag(target, "local")
 
         setField(target, "blocks", mutableSetOf<CrumbleState>())
 

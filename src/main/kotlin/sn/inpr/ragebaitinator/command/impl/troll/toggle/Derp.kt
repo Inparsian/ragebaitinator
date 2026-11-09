@@ -3,9 +3,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerPlayerRotation
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -14,22 +14,17 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.SKELETON_SKULL,
     description = "Something is off about their neck. Makes a player's head spasm every so often.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Interval",
-            description = "The amount of seconds between each spasm (min 0.1, max 10).",
-            default = "2"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Derp : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val seconds = (args.getOrNull(2)?.toDoubleOrNull() ?: 2.0).coerceIn(0.1, 10.0)
+    private val interval = param<Double>("Interval", "The amount of seconds between each spasm (min 0.1, max 10).", default = 2.0, range = 0.1..10.0)
+
+    override val syntax = withTarget(interval)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val seconds = args[interval]
         val period = (seconds * 20).toLong()
         addTaskTimer(target, { spasm(target) }, period, period)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s head is now spasming")

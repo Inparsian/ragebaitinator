@@ -5,9 +5,9 @@ import org.bukkit.command.CommandSender
 import org.bukkit.event.player.PlayerBucketEmptyEvent
 import org.bukkit.event.player.PlayerBucketFillEvent
 import sn.inpr.ragebaitinator.Main.Companion.language
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerBucketEmptySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerBucketFillSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
@@ -18,29 +18,19 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     category = CommandInfo.Category.WORLD,
     icon = Material.BUCKET,
     description = "Prevents a player from emptying or filling buckets.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Empty",
-            description = "Should the player be prevented from emptying buckets?",
-            default = "true"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Fill",
-            description = "Should the player be prevented from filling buckets?",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFillSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val empty = args.getOrNull(2)?.toBooleanStrictOrNull() ?: true
-        val fill = args.getOrNull(3)?.toBooleanStrictOrNull() ?: true
+    private val empty = param<Boolean>("Empty", "Should the player be prevented from emptying buckets?", default = true)
+    private val fill = param<Boolean>("Fill", "Should the player be prevented from filling buckets?", default = true)
+
+    override val syntax = withTarget(empty, fill)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val empty = args[empty]
+        val fill = args[fill]
 
         return if (!empty && !fill) {
             removePlayer(target)

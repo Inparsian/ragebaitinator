@@ -3,9 +3,9 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.*
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -14,22 +14,15 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.DISPENSER,
     description = "Fires projectiles from thin air at a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.STRING,
-            completions = ["arrow", "snowball", "egg", "fireball"],
-            strictCompletion = true,
-            purpose = "Projectile",
-            description = "The projectile to fire",
-            default = "arrow"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Bomb : BaseToggleTroll() {
+    private val projectile = param<String>("Projectile", "The projectile to fire", default = "arrow", completions = listOf("arrow", "snowball", "egg", "fireball"), strictCompletion = true)
+
+    override val syntax = withTarget(projectile)
+
     companion object {
         val types: List<Class<out Projectile>> = listOf(
             Arrow::class.java,
@@ -39,12 +32,8 @@ class Bomb : BaseToggleTroll() {
         )
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        val type: Class<out Projectile> = if (args.size > 2) {
-            types.firstOrNull { it.simpleName.equals(args[2], ignoreCase = true) } ?: types.first()
-        } else {
-            Arrow::class.java
-        }
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val type: Class<out Projectile> = types.firstOrNull { it.simpleName.equals(args[projectile], ignoreCase = true) } ?: types.first()
 
         setField(target, "projectileType", type)
 

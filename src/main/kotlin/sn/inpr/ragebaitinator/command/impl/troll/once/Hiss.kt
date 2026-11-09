@@ -6,9 +6,9 @@ import com.github.retrooper.packetevents.util.Vector3d
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSoundEffect
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
@@ -17,12 +17,9 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.CREEPER_SPAWN_EGG,
     description = "Plays a creeper hiss sound from directly behind the player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ]
 )
 class Hiss : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val behind = target.location.toVector()
             .add(LocationUtil.vectorRelativeYaw(target, 180, 2.0))
         val position = Vector3d(behind.x, behind.y, behind.z)
