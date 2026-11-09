@@ -17,6 +17,7 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
+import org.bukkit.profile.PlayerProfile
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -43,25 +44,48 @@ object PlayerUtil {
         return enabled
     }
 
-    fun getHead(name: String): ItemStack {
+    /**
+     * The head of a player. This is looked up by name only for a player who isn't known to the server, and only where
+     * there is something to look them up in
+     */
+    fun getHead(name: String): ItemStack = head(name, Bukkit.getPlayerExact(name)?.playerProfile)
+
+    fun getHead(player: OfflinePlayer): ItemStack {
+        val name = player.name ?: return ItemStack(Material.BARRIER)
+        return head(name, (player as? Player)?.playerProfile)
+    }
+
+    private fun head(name: String, profile: PlayerProfile?): ItemStack {
         val head = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
             // This is not deprecated <1.13
             @Suppress("DEPRECATION")
             ItemStack(Reflection.getMaterial("SKULL_ITEM") ?: return ItemStack(Material.BARRIER), 1, 3.toShort())
         else
             ItemStack(Material.PLAYER_HEAD, 1)
-        val meta: SkullMeta = head.itemMeta as SkullMeta
-        // IGNORE DEPRECATION WARNING!!! setOwnerPlayer fetches skins sync!!!
-        @Suppress("DEPRECATION")
-        meta.owner = name
-        meta.setDisplayName("§f$name")
-        head.itemMeta = meta
-        return head
-    }
 
-    fun getHead(player: OfflinePlayer): ItemStack {
-        val name = player.name ?: return ItemStack(Material.BARRIER)
-        return getHead(name)
+        // Asking for a skin must never be able to stop the head from being made. A name that's looked up has to be
+        // something that exists, and on a server that isn't online-mode most of them have never had an account, so
+        // there is nothing to find (and no point asking). Those get the default head
+        val skinned = runCatching {
+            val meta = head.itemMeta as SkullMeta
+            meta.setDisplayName("§f$name")
+            when {
+                profile != null -> meta.ownerProfile = profile
+                // IGNORE DEPRECATION WARNING!!! setOwningPlayer fetches skins sync!!!
+                Bukkit.getOnlineMode() -> @Suppress("DEPRECATION")
+                meta.owner = name
+            }
+            head.itemMeta = meta
+        }
+
+        if (skinned.isFailure) {
+            LogUtil.info("&cCouldn't get the skin for the head of $name, using the default one: ${skinned.exceptionOrNull()}")
+            val meta = head.itemMeta as SkullMeta
+            meta.setDisplayName("§f$name")
+            head.itemMeta = meta
+        }
+
+        return head
     }
 
     fun isFireworkBoost(event: PlayerInteractEvent): Boolean {
