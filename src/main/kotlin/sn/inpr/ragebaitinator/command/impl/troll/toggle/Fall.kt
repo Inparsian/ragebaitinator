@@ -10,7 +10,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
 
 @CommandInfo(
     name = "fall",
@@ -25,8 +24,6 @@ import java.util.*
     ]
 )
 class Fall : BaseToggleTroll(), EntityDamageSubscriber {
-    val locations: MutableMap<UUID, Location> = mutableMapOf()
-
     fun getHighestLocation(location: Location): Location? {
         val world = location.world ?: return null
         var highestY = Int.MIN_VALUE
@@ -38,24 +35,20 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val highest = getHighestLocation(target.location) ?: return "&cCould not find a location to fall from"
-        locations[target.uuid] = highest.add(0.0, 20.0, 0.0)
+        setField(target, "location", highest.add(0.0, 20.0, 0.0))
         addTaskTimer(target, {
-            val newLocation = locations[target.uuid] ?: return@addTaskTimer
+            val newLocation = getField<Location>(target, "location") ?: return@addTaskTimer
             val currentLocation = target.location
             if (currentLocation.world != newLocation.world || currentLocation.y < newLocation.y - 15 || target.isOnGround) {
                 val highest = getHighestLocation(currentLocation) ?: return@addTaskTimer
                 val destination = highest.add(0.0, 20.0, 0.0).setDirection(currentLocation.direction)
-                locations[target.uuid] = destination
+                setField(target, "location", destination)
                 target.teleportRetainVelocity(destination)
             }
         }, 0, 1, true)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever")
             .put("player", target.name)
             .toString()
-    }
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        locations.remove(player.uuid)
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String

@@ -8,8 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerExpChangeSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "taxman",
@@ -30,11 +28,9 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Taxman : BaseToggleTroll(), PlayerExpChangeSubscriber {
-    private val rates = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val rate = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
-        rates[target.uuid] = rate
+        setField(target, "rate", rate)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now pays %c1%%rate% %c2%income tax on all XP")
             .put("player", target.name)
             .put("rate", "${(rate * 100).toInt()}%")
@@ -46,15 +42,11 @@ class Taxman : BaseToggleTroll(), PlayerExpChangeSubscriber {
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        rates.remove(player.uuid)
-    }
-
     override fun onPlayerExpChange(event: PlayerExpChangeEvent) {
         if (!hasPlayer(event.player) || event.amount <= 0)
             return
 
         // the house always wins, so this rounds down what the player gets to keep
-        event.amount = (event.amount * (1.0 - (rates[event.player.uniqueId] ?: 0.5))).toInt()
+        event.amount = (event.amount * (1.0 - (getField<Double>(event.player, "rate") ?: 0.5))).toInt()
     }
 }

@@ -32,11 +32,9 @@ import java.util.*
     ]
 )
 class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
-    private val multipliers = mutableMapOf<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val multiplier = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0..5.0) ?: 2.0
-        multipliers[target.uuid] = multiplier
+        setField(target, "multiplier", multiplier)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks")
             .put("player", target.name)
             .put("multiplier", multiplier.toString())
@@ -47,10 +45,6 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s velocity is no longer being magnified")
             .put("player", target.name)
             .toString()
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        multipliers.remove(player.uuid)
-    }
 
     fun markDamaged(uuid: UUID) {
         addFlag(uuid, "damaged")
@@ -70,7 +64,7 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
                         markDamaged(uuid)
                 }
                 PacketType.Play.Server.ENTITY_VELOCITY -> if (removeFlag(uuid, "damaged")) {
-                    val multiplier = multipliers[uuid] ?: 2.0 // saftey
+                    val multiplier = getField<Double>(uuid, "multiplier") ?: 2.0 // saftey
                     val wrapper = WrapperPlayServerEntityVelocity(event)
                     wrapper.velocity = wrapper.velocity.multiply(multiplier)
                     removeTask(uuid)

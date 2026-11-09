@@ -144,8 +144,15 @@ fun interface TransformsPlayer {
 }
 
 abstract class BaseToggleTroll : BaseTroll() {
-    internal val players: Map<RbPlayer, MutableSet<String>>
+    /** Every player this troll is toggled on, along with their respective field values */
+    internal val players: Map<RbPlayer, MutableMap<String, Any>>
         field = ConcurrentHashMap()
+
+    /** The fields of a player that is being removed so that they stay readable while onRemovePlayer runs */
+    private val detached = ConcurrentHashMap<RbPlayer, MutableMap<String, Any>>()
+
+    // concurrent maps can't hold null, so this stands in for it
+    private object NullValue
 
     internal val tasks: Map<RbPlayer, BukkitTask>
         field = mutableMapOf()
@@ -195,7 +202,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                 }
 
                 val had = this.hasPlayer(target)
-                if (!had) players[target] = mutableSetOf()
+                if (!had) players[target] = ConcurrentHashMap()
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had)
                     removePlayer(target, "")
@@ -215,26 +222,68 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun hasPlayer(player: Player): Boolean = hasPlayer(player.rb)
     fun hasPlayer(uuid: UUID): Boolean = hasPlayer(RbPlayer(uuid))
 
-    fun addFlag(player: RbPlayer, flag: String): Boolean? = players[player]?.add(flag)
-    fun addFlag(uuid: UUID, flag: String): Boolean? = addFlag(RbPlayer(uuid), flag)
-    fun hasFlag(player: RbPlayer, flag: String): Boolean = players[player]?.contains(flag) ?: false
-    fun hasFlag(player: Player, flag: String): Boolean = hasFlag(player.rb, flag)
-    fun hasFlag(uuid: UUID, flag: String): Boolean = hasFlag(RbPlayer(uuid), flag)
-    fun removeFlag(player: RbPlayer, flag: String): Boolean = players[player]?.remove(flag) ?: false
-    fun removeFlag(uuid: UUID, flag: String): Boolean = removeFlag(RbPlayer(uuid), flag)
+    private fun fieldsOf(player: RbPlayer): MutableMap<String, Any>? = players[player] ?: detached[player]
+
+    fun hasField(player: RbPlayer, name: String): Boolean = fieldsOf(player)?.containsKey(name) == true
+    fun hasField(player: Player, name: String): Boolean = hasField(player.rb, name)
+    fun hasField(uuid: UUID, name: String): Boolean = hasField(RbPlayer(uuid), name)
+
+    fun setField(player: RbPlayer, name: String, value: Any?) = players[player]?.put(name, value ?: NullValue)
+    fun setField(player: Player, name: String, value: Any?) = setField(player.rb, name, value)
+    fun setField(uuid: UUID, name: String, value: Any?) = setField(RbPlayer(uuid), name, value)
+
+    inline fun <reified T> getField(player: RbPlayer, name: String): T? = rawField(player, name) as T?
+    inline fun <reified T> getField(player: Player, name: String): T? = getField(player.rb, name)
+    inline fun <reified T> getField(uuid: UUID, name: String): T? = getField(RbPlayer(uuid), name)
+
+    inline fun <reified T> takeField(player: RbPlayer, name: String): T? = rawTakeField(player, name) as T?
+    inline fun <reified T> takeField(player: Player, name: String): T? = takeField(player.rb, name)
+    inline fun <reified T> takeField(uuid: UUID, name: String): T? = takeField(RbPlayer(uuid), name)
+
+    fun removeField(player: RbPlayer, name: String): Boolean = fieldsOf(player)?.remove(name) != null
+    fun removeField(uuid: UUID, name: String): Boolean = removeField(RbPlayer(uuid), name)
+
+    inline fun <reified T> fieldEntries(name: String): Sequence<Pair<RbPlayer, T>> = rawFieldEntries(name).map { [player, value] -> player to value as T }
+    inline fun <reified T> fieldValues(name: String): Sequence<T> = rawFieldEntries(name).map { it.second as T }
+
+    @PublishedApi
+    internal fun rawField(player: RbPlayer, name: String): Any? = fieldsOf(player)?.get(name)?.takeIf { it !== NullValue }
+
+    @PublishedApi
+    internal fun rawTakeField(player: RbPlayer, name: String): Any? = fieldsOf(player)?.remove(name)?.takeIf { it !== NullValue }
+
+    @PublishedApi
+    internal fun rawFieldEntries(name: String): Sequence<Pair<RbPlayer, Any>> = players.asSequence().mapNotNull { [player, fields] ->
+        fields[name]?.takeIf { it !== NullValue }?.let { player to it }
+    }
+
+    // Flags are fields without a value
+    fun addFlag(player: RbPlayer, flag: String) = setField(player, flag, null)
+    fun addFlag(player: Player, flag: String) = setField(player, flag, null)
+    fun addFlag(uuid: UUID, flag: String) = setField(uuid, flag, null)
+    fun hasFlag(player: RbPlayer, flag: String): Boolean = hasField(player, flag)
+    fun hasFlag(player: Player, flag: String): Boolean = hasField(player, flag)
+    fun hasFlag(uuid: UUID, flag: String): Boolean = hasField(uuid, flag)
+    fun removeFlag(player: RbPlayer, flag: String): Boolean = removeField(player, flag)
+    fun removeFlag(uuid: UUID, flag: String): Boolean = removeField(uuid, flag)
 
     open fun onRemovePlayer(player: RbPlayer, reason: String) {}
 
     fun removeTask(player: RbPlayer): Unit? = tasks.remove(player)?.cancel()
     fun removeTask(uuid: UUID): Unit? = removeTask(RbPlayer(uuid))
     fun removePlayer(player: RbPlayer, reason: String): Boolean {
-        if (players.remove(player) != null) {
-            removeTask(player)
+        // the player stops counting as toggled before onRemovePlayer runs, which relies on that, but the fields stay
+        // readable until it's done
+        val fields = players.remove(player) ?: return false
+        removeTask(player)
+        detached[player] = fields
+        try {
             onRemovePlayer(player, reason)
-            broadcastGuiUpdate()
-            return true
+        } finally {
+            detached.remove(player)
         }
-        return false
+        broadcastGuiUpdate()
+        return true
     }
     fun removePlayer(player: RbPlayer): Boolean = removePlayer(player, "")
     fun removePlayer(player: Player, reason: String): Boolean = removePlayer(player.rb, reason)
@@ -243,15 +292,8 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun removePlayer(uuid: UUID): Boolean = removePlayer(RbPlayer(uuid))
 
     fun clearPlayers(): Boolean {
-        for (player in players.keys) {
-            if (players.remove(player) == null)
-                return false
-            else {
-                removeTask(player)
-                broadcastGuiUpdate()
-                onRemovePlayer(player, "cleared")
-            }
-        }
+        for (player in players.keys.toList())
+            removePlayer(player, "cleared")
         return true
     }
 

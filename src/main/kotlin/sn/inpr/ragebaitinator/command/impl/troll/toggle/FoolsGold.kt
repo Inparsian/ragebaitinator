@@ -12,8 +12,6 @@ import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "foolsgold",
@@ -43,10 +41,8 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
         val faces = listOf(BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST)
     }
 
-    private val fakes = ConcurrentHashMap<UUID, LinkedHashSet<Block>>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        fakes[target.uuid] = linkedSetOf()
+        setField(target, "fakes", linkedSetOf<Block>())
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now find fake diamonds while mining")
             .put("player", target.name)
             .toString()
@@ -63,7 +59,7 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
     }
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        fakes.remove(player.uuid)?.forEach { restore(player, it) }
+        takeField<LinkedHashSet<Block>>(player, "fakes")?.forEach { restore(player, it) }
     }
 
     private fun vein(center: Block): List<Block> {
@@ -82,7 +78,7 @@ class FoolsGold : BaseToggleTroll(), BlockBreakSubscriber {
 
     override fun onBlockBreak(event: BlockBreakEvent) {
         val player = event.player
-        val tracked = fakes[player.uniqueId]
+        val tracked = getField<LinkedHashSet<Block>>(player, "fakes")
         if (event.isCancelled || tracked == null || !MathUtil.randomBool(CHANCE))
             return
 

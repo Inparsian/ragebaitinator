@@ -8,7 +8,6 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
 import kotlin.math.absoluteValue
 
 @CommandInfo(
@@ -32,15 +31,13 @@ import kotlin.math.absoluteValue
 class Rewind : BaseToggleTroll() {
     data class RewindEntry(val originalTime: Long, val currentTime: Long, val speed: Int)
 
-    private val times: MutableMap<UUID, RewindEntry> = mutableMapOf()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val originalOffset = target.playerTimeOffset
         val speed = args.getOrNull(2)?.toIntOrNull()?.coerceIn(-1500..1500) ?: 15
-        times[target.uuid] = RewindEntry(originalOffset, originalOffset, speed)
+        setField(target, "entry", RewindEntry(originalOffset, originalOffset, speed))
 
         addTaskTimer(target, {
-            val entry = times[target.uuid] ?: return@addTaskTimer
+            val entry = getField<RewindEntry>(target, "entry") ?: return@addTaskTimer
             val dayOffset = if (entry.currentTime <= -target.world.fullTime) 24000 else 0
             val deducted = entry.currentTime + dayOffset - entry.speed
 
@@ -49,7 +46,7 @@ class Rewind : BaseToggleTroll() {
             // so we use both to ensure that changes are swift and retained
             target.setPlayerTime(deducted, true)
             target.sendPacket(WrapperPlayServerTimeUpdate(target.world.time, target.playerTime))
-            times[target.uuid] = RewindEntry(entry.originalTime, deducted, speed)
+            setField(target, "entry", RewindEntry(entry.originalTime, deducted, speed))
         }, 0, 1, true)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick")
@@ -66,7 +63,7 @@ class Rewind : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        val entry = times.remove(player.uuid) ?: return
+        val entry = takeField<RewindEntry>(player, "entry") ?: return
         if (entry.originalTime == 0L)
             player.resetPlayerTime()
         else

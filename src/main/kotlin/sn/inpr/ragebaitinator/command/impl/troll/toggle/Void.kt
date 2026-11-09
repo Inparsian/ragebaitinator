@@ -15,7 +15,6 @@ import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
-import java.util.*
 
 @CommandInfo(
     name = "void",
@@ -31,8 +30,6 @@ import java.util.*
     incompatible = [ "cage" ]
 )
 class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
-    private val locations = mutableMapOf<UUID, Location>()
-
     fun get65536(player: RbPlayer): Location {
         val location = player.location.clone()
         location.y = -65536.0
@@ -40,7 +37,7 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        locations[target.uuid] = target.location
+        setField(target, "location", target.location)
         target.teleport(get65536(target))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void")
             .put("player", target.name)
@@ -55,7 +52,7 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
         player.fallDistance = 0f // prevents an oopsie
-        locations.remove(player.uuid)?.let { player.teleport(it) }
+        takeField<Location>(player, "location")?.let { player.teleport(it) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {

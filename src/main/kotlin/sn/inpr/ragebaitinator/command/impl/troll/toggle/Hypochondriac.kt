@@ -8,8 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "hypochondriac",
@@ -24,9 +22,6 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Hypochondriac : BaseToggleTroll() {
-    // everyone whose health bar is lying to them right now
-    private val scared = ConcurrentHashMap.newKeySet<UUID>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         scheduleScare(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while")
@@ -40,7 +35,7 @@ class Hypochondriac : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (scared.remove(player.uuid) && reason != "logout")
+        if (removeFlag(player, "scared") && reason != "logout")
             showRealHealth(player)
     }
 
@@ -55,12 +50,12 @@ class Hypochondriac : BaseToggleTroll() {
             return
         }
 
-        scared.add(player.uuid)
+        addFlag(player, "scared")
         player.sendPacket(
             WrapperPlayServerUpdateHealth(MathUtil.random(1f, 4f), player.foodLevel, player.saturation)
         )
         addTask(player, {
-            if (scared.remove(player.uuid))
+            if (removeFlag(player, "scared"))
                 showRealHealth(player)
             scheduleScare(player)
         }, MathUtil.random(30L, 80L))

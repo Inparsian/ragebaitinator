@@ -10,8 +10,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemHeldSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "wanderhand",
@@ -32,10 +30,8 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
-    private val chances = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        chances[target.uuid] = (args.getOrNull(2)?.toDoubleOrNull() ?: 0.25).coerceIn(0.0, 1.0)
+        setField(target, "chance", (args.getOrNull(2)?.toDoubleOrNull() ?: 0.25).coerceIn(0.0, 1.0))
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself")
             .put("player", target.name)
             .toString()
@@ -46,13 +42,9 @@ class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        chances.remove(player.uuid)
-    }
-
     override fun onPlayerItemHeld(event: PlayerItemHeldEvent) {
         val player = event.player
-        val chance = chances[player.uniqueId] ?: return
+        val chance = getField<Double>(player, "chance") ?: return
         if (!MathUtil.randomBool(chance))
             return
 
@@ -72,7 +64,7 @@ class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
         // the server applies the slot that the client asked for after this event,
         // so it can only be changed after it
         Main.runTask {
-            if (player.isOnline && chances.containsKey(player.uniqueId))
+            if (player.isOnline && hasField(player, "chance"))
                 player.inventory.heldItemSlot = slot
         }
     }

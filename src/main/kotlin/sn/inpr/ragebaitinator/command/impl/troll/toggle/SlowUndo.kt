@@ -18,7 +18,6 @@ import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "slowundo",
@@ -52,12 +51,10 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         val exp: Int = 0
     )
 
-    private val pending = ConcurrentHashMap<UUID, ArrayDeque<Change>>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val interval = (args.getOrNull(2)?.toIntOrNull() ?: 40).coerceIn(1, 1200).toLong()
         val queue = ArrayDeque<Change>()
-        pending[target.uuid] = queue
+        setField(target, "pending", queue)
 
         addTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone")
@@ -73,7 +70,7 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they
     // get what those blocks would have dropped instead
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        val queue = pending.remove(player.uuid) ?: return
+        val queue = takeField<ArrayDeque<Change>>(player, "pending") ?: return
         for (change in queue)
             release(change)
     }
@@ -108,7 +105,7 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
     }
 
     private fun track(player: Player, change: Change) {
-        val queue = pending[player.uniqueId] ?: return
+        val queue = getField<ArrayDeque<Change>>(player, "pending") ?: return
         queue.addLast(change)
         if (queue.size > MAX_PENDING)
             undo(queue.pollFirst())

@@ -136,10 +136,8 @@ class Lag : BaseToggleTroll() {
         PacketEvents.getAPI().eventManager.registerListener(LagPacketListener(this))
     }
 
-    private val sessions = ConcurrentHashMap<UUID, Session>()
-
     override fun onDisable() {
-        sessions.forEach { [_, session] -> session.inbound.close(); session.outbound.close() }
+        fieldValues<Session>("session").forEach { session -> session.inbound.close(); session.outbound.close() }
         scheduler.shutdownNow()
     }
 
@@ -147,7 +145,7 @@ class Lag : BaseToggleTroll() {
         val rtt = args.getOrNull(2)?.toLongOrNull()?.coerceIn(2L, 10000L) ?: 300L
         val jitter = args.getOrNull(3)?.toLongOrNull()?.coerceIn(0L, 100L) ?: 5L
         val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
-        sessions[target.uuid] = Session(rtt, jitter, inbound, outbound)
+        setField(target, "session", Session(rtt, jitter, inbound, outbound))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi")
             .put("player", target.name)
             .toString()
@@ -159,10 +157,9 @@ class Lag : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        sessions[player.uuid]?.let { session ->
+        getField<Session>(player, "session")?.let { session ->
             session.inbound.close()
             session.outbound.close()
-            sessions.remove(player.uuid, session)
         }
     }
 
@@ -203,7 +200,7 @@ class Lag : BaseToggleTroll() {
 
     // Add jitter for realism
     fun jitteryOneTripDelay(uuid: UUID): Long {
-        val session = sessions[uuid] ?: return 0
+        val session = getField<Session>(uuid, "session") ?: return 0
         // Divide by 2 to represent one trip delay
         return (session.rtt + MathUtil.random(-session.jitter, session.jitter)) / 2
     }
@@ -212,9 +209,10 @@ class Lag : BaseToggleTroll() {
         // We are only really interested in delaying the PLAY state
         if (event == null || event.isCancelled || event.connectionState != ConnectionState.PLAY)
             return
-        val session = sessions[event.user.uuid] ?: return
+        val uuid = event.user.uuid ?: return
+        val session = getField<Session>(uuid, "session") ?: return
         val packet = snapshot(event)
-        if (session.inbound.enqueue(jitteryOneTripDelay(event.user.uuid)) {
+        if (session.inbound.enqueue(jitteryOneTripDelay(uuid)) {
             when (event) {
                 is PacketReceiveEvent -> event.user.receivePacketSilently(Unpooled.wrappedBuffer(packet))
                 is PacketSendEvent -> event.user.sendPacketSilently(Unpooled.wrappedBuffer(packet))

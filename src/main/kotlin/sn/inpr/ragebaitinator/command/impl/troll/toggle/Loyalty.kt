@@ -12,7 +12,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
 
 @CommandInfo(
     name = "loyalty",
@@ -27,14 +26,12 @@ import java.util.*
     ]
 )
 class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
-    val homing: MutableMap<UUID, MutableSet<Entity>> = mutableMapOf()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        homing[target.uuid] = mutableSetOf()
+        setField(target, "homing", mutableSetOf<Entity>())
         addTaskTimer(target, {
-            if (!homing.containsKey(target.uuid)) return@addTaskTimer
+            if (!hasField(target, "homing")) return@addTaskTimer
 
-            val projectiles = homing[target.uuid]?.iterator() ?: return@addTaskTimer
+            val projectiles = getField<MutableSet<Entity>>(target, "homing")?.iterator() ?: return@addTaskTimer
             while (projectiles.hasNext()) {
                 val projectile = projectiles.next()
                 if (projectile.isOnGround || projectile.isDead) {
@@ -66,22 +63,18 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity as? Player ?: return
         if (hasPlayer(player))
-            homing[player.uniqueId]?.add(event.projectile)
+            getField<MutableSet<Entity>>(player, "homing")?.add(event.projectile)
     }
 
     override fun onProjectileLaunch(event: ProjectileLaunchEvent) {
         val player = event.entity.shooter as? Player ?: return
         if (hasPlayer(player)) {
-            homing[player.uniqueId]?.add(event.entity)
+            getField<MutableSet<Entity>>(player, "homing")?.add(event.entity)
 
             val velocity = event.entity.velocity
             if (velocity.lengthSquared() > 0) {
                 event.entity.teleport(event.entity.location.add(velocity.normalize()))
             }
         }
-    }
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        homing.remove(player.uuid)
     }
 }

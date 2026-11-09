@@ -40,8 +40,6 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         val rollbackOwner: String = "sinkhole:${UUID.randomUUID()}"
     )
 
-    private val sinkholes: MutableMap<UUID, SinkholeState> = mutableMapOf()
-
     fun floorBelowPlayer(player: RbPlayer): Boolean {
         if (!Bukkit.isPrimaryThread() && !player.location.chunk.isLoaded)
         // err we dunno really
@@ -67,7 +65,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
 
     fun sink(cylinder: Set<Vector>, player: RbPlayer) {
         player.isFlying = false
-        val owner = sinkholes[player.uuid]?.rollbackOwner ?: return
+        val owner = getField<SinkholeState>(player, "sinkhole")?.rollbackOwner ?: return
         val blocks = cylinder.map { it.toLocation(player.world).block }.filter { it.type.isSolid }
         if (blocks.isEmpty())
             return
@@ -77,19 +75,19 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        sinkholes[target.uuid] = SinkholeState(target.location, target.location)
+        setField(target, "sinkhole", SinkholeState(target.location, target.location))
 
         val initCylinder = LocationUtil.cylinder(target.location.toVector().add(Vector(0.0, -2.0, 0.0)), 2.0, 3)
         sink(initCylinder, target)
 
         addTaskTimer(target, {
-            if (sinkholes.containsKey(target.uuid)) {
+            if (hasField(target, "sinkhole")) {
                 if (PlayerUtil.inVoid(target) || !floorBelowPlayer(target)) {
                     removePlayer(target, "done")
                     return@addTaskTimer
                 }
 
-                val sinkhole = sinkholes[target.uuid]!!
+                val sinkhole = getField<SinkholeState>(target, "sinkhole")!!
                 val holeLocation = sinkhole.startLocation.toVector().setY(target.location.y).toLocation(target.world)
 
                 if (target.location.y < sinkhole.pastPlayerLocation.y) {
@@ -124,14 +122,14 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
         if (!arrayOf("done", "death").contains(reason)) {
             player.fallDistance = 0f
-            player.teleport(sinkholes[player.uuid]?.startLocation ?: player.location)
+            player.teleport(getField<SinkholeState>(player, "sinkhole")?.startLocation ?: player.location)
         }
 
-        sinkholes.remove(player.uuid)?.let { Blocks.release(it.rollbackOwner) }
+        takeField<SinkholeState>(player, "sinkhole")?.let { Blocks.release(it.rollbackOwner) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val uuid = (event.entity as? Player ?: return).uniqueId
-        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && sinkholes.containsKey(uuid))
+        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && hasField(uuid, "sinkhole"))
     }
 }

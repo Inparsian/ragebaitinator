@@ -16,8 +16,6 @@ import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "butterfingers",
@@ -42,11 +40,8 @@ class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSub
         const val COOLDOWN_MILLIS = 250L
     }
 
-    private val chances = ConcurrentHashMap<UUID, Double>()
-    private val lastRoll = ConcurrentHashMap<UUID, Long>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        chances[target.uuid] = (args.getOrNull(2)?.toDoubleOrNull() ?: 0.1).coerceIn(0.0, 1.0)
+        setField(target, "chance", (args.getOrNull(2)?.toDoubleOrNull() ?: 0.1).coerceIn(0.0, 1.0))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers")
             .put("player", target.name)
             .toString()
@@ -57,17 +52,12 @@ class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSub
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        chances.remove(player.uuid)
-        lastRoll.remove(player.uuid)
-    }
-
     private fun roll(player: Player) {
-        val chance = chances[player.uniqueId] ?: return
+        val chance = getField<Double>(player, "chance") ?: return
         val now = System.currentTimeMillis()
-        if (now - (lastRoll[player.uniqueId] ?: 0L) < COOLDOWN_MILLIS)
+        if (now - (getField<Long>(player, "lastRoll") ?: 0L) < COOLDOWN_MILLIS)
             return
-        lastRoll[player.uniqueId] = now
+        setField(player, "lastRoll", now)
 
         if (!MathUtil.randomBool(chance) || player.inventory.itemInMainHand.type.isAir)
             return

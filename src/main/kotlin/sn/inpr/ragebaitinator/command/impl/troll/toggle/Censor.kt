@@ -8,8 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "censor",
@@ -31,10 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
     incompatible = [ "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "backwards", "yell" ]
 )
 class Censor : BaseChatTroll() {
-    private val chances = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        chances[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.3
+        setField(target, "chance", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.3)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being censored")
             .put("player", target.name)
             .toString()
@@ -45,10 +41,6 @@ class Censor : BaseChatTroll() {
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        chances.remove(player.uuid)
-    }
-
     override fun transform(player: Player, message: String): String
-        = TextTransform.censor(message, chances[player.uniqueId] ?: 0.3)
+        = TextTransform.censor(message, getField<Double>(player, "chance") ?: 0.3)
 }

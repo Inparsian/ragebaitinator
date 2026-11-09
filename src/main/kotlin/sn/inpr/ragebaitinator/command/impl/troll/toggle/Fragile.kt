@@ -8,8 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "fragile",
@@ -35,11 +33,9 @@ class Fragile : BaseToggleTroll(), PlayerItemDamageSubscriber {
         const val BREAKS_ANYTHING = 1_000_000
     }
 
-    private val multipliers = ConcurrentHashMap<UUID, Int>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val multiplier = (args.getOrNull(2)?.toIntOrNull() ?: 10).coerceIn(0, 1000)
-        multipliers[target.uuid] = multiplier
+        setField(target, "multiplier", multiplier)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s items will now %effect%")
             .put("player", target.name)
             .put("effect", if (multiplier == 0) "break instantly" else "wear out ${multiplier}x faster")
@@ -51,12 +47,8 @@ class Fragile : BaseToggleTroll(), PlayerItemDamageSubscriber {
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        multipliers.remove(player.uuid)
-    }
-
     override fun onPlayerItemDamage(event: PlayerItemDamageEvent) {
-        val multiplier = multipliers[event.player.uniqueId] ?: return
+        val multiplier = getField<Int>(event.player, "multiplier") ?: return
         if (event.isCancelled || !hasPlayer(event.player))
             return
 

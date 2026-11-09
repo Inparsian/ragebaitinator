@@ -28,7 +28,6 @@ import sn.inpr.ragebaitinator.command.def.TransformsPlayer
 import sn.inpr.ragebaitinator.listeners.*
 import sn.inpr.ragebaitinator.type.PlayerSnapshot
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
@@ -61,9 +60,7 @@ class Potato : BaseToggleTroll(),
             Material.POTATO
     }
 
-    val potatoes: Map<RbPlayer, Pair<Item, PlayerSnapshot>> field = mutableMapOf()
-
-    override fun transformation(player: RbPlayer): Entity? = potatoes[player]?.first
+    override fun transformation(player: RbPlayer): Entity? = getField<Pair<Item, PlayerSnapshot>>(player, "potato")?.first
 
     private fun sendFakeGameMode(player: RbPlayer, mode: GameMode) {
         val api = PacketEvents.getAPI()
@@ -96,7 +93,7 @@ class Potato : BaseToggleTroll(),
         potato.customName = "Potahtoe" // prevent despawning
 
         val snapshot = PlayerSnapshot(player)
-        potatoes[target] = Pair(potato, snapshot)
+        setField(target, "potato", Pair(potato, snapshot))
         target.clearInventory()
         target.clearPotionEffects()
         target.allowFlight = true
@@ -132,29 +129,28 @@ class Potato : BaseToggleTroll(),
     }
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        if (potatoes.containsKey(player)) {
-            val [potato, snapshot] = potatoes.remove(player)!!
-            snapshot.restore()
-            potato.remove()
-            if (player.isOnline) {
-                sendFakeGameMode(player, GameMode.valueOf(player.gameMode.name))
-                player.teleport(potato.location.setDirection(player.location.direction))
-                player.velocity = potato.velocity
-                player.sendPacket(WrapperPlayServerCamera(player.entityId))
-                player.others.forEach {
-                    it.hidePlayer(player)
-                    it.showPlayer(player)
-                }
+        // taking the potato is what turns them back into a player, so this has to come before anything uses their entity
+        val [potato, snapshot] = takeField<Pair<Item, PlayerSnapshot>>(player, "potato") ?: return
+        snapshot.restore()
+        potato.remove()
+        if (player.isOnline) {
+            sendFakeGameMode(player, GameMode.valueOf(player.gameMode.name))
+            player.teleport(potato.location.setDirection(player.location.direction))
+            player.velocity = potato.velocity
+            player.sendPacket(WrapperPlayServerCamera(player.entityId))
+            player.others.forEach {
+                it.hidePlayer(player)
+                it.showPlayer(player)
             }
         }
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
         if (event !is PlayerTeleportEvent)
-            event.cancelIf(potatoes.containsKey(event.player.rb))
+            event.cancelIf(hasPlayer(event.player))
         else if (event.to != null) {
             val to = event.to!!
-            val [potato] = potatoes[event.player.rb] ?: return
+            val [potato] = getField<Pair<Item, PlayerSnapshot>>(event.player, "potato") ?: return
 
             // if distance >= 1, and this would result in the potato falling outside sim distance, it
             // will be unloaded
@@ -167,21 +163,21 @@ class Potato : BaseToggleTroll(),
     }
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
-        event.cancelIf(potatoes.containsKey(event.player.rb))
+        event.cancelIf(hasPlayer(event.player))
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
-        event.cancelIf(event.entity is Player && potatoes.containsKey((event.entity as Player).rb))
+        event.cancelIf(event.entity is Player && hasPlayer(event.entity as Player))
     }
 
     override fun onEntityPickupItem(event: EntityPickupItemEvent) {
-        event.cancelIf(potatoes.any { it.value.first == event.item } || event.entity is Player && potatoes.containsKey((event.entity as Player).rb))
+        event.cancelIf(fieldValues<Pair<Item, PlayerSnapshot>>("potato").any { it.first == event.item } || event.entity is Player && hasPlayer(event.entity as Player))
     }
 
     // cancel some actions at the packet level that potatoes would not be able to do
     override fun onPacketReceive(event: PacketReceiveEvent) {
         val uuid = event.user.uuid ?: return
-        if (potatoes.any { it.key.uuid == uuid })
+        if (hasPlayer(uuid))
             when(event.packetType) {
                 PacketType.Play.Client.INTERACT_ENTITY,
                 PacketType.Play.Client.ATTACK,
@@ -207,9 +203,8 @@ class Potato : BaseToggleTroll(),
 
         // if this potato respawns as a result of a far teleport/world change, we should resync camera
         if (event.packetType == PacketType.Play.Server.SPAWN_ENTITY) {
-            val player = potatoes.keys.firstOrNull { it.uuid == uuid } ?: return
-            val [potato] = potatoes[player]!!
-            if (WrapperPlayServerSpawnEntity(event).entityId == potato.entityId)
+            val potato = getField<Pair<Item, PlayerSnapshot>>(uuid, "potato")?.first
+            if (potato != null && WrapperPlayServerSpawnEntity(event).entityId == potato.entityId)
                 runTask {
                     val owner = Bukkit.getPlayer(uuid) ?: return@runTask
                     if (potato.isValid)
@@ -219,13 +214,13 @@ class Potato : BaseToggleTroll(),
 
         if (event.packetType == PacketType.Play.Server.SPAWN_PLAYER) { // <=1.20.1
             val id = WrapperPlayServerSpawnPlayer(event).entityId
-            if (potatoes.keys.any { it.entityId == id }) event.isCancelled = true
+            if (players.keys.any { it.bukkit?.entityId == id }) event.isCancelled = true
         } else if (event.packetType == PacketType.Play.Server.SPAWN_ENTITY) { // >=1.20.2
             val id = WrapperPlayServerSpawnEntity(event).entityId
-            if (potatoes.keys.any { it.entityId == id }) event.isCancelled = true
+            if (players.keys.any { it.bukkit?.entityId == id }) event.isCancelled = true
         }
 
-        if (potatoes.containsKey(RbPlayer(uuid)))
+        if (hasPlayer(uuid))
             when (event.packetType) {
                 // the client must never learn it can now fly if they were not able to before
                 PacketType.Play.Server.PLAYER_ABILITIES -> event.isCancelled = true

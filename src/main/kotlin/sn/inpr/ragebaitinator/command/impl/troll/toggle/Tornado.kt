@@ -11,7 +11,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
 import kotlin.math.pow
 
 @CommandInfo(
@@ -33,8 +32,6 @@ import kotlin.math.pow
     ]
 )
 class Tornado : BaseToggleTroll() {
-    private val twisters: MutableMap<UUID, Twister> = mutableMapOf()
-
     private class Twister(val chase: RbPlayer, var location: Location, val strength: Int) {
         var axis: Int = 0
         val pickupPoint: Location get() = location.clone().add(0.0, strength.toDouble() * 2, 0.0)
@@ -108,13 +105,13 @@ class Tornado : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val strength = (args.getOrNull(2)?.toIntOrNull() ?: 3).coerceIn(1, 10)
         val yaw = MathUtil.random(0.0, 360.0)
-        twisters[target.uuid] = Twister(target, target.location.clone().add(
+        setField(target, "twister", Twister(target, target.location.clone().add(
             MathUtil.rcos(yaw) * 10,
             0.0,
             MathUtil.rsin(yaw) * 10,
-        ), strength)
+        ), strength))
 
-        addTaskTimer(target, { twisters[target.uuid]?.tick() }, 0, 1, true)
+        addTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1, true)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas")
             .put("player", target.name)
@@ -125,8 +122,4 @@ class Tornado : BaseToggleTroll() {
         = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated")
             .put("player", target.name)
             .toString()
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        twisters.remove(player.uuid)
-    }
 }

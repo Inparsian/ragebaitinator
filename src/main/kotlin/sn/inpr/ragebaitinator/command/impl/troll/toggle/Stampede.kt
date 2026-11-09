@@ -17,7 +17,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
-import java.util.*
 
 private const val PURSUIT_SPEED_MULTIPLIER = 2.4
 
@@ -65,8 +64,6 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }
     }
 
-    val herds: MutableMap<UUID, MutableSet<Creature>> = mutableMapOf()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val fromShooter = args.getOrNull(2)?.toBoolean() ?: false
         val herdLocation = if (sender is Player && fromShooter && sender.world == target.world)
@@ -82,7 +79,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         val herd = mutableSetOf<Creature>()
         val navigators = mutableMapOf<Creature, CowNavigation>()
-        herds[target.uuid] = herd
+        setField(target, "herd", herd)
         try {
             for (position in positions) {
                 val cow = position.world!!.spawn(position, Cow::class.java)
@@ -96,7 +93,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         var ticks = 0
         addTaskTimer(target, {
-            val herd = herds[target.uuid] ?: return@addTaskTimer
+            val herd = getField<MutableSet<Creature>>(target, "herd") ?: return@addTaskTimer
             val refreshRoute = ticks++ % 10 == 0
             try {
                 for (cow in herd.toList()) {
@@ -152,12 +149,12 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        herds.remove(player.uuid)?.forEach { it.remove() }
+        getField<MutableSet<Creature>>(player, "herd")?.forEach { it.remove() }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val creature = event.entity as? Creature ?: return
-        event.cancelIf(herds.values.any { creature in it })
+        event.cancelIf(fieldValues<MutableSet<Creature>>("herd").any { creature in it })
     }
 
     private fun safePositions(origin: Location, target: Location): List<Location> {

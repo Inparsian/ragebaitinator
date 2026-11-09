@@ -50,8 +50,6 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
-    private val asleep: MutableSet<UUID> = Collections.newSetFromMap(java.util.concurrent.ConcurrentHashMap())
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         scheduleSleep(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now randomly fall asleep")
@@ -80,7 +78,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
             return
         }
 
-        asleep.add(player.uuid)
+        addFlag(player, "asleep")
         broadcast(player, true)
         addTask(player, {
             wake(player)
@@ -89,7 +87,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
     }
 
     private fun wake(player: RbPlayer): Boolean {
-        if (!asleep.remove(player.uuid))
+        if (!removeFlag(player, "asleep"))
             return false
 
         broadcast(player, false)
@@ -133,7 +131,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        if (event is PlayerTeleportEvent || event.player.uniqueId !in asleep)
+        if (event is PlayerTeleportEvent || !hasFlag(event.player, "asleep"))
             return
 
         val from = event.from
@@ -142,7 +140,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
         event.cancelIf(from.x != to.x || from.z != to.z || to.y > from.y)
     }
 
-    override fun onPlayerInteract(event: PlayerInteractEvent) = event.cancelIf(event.player.uniqueId in asleep)
+    override fun onPlayerInteract(event: PlayerInteractEvent) = event.cancelIf(hasFlag(event.player, "asleep"))
 
     // getting hurt wakes anyone up
     override fun onEntityDamage(event: EntityDamageEvent) {

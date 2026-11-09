@@ -17,7 +17,6 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.*
 import com.github.retrooper.packetevents.protocol.world.Location as PacketLocation
 
@@ -79,11 +78,8 @@ class FromTheFog : BaseToggleTroll() {
         val team = "rb_fog_${name}"
     }
 
-    private val figures = ConcurrentHashMap<UUID, Figure>()
-    private val intervals = ConcurrentHashMap<UUID, Int>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        intervals[target.uuid] = (args.getOrNull(2)?.toIntOrNull() ?: 90).coerceIn(5, 3600)
+        setField(target, "interval", (args.getOrNull(2)?.toIntOrNull() ?: 90).coerceIn(5, 3600))
         scheduleAppearance(target)
         return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog")
             .put("player", target.name)
@@ -96,12 +92,11 @@ class FromTheFog : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        intervals.remove(player.uuid)
         despawn(player, reason != "logout")
     }
 
     private fun scheduleAppearance(player: RbPlayer, delay: Long? = null) {
-        val interval = (intervals[player.uuid] ?: 90) * 20.0
+        val interval = (getField<Int>(player, "interval") ?: 90) * 20.0
         addTask(player, { appear(player) }, delay ?: MathUtil.random(interval * 0.5, interval * 1.5).toLong())
     }
 
@@ -164,7 +159,7 @@ class FromTheFog : BaseToggleTroll() {
             NamedTextColor.WHITE, WrapperPlayServerTeams.OptionData.NONE
         )
 
-        figures[player.uuid] = figure
+        setField(player, "figure", figure)
         player.sendPacketSilently(
             // the client won't spawn a player it hasn't been told about, but the entry doesn't have to be listed
             WrapperPlayServerPlayerInfoUpdate(
@@ -192,7 +187,7 @@ class FromTheFog : BaseToggleTroll() {
     }
 
     private fun watch(player: RbPlayer) {
-        val figure = figures[player.uuid]
+        val figure = getField<Figure>(player, "figure")
         if (figure == null || !player.isOnline) {
             scheduleAppearance(player)
             return
@@ -282,7 +277,7 @@ class FromTheFog : BaseToggleTroll() {
     }
 
     private fun despawn(player: RbPlayer, notify: Boolean) {
-        val figure = figures.remove(player.uuid) ?: return
+        val figure = takeField<Figure>(player, "figure") ?: return
         if (notify && player.isOnline)
             player.sendPacketSilently(
                 WrapperPlayServerDestroyEntities(figure.entityId),

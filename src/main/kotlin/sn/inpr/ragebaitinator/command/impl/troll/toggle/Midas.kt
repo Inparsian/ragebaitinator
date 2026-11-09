@@ -10,8 +10,6 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.floor
 
 @CommandInfo(
@@ -39,14 +37,12 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
     }
 
     private val gold = Material.GOLD_BLOCK.createBlockData()
-    private val trails = ConcurrentHashMap<UUID, LinkedHashSet<Block>>()
-    private val lastChecked = ConcurrentHashMap<UUID, Block>()
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
             addFlag(target, "local")
 
-        trails[target.uuid] = linkedSetOf()
+        setField(target, "trail", linkedSetOf<Block>())
         return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold")
             .put("player", target.name)
             .toString()
@@ -64,8 +60,7 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
     }
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        lastChecked.remove(player.uuid)
-        trails.remove(player.uuid)?.forEach(::restore)
+        takeField<LinkedHashSet<Block>>(player, "trail")?.forEach(::restore)
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
@@ -75,11 +70,13 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
 
         val to = event.to ?: return
         val world = to.world ?: return
-        val trail = trails[player.uniqueId] ?: return
+        val trail = getField<LinkedHashSet<Block>>(player, "trail") ?: return
         val block = world.getBlockAt(to.blockX, floor(to.y - 0.1).toInt(), to.blockZ)
 
         // move events are far more frequent than block changes, and a tile entity check isn't free
-        if (lastChecked.put(player.uniqueId, block) == block)
+        val lastChecked = getField<Block>(player, "lastChecked")
+        setField(player, "lastChecked", block)
+        if (lastChecked == block)
             return
         if (block in trail || !block.type.isSolid || block.state is TileState)
             return

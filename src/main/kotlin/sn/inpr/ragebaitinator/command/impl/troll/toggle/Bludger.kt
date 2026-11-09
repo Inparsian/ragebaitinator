@@ -32,8 +32,6 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
-    private val bludgers: MutableMap<RbPlayer, Projectile> = mutableMapOf()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val fromShooter = args.getOrNull(2)?.toBoolean() ?: true
         val bludgerLocation = if (sender is Player && fromShooter)
@@ -50,13 +48,13 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
             bludger.velocity = velocity
         bludger.fireTicks = 1_000_000
         bludger.setGravity(false)
-        bludgers[target] = bludger
+        setField(target, "bludger", bludger)
 
         addTaskTimer(target, {
-            if (bludgers.containsKey(target)) {
+            if (hasField(target, "bludger")) {
                 // the bludger shalt not have a foot fetish
                 val plusOne = target.location.clone().add(0.0, 1.0, 0.0)
-                val targetBludger = bludgers[target]!!
+                val targetBludger = getField<Projectile>(target, "bludger")!!
                 val targetVelocity = plusOne
                     .subtract(targetBludger.location)
                     .toVector()
@@ -85,7 +83,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        bludgers.remove(player)?.remove()
+        getField<Projectile>(player, "bludger")?.remove()
     }
 
     fun kaboom(target: RbPlayer, projectile: Projectile) {
@@ -94,9 +92,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
     }
 
     override fun onProjectileHit(event: ProjectileHitEvent) {
-        if (bludgers.containsValue(event.entity)) {
-            val target = bludgers.entries.first { it.value == event.entity }.key
-            kaboom(target, event.entity)
-        }
+        val target = fieldEntries<Projectile>("bludger").firstOrNull { it.second == event.entity }?.first ?: return
+        kaboom(target, event.entity)
     }
 }

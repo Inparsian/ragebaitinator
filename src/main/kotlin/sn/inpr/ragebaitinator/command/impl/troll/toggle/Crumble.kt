@@ -11,7 +11,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
 
 @CommandInfo(
     name = "crumble",
@@ -34,24 +33,22 @@ import java.util.*
 class Crumble : BaseToggleTroll() {
     data class CrumbleState(val entityId: Int, val stage: Byte, val vector: Vector)
 
-    val blocks: MutableMap<UUID, MutableSet<CrumbleState>> = mutableMapOf()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
             addFlag(target, "local")
 
-        blocks.putIfAbsent(target.uuid, mutableSetOf())
+        setField(target, "blocks", mutableSetOf<CrumbleState>())
 
         addTaskTimer(target, {
             val blockified = LocationUtil.blockify(target.location, false).toVector()
             val sphere = LocationUtil.sphere(blockified, 4.5)
             for (vector in sphere) {
-                val block = blocks[target.uuid]?.firstOrNull { it.vector == vector }
+                val block = getField<MutableSet<CrumbleState>>(target, "blocks")?.firstOrNull { it.vector == vector }
                 var [entityId, stage] = if (block != null) {
                     val delta = if (MathUtil.randomBool(0.2)) 1 else 0
                     val newStage = (block.stage + delta).toByte()
                     if (newStage < 9)
-                        blocks[target.uuid]?.removeIf { it.vector == vector }
+                        getField<MutableSet<CrumbleState>>(target, "blocks")?.removeIf { it.vector == vector }
                     else
                         continue
                     Pair(block.entityId, newStage)
@@ -67,7 +64,7 @@ class Crumble : BaseToggleTroll() {
                     RbPlayer.online.forEach { it.sendPacket(packet) }
 
                 val state = CrumbleState(entityId, stage, vector)
-                blocks[target.uuid]?.add(state)
+                getField<MutableSet<CrumbleState>>(target, "blocks")?.add(state)
             }
         }, 0, 1, true)
 
@@ -77,7 +74,7 @@ class Crumble : BaseToggleTroll() {
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        blocks.remove(target.uuid)?.forEach { state ->
+        takeField<MutableSet<CrumbleState>>(target, "blocks")?.forEach { state ->
             val vector3i = Vector3i(state.vector.x.toInt(), state.vector.y.toInt(), state.vector.z.toInt())
             val packet = WrapperPlayServerBlockBreakAnimation(state.entityId, vector3i, -1)
             if (hasFlag(target, "local"))

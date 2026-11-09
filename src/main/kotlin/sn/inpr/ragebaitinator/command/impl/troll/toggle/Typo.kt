@@ -11,8 +11,6 @@ import sn.inpr.ragebaitinator.listeners.PlayerCommandPreprocessSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.TextTransform
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "typo",
@@ -33,10 +31,8 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
-    private val chances = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        chances[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.4
+        setField(target, "chance", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.4)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has very clumsy fingers")
             .put("player", target.name)
             .toString()
@@ -46,10 +42,6 @@ class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fingers are no longer clumsy")
             .put("player", target.name)
             .toString()
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        chances.remove(player.uuid)
-    }
 
     // never mangle our own command, or there'd be no way to turn this off
     private fun isOwnCommand(label: String): Boolean {
@@ -61,7 +53,7 @@ class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
     override fun onPlayerCommandPreprocess(event: PlayerCommandPreprocessEvent) {
         if (event.isCancelled || !hasPlayer(event.player))
             return
-        if (!MathUtil.randomBool(chances[event.player.uniqueId] ?: 0.4))
+        if (!MathUtil.randomBool(getField<Double>(event.player, "chance") ?: 0.4))
             return
 
         val body = event.message.removePrefix("/")

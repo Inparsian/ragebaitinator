@@ -21,7 +21,6 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "storm",
@@ -42,11 +41,8 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
-    private val stormy: MutableSet<UUID> = Collections.newSetFromMap(ConcurrentHashMap())
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
         val seconds = (args.getOrNull(2)?.toDoubleOrNull() ?: 8.0)
-        stormy.add(target.uuid)
         brew(target)
         if (seconds > 0) {
             val interval = (seconds.coerceIn(1.0, 60.0) * 20).toLong()
@@ -63,7 +59,6 @@ class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        stormy.remove(player.uuid)
         if (player.isOnline && reason != "logout")
             clear(player)
     }
@@ -115,17 +110,15 @@ class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
 
     // the real weather changing (or being sent again when a player joins or changes worlds) must not clear the storm
     override fun onPacketSend(event: PacketSendEvent) {
-        if (stormy.isEmpty())
-            return
         val uuid = event.user.uuid ?: return
-        if (uuid !in stormy)
+        if (!hasPlayer(uuid))
             return
 
         // switching worlds makes a new level for the client, which starts out clear
         if (event.packetType == PacketType.Play.Server.RESPAWN) {
             Main.runTaskLater({
                 val player = Bukkit.getPlayer(uuid)
-                if (player != null && uuid in stormy) brew(player.rb)
+                if (player != null && hasPlayer(uuid)) brew(player.rb)
             }, 2)
             return
         }

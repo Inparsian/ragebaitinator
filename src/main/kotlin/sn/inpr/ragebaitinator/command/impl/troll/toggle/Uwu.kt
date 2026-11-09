@@ -8,8 +8,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "uwu",
@@ -31,10 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
     incompatible = [ "haxorman", "oink", "garble", "mock", "leet", "clap", "backwards", "yell", "censor" ]
 )
 class Uwu : BaseChatTroll() {
-    private val chances = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        chances[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5
+        setField(target, "chance", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 1.0) ?: 0.5)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in UwUspeak")
             .put("player", target.name)
             .toString()
@@ -45,10 +41,6 @@ class Uwu : BaseChatTroll() {
             .put("player", target.name)
             .toString()
 
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        chances.remove(player.uuid)
-    }
-
     override fun transform(player: Player, message: String): String
-        = TextTransform.uwu(message, chances[player.uniqueId] ?: 0.5)
+        = TextTransform.uwu(message, getField<Double>(player, "chance") ?: 0.5)
 }

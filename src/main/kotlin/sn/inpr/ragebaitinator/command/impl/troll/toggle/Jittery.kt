@@ -11,8 +11,6 @@ import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerToggleSneakSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "jittery",
@@ -39,10 +37,8 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
         const val HOLE_DEPTH = 3
     }
 
-    private val powers = ConcurrentHashMap<UUID, Double>()
-
     override fun init(sender: CommandSender, target: RbPlayer, args: Array<out String>): String {
-        powers[target.uuid] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.6
+        setField(target, "power", args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.6)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking")
             .put("player", target.name)
             .toString()
@@ -52,10 +48,6 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down")
             .put("player", target.name)
             .toString()
-
-    override fun onRemovePlayer(player: RbPlayer, reason: String) {
-        powers.remove(player.uuid)
-    }
 
     // finds the closest column nearby that's lava, or a drop of at least HOLE_DEPTH blocks, and returns the direction to it
     private fun findHazard(player: Player): Vector? {
@@ -99,7 +91,7 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
         if (event.isCancelled || !event.isSneaking || !hasPlayer(event.player))
             return
 
-        val power = powers[event.player.uniqueId] ?: 0.6
+        val power = getField<Double>(event.player, "power") ?: 0.6
         // if there's nothing dangerous around, any direction will do
         val direction = findHazard(event.player) ?: MathUtil.random(0.0, 360.0).let { Vector(MathUtil.rcos(it), 0.0, MathUtil.rsin(it)) }
         event.player.velocity = direction.multiply(power).setY(power / 2)
