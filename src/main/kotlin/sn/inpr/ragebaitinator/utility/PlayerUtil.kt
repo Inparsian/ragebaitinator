@@ -19,6 +19,7 @@ import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
 import org.bukkit.profile.PlayerProfile
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -57,7 +58,7 @@ object PlayerUtil {
 
     private fun head(name: String, profile: PlayerProfile?): ItemStack {
         val head = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
-            // This is not deprecated <1.13
+        // This is not deprecated <1.13
             @Suppress("DEPRECATION")
             ItemStack(Reflection.getMaterial("SKULL_ITEM") ?: return ItemStack(Material.BARRIER), 1, 3.toShort())
         else
@@ -101,8 +102,35 @@ object PlayerUtil {
     // works even without a source
     fun targetPlayers(input: String, source: Permissible? = null): List<Player> {
         val online = Bukkit.getOnlinePlayers()
-        return input.split(",").flatMap { token ->
+        val tokens = input.split(",")
+
+        // a token with a - in front takes whatever it selects out of everything else
+        val excluded = tokens.filter { it.length > 1 && it.startsWith("-") }
+            .flatMap { targetPlayers(it.removePrefix("-"), source) }
+            .mapTo(mutableSetOf()) { it.uniqueId }
+
+        return tokens.filterNot { it.length > 1 && it.startsWith("-") }.flatMap { token ->
             when {
+                // everybody who has at least one troll on them
+                token.equals("trolled", true) ->
+                    online.filter { player -> CommandManager.toggleTrolls.any { it.hasPlayer(player) } }
+
+                // everybody who has this troll on them
+                token.startsWith("troll=") -> {
+                    val troll = CommandManager.getCommand(token.removePrefix("troll=")) as? BaseToggleTroll
+                    if (troll == null)
+                        emptyList()
+                    else online.filter { troll.hasPlayer(it) }
+                }
+
+                // self
+                token.equals("@s", true) || token.equals("!", true) ->
+                    listOfNotNull(source as? Player)
+
+                // absolutely everybody
+                token.equals("@e", true) || token.equals("**", true) ->
+                    online
+
                 // all players (excl. sender)
                 token.equals("@a", true) || token.equals("*", true) ->
                     online.filter { it != source }
@@ -111,11 +139,15 @@ object PlayerUtil {
                 token.equals("@r", true) || token.equals("?", true) ->
                     listOfNotNull(online.randomOrNull())
 
-                // self
-                token.equals("@s", true) || token.equals("!", true) ->
-                    listOfNotNull(source as? Player)
+                // random X players
+                token.startsWith("random=") -> {
+                    val count = token.removePrefix("random=").toIntOrNull() ?: 0
+                    if (count <= 0)
+                        emptyList()
+                    else online.shuffled().take(count)
+                }
 
-                // all players in a world
+                // all players in a world (excl. sender)
                 token.startsWith("world=") -> {
                     val world = token.removePrefix("world=")
                     online.filter { it != source && it.world.name.equals(world, true) }
@@ -127,14 +159,14 @@ object PlayerUtil {
                     if (source !is Player)
                         emptyList()
                     else online.filter {
-                        it != source && it.location.distance(source.location) <= radius
+                        it != source && it.world == source.world && it.location.distance(source.location) <= radius
                     }
                 }
 
                 // specific player
                 else -> listOfNotNull(Bukkit.getPlayer(token))
             }
-        }
+        }.filter { it.uniqueId !in excluded }.distinctBy { it.uniqueId }
     }
 
     // my method of "damaging" players that bypasses creative, godmode, etc. and has only a one-tick cooldown
