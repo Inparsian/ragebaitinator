@@ -89,6 +89,9 @@ value class RbPlayer(val uuid: UUID) {
             entity?.velocity = value
         }
 
+    /** Sends a color-formatted message to this player */
+    fun send(message: String) = bukkit?.sendMessage(ChatColor.translateAlternateColorCodes('&', message))
+    fun send(placeholders: Placeholders) = send(placeholders.toString())
     fun teleport(location: Location): Boolean? = bukkit?.teleport(location)
     /** Teleports this player whilst retaining its velocity */
     fun teleportRetainVelocity(location: Location) {
