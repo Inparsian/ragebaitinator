@@ -37,6 +37,8 @@ interface ArgumentType<T : Any> {
     fun parse(input: String, source: Permissible?): T?
     fun format(value: T): String = value.toString()
     fun completions(): List<String> = emptyList()
+    /** What to suggest for the text that has been typed of this argument so far, which each suggestion replaces */
+    fun complete(partial: String): List<String> = completions().filter { it.startsWith(partial, true) }
     /** For a type that only has so many values, all of them. Nothing else is a value, so these are also what is listed */
     val values: List<String> get() = emptyList()
     /** Other ways of writing the values. These are accepted, but nothing suggests them */
@@ -79,6 +81,15 @@ object ArgumentTypes {
         override fun parse(input: String, source: Permissible?): Targets? =
             PlayerUtil.targetPlayers(input, source).map { it.rb }.takeIf { it.isNotEmpty() }?.let { Targets(it) }
         override fun completions(): List<String> = onlinePlayers()
+        override fun complete(partial: String): List<String> {
+            val head = partial.substring(0, partial.lastIndexOf(',') + 1)
+            val tail = partial.substring(head.length)
+            val prefix = if (tail.startsWith("-")) "-" else ""
+            val typed = tail.removePrefix("-")
+            return PlayerUtil.targetSuggestions(typed)
+                .filter { it.startsWith(typed, true) }
+                .map { head + prefix + it }
+        }
     }
 
     /** Any enum is a type of argument, as the constant that was typed. How it's capitalized doesn't matter */

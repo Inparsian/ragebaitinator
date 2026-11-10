@@ -99,6 +99,11 @@ object PlayerUtil {
         } else false
     }
 
+    fun targetSuggestions(typed: String = ""): List<String> = Bukkit.getOnlinePlayers().map { it.name } +
+            listOf("@a", "@e", "@r", "@s", "trolled", "troll=", "random=", "radius=", "world=") +
+            (if (typed.startsWith("world=", true)) Bukkit.getWorlds().map { "world=${it.name}" } else emptyList()) +
+            (if (typed.startsWith("troll=", true)) CommandManager.toggleTrolls.map { "troll=${it.info.name}" } else emptyList())
+
     // works even without a source
     fun targetPlayers(input: String, source: Permissible? = null): List<Player> {
         val online = Bukkit.getOnlinePlayers()

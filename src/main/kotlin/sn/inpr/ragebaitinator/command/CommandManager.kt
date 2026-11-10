@@ -13,8 +13,6 @@ import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.LogUtil.info
-import java.util.*
-import java.util.stream.Collectors
 
 object CommandManager : CommandExecutor, TabCompleter {
     val commands: List<BaseCommand>
@@ -92,25 +90,13 @@ object CommandManager : CommandExecutor, TabCompleter {
     }
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
-        val list: MutableList<String> = mutableListOf()
+        if (args.size == 1)
+            return commands.map { it.info.name }.filter { it.startsWith(args.last(), true) }
 
-        if (args.size == 1) {
-            list.addAll(commands.map { it.info.name })
-        } else if (args.size > 1) {
-            val command: BaseCommand? = getCommand(args[0])
-            // the first argument after the name of the command is the first parameter
-            val parameter = command?.syntax?.getOrNull(args.size - 2)
-            if (parameter != null) {
-                list.addAll(parameter.argumentType.completions())
-                list.addAll(parameter.completions)
-            }
-        }
-
-        return if (list.isNotEmpty())
-            list.stream()
-                .filter { s: String? -> s!!.lowercase(Locale.getDefault()).startsWith(args.last()) }
-                .collect(Collectors.toList())
-        else
-            mutableListOf()
+        val command: BaseCommand? = getCommand(args[0])
+        // the first argument after the name of the command is the first parameter
+        val parameter = command?.syntax?.getOrNull(args.size - 2) ?: return emptyList()
+        return parameter.argumentType.complete(args.last()) +
+                parameter.completions.filter { it.startsWith(args.last(), true) }
     }
 }
