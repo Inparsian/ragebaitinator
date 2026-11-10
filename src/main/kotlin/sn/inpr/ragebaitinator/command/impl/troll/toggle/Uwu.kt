@@ -17,7 +17,7 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
-    incompatible = [ "haxorman", "oink", "garble", "mock", "leet", "clap", "backwards", "yell", "censor" ]
+    incompatible = [ "stutter", "pirate", "haxorman", "oink", "garble", "mock", "leet", "clap", "backwards", "yell", "censor" ]
 )
 class Uwu : BaseChatTroll() {
     private val chance = param<Double>("Chance", "The chance (0 to 1) of each sentence ending in a tilde or an UwU.", default = 0.5, range = 0.0..1.0)

@@ -16,7 +16,7 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
-    incompatible = [ "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "yell", "censor" ]
+    incompatible = [ "stutter", "pirate", "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "yell", "censor" ]
 )
 class Backwards : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String

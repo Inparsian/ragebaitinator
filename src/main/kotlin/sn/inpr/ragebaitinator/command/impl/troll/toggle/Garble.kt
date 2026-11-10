@@ -17,7 +17,7 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
-    incompatible = [ "haxorman", "uwu", "oink", "mock", "leet", "clap", "backwards", "yell", "censor" ]
+    incompatible = [ "stutter", "pirate", "haxorman", "uwu", "oink", "mock", "leet", "clap", "backwards", "yell", "censor" ]
 )
 class Garble : BaseChatTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String

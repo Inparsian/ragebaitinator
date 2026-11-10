@@ -8,9 +8,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.*
-import org.bukkit.event.inventory.FurnaceStartSmeltEvent
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -61,6 +59,8 @@ fun interface AreaEffectCloudApplySubscriber { fun onAreaEffectCloudApply(event:
 fun interface FurnaceStartSmeltSubscriber { fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) }
 fun interface PlayerDropItemSubscriber { fun onPlayerDropItem(event: PlayerDropItemEvent) }
 fun interface EntityChangeBlockSubscriber { fun onEntityChangeBlock(event: EntityChangeBlockEvent) }
+fun interface InventoryOpenSubscriber { fun onInventoryOpen(event: InventoryOpenEvent) }
+fun interface InventoryCloseSubscriber { fun onInventoryClose(event: InventoryCloseEvent) }
 
 object BukkitEventListener : Listener {
     fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: RemoveReason) {
@@ -110,6 +110,8 @@ object BukkitEventListener : Listener {
             if (command is FurnaceStartSmeltSubscriber && event is FurnaceStartSmeltEvent) command.onFurnaceStartSmelt(event)
             if (command is PlayerDropItemSubscriber && event is PlayerDropItemEvent) command.onPlayerDropItem(event)
             if (command is EntityChangeBlockSubscriber && event is EntityChangeBlockEvent) command.onEntityChangeBlock(event)
+            if (command is InventoryOpenSubscriber && event is InventoryOpenEvent) command.onInventoryOpen(event)
+            if (command is InventoryCloseSubscriber && event is InventoryCloseEvent) command.onInventoryClose(event)
         }
 
         for (menu in GuiHandler.menus.values) {
@@ -207,4 +209,8 @@ object BukkitEventListener : Listener {
     fun onPlayerDropItem(event: PlayerDropItemEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityChangeBlock(event: EntityChangeBlockEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryOpen(event: InventoryOpenEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryClose(event: InventoryCloseEvent) = interceptBukkitEvent(event)
 }

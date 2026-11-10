@@ -17,7 +17,7 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
-    incompatible = [ "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "backwards", "yell" ]
+    incompatible = [ "stutter", "pirate", "haxorman", "uwu", "oink", "garble", "mock", "leet", "clap", "backwards", "yell" ]
 )
 class Censor : BaseChatTroll() {
     private val chance = param<Double>("Chance", "The chance (0 to 1) of each word being censored.", default = 0.3, range = 0.0..1.0)
