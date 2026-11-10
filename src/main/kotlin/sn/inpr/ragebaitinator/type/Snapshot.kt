@@ -7,7 +7,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.util.Vector
 import java.lang.reflect.Method
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class PlayerSnapshot(val player: Player) {

@@ -1,7 +1,6 @@
 package sn.inpr.ragebaitinator.command
 
 import io.github.classgraph.ClassGraph
-import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
@@ -20,12 +19,30 @@ import java.util.stream.Collectors
 object CommandManager : CommandExecutor, TabCompleter {
     val commands: List<BaseCommand>
         field = mutableListOf()
-    val trolls: List<BaseTroll> get() = commands.filterIsInstance<BaseTroll>()
-    val toggleTrolls: List<BaseToggleTroll> get() = commands.filterIsInstance<BaseToggleTroll>()
-    val onceTrolls: List<BaseTroll> get() = trolls.filterNot { it is BaseToggleTroll }
+
+    // These are derived from `commands`, which only changes in registerCommands, so they are built
+    // once there instead of on every access
+    // RbPlayer.entity reads `transformers` on nearly every call, from any thread
+    @Volatile var trolls: List<BaseTroll> = emptyList()
+        private set
+    @Volatile var toggleTrolls: List<BaseToggleTroll> = emptyList()
+        private set
+    @Volatile var onceTrolls: List<BaseTroll> = emptyList()
+        private set
+    /** The toggle trolls that can transform a player into another entity */
+    @Volatile var transformers: List<TransformsPlayer> = emptyList()
+        private set
+
+    private fun refreshCaches() {
+        trolls = commands.filterIsInstance<BaseTroll>()
+        toggleTrolls = commands.filterIsInstance<BaseToggleTroll>()
+        onceTrolls = trolls.filterNot { it is BaseToggleTroll }
+        transformers = toggleTrolls.filterIsInstance<TransformsPlayer>()
+    }
 
     fun registerCommands() {
         commands.clear()
+        refreshCaches()
         ClassGraph()
             .acceptPackages("sn.inpr.ragebaitinator.command.impl")
             .enableClassInfo()
@@ -43,6 +60,7 @@ object CommandManager : CommandExecutor, TabCompleter {
                     }
             }
 
+        refreshCaches()
         info("Registered ${commands.size} commands")
     }
 
@@ -53,7 +71,7 @@ object CommandManager : CommandExecutor, TabCompleter {
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty() && commands.any { it.info.name == args.first() }) {
             val first = commands.first { it.info.name == args.first() }
-            if (!first.process(sender, command, label, args))
+            if (!first.process(sender, command, label, Args(args, first, sender)))
                 first.sendUsage(sender)
             else {
                 val everything = "${command.label} ${args.joinToString(" ")}"
@@ -80,22 +98,11 @@ object CommandManager : CommandExecutor, TabCompleter {
             list.addAll(commands.map { it.info.name })
         } else if (args.size > 1) {
             val command: BaseCommand? = getCommand(args[0])
-            val syntax: Array<CommandSyntax>? = command?.info?.syntax
-
-            if (syntax != null) {
-                for (i in syntax.indices) {
-                    if (i != args.size - 2)
-                        continue
-
-                    val syntaxArg: CommandSyntax = syntax[i]
-                    when (syntaxArg.type) {
-                        CommandSyntax.Type.PLAYER -> list.addAll(Bukkit.getOnlinePlayers().map { it.name })
-                        CommandSyntax.Type.BOOLEAN -> list.addAll(listOf("true", "false"))
-                        CommandSyntax.Type.STRING -> list.addAll(syntaxArg.completions)
-                        else -> {}
-                    }
-                    break
-                }
+            // the first argument after the name of the command is the first parameter
+            val parameter = command?.syntax?.getOrNull(args.size - 2)
+            if (parameter != null) {
+                list.addAll(parameter.argumentType.completions())
+                list.addAll(parameter.completions)
             }
         }
 

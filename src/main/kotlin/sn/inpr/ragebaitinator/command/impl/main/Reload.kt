@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.configuration
 import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
@@ -19,7 +20,7 @@ class Reload : BaseCommand() {
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
         val reloadTime = TimeUtil.timeTask {
             configuration.reload()

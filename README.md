@@ -4,7 +4,7 @@ A Spigot plugin for 26.1+ that allows you to piss off people in block game
 
 - Costs nothing! Completely free and open-source software
 - Integration with PlaceholderAPI
-- 100+ trolls, many ways to make ppl angry!!!
+- 120+ trolls, many ways to make ppl angry!!!
 - Extremely configurable
 - Block rollback system that rolls back block changes even after a crash
 

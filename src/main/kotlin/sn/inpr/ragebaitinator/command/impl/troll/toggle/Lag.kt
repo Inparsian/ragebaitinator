@@ -9,10 +9,11 @@ import io.netty.buffer.ByteBufUtil
 import io.netty.buffer.Unpooled
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.*
@@ -35,26 +36,16 @@ import java.util.concurrent.*
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.REPEATER,
     description = "Makes a player \"lag\".",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.LONG,
-            purpose = "RTT",
-            description = "The round-trip time (RTT) in milliseconds (min 2, max 10000)",
-            default = "300"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.LONG,
-            purpose = "Jitter",
-            description = "The amount of randomness to add to the RTT (min 0, max 100)",
-            default = "5"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Lag : BaseToggleTroll() {
+    private val rtt = param<Long>("RTT", "The round-trip time (RTT) in milliseconds (min 2, max 10000)", default = 300L, range = 2L..10000L)
+    private val jitter = param<Long>("Jitter", "The amount of randomness to add to the RTT (min 0, max 100)", default = 5L, range = 0L..100L)
+
+    override val syntax = withTarget(rtt, jitter)
+
     // Shared scheduler for each duplex
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
@@ -136,33 +127,28 @@ class Lag : BaseToggleTroll() {
         PacketEvents.getAPI().eventManager.registerListener(LagPacketListener(this))
     }
 
-    private val sessions = ConcurrentHashMap<UUID, Session>()
-
     override fun onDisable() {
-        sessions.forEach { [_, session] -> session.inbound.close(); session.outbound.close() }
+        fieldValues<Session>("session").forEach { session -> session.inbound.close(); session.outbound.close() }
         scheduler.shutdownNow()
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val rtt = args.getOrNull(2)?.toLongOrNull()?.coerceIn(2L, 10000L) ?: 300L
-        val jitter = args.getOrNull(3)?.toLongOrNull()?.coerceIn(0L, 100L) ?: 5L
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val rtt = args[rtt]
+        val jitter = args[jitter]
         val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
-        sessions[target.uniqueId] = Session(rtt, jitter, inbound, outbound)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi")
-            .put("player", target.name)
+        setField(target, "session", Session(rtt, jitter, inbound, outbound))
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        sessions[player.uniqueId]?.let { session ->
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        getField<Session>(player, "session")?.let { session ->
             session.inbound.close()
             session.outbound.close()
-            sessions.remove(player.uniqueId, session)
         }
     }
 
@@ -203,7 +189,7 @@ class Lag : BaseToggleTroll() {
 
     // Add jitter for realism
     fun jitteryOneTripDelay(uuid: UUID): Long {
-        val session = sessions[uuid] ?: return 0
+        val session = getField<Session>(uuid, "session") ?: return 0
         // Divide by 2 to represent one trip delay
         return (session.rtt + MathUtil.random(-session.jitter, session.jitter)) / 2
     }
@@ -212,9 +198,10 @@ class Lag : BaseToggleTroll() {
         // We are only really interested in delaying the PLAY state
         if (event == null || event.isCancelled || event.connectionState != ConnectionState.PLAY)
             return
-        val session = sessions[event.user.uuid] ?: return
+        val uuid = event.user.uuid ?: return
+        val session = getField<Session>(uuid, "session") ?: return
         val packet = snapshot(event)
-        if (session.inbound.enqueue(jitteryOneTripDelay(event.user.uuid)) {
+        if (session.inbound.enqueue(jitteryOneTripDelay(uuid)) {
             when (event) {
                 is PacketReceiveEvent -> event.user.receivePacketSilently(Unpooled.wrappedBuffer(packet))
                 is PacketSendEvent -> event.user.sendPacketSilently(Unpooled.wrappedBuffer(packet))

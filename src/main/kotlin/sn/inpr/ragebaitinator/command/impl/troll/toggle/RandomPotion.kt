@@ -10,12 +10,13 @@ import org.bukkit.event.player.PlayerItemConsumeEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.AreaEffectCloudApplySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
 import sn.inpr.ragebaitinator.listeners.PotionSplashSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
 @CommandInfo(
@@ -23,9 +24,6 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     category = CommandInfo.Category.INVENTORY,
     icon = Material.POTION,
     description = "Mystery flavor. Potions a player drinks or is hit with give them a random effect instead.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -38,14 +36,12 @@ class RandomPotion : BaseToggleTroll(), PlayerItemConsumeSubscriber, PotionSplas
 
     private val pool: List<PotionEffectType> by lazy { Registry.EFFECT.filterNot { it in excluded } }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s potions are now a lottery")
-            .put("player", target.name)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+        = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s potions are now a lottery", target)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s potions do what they say on the bottle again")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s potions do what they say on the bottle again", target)
             .toString()
 
     private fun randomEffect(): PotionEffect {

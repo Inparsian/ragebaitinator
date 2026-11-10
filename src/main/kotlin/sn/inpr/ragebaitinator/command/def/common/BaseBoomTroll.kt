@@ -5,6 +5,8 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.Event
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 /**
@@ -12,14 +14,15 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
  * There are two flags for persistence and destructiveness.
  */
 abstract class BaseBoomTroll : BaseToggleTroll() {
-    fun addBoomFlags(target: Player, args: Array<out String>) {
-        if (args.getOrNull(2).toBoolean())
-            addFlag(target, "persistent")
-        if (args.getOrNull(3).toBoolean())
-            addFlag(target, "destructive")
+    fun addBoomFlags(target: RbPlayer, persistent: Boolean, destructive: Boolean) {
+        if (persistent) addFlag(target, "persistent")
+        if (destructive) addFlag(target, "destructive")
     }
 
-    fun kaboom(event: Event, player: Player, sourceLocation: Location, cancel: Boolean = true) {
+    fun kaboom(event: Event, player: Player, sourceLocation: Location, cancel: Boolean = true): Unit =
+        kaboom(event, player.rb, sourceLocation, cancel)
+
+    fun kaboom(event: Event, player: RbPlayer, sourceLocation: Location, cancel: Boolean = true) {
         val run = {
             if (hasFlag(player, "destructive"))
                 sourceLocation.world?.createExplosion(sourceLocation, 5f, true)

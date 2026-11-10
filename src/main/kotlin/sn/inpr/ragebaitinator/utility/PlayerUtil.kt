@@ -9,7 +9,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDa
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityAnimation
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityStatus
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
@@ -18,21 +17,24 @@ import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
-import org.bukkit.util.Vector
+import org.bukkit.profile.PlayerProfile
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.impl.troll.toggle.Potato
-import sn.inpr.ragebaitinator.utility.LocationUtil.downHeightLimit
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
+import sn.inpr.ragebaitinator.type.rbPlayers
+import sn.inpr.ragebaitinator.type.sendPacket
 
 object PlayerUtil {
     // the maximum double that you can damage a player (i think). any higher will cause a weird glitch
     // that nullifies player damage until the server is restarted.
     const val MAX_POSSIBLE_DAMAGE: Double = 170_141_173_319_264_430_000_000_000_000_000_000_000.0
 
-    fun inVoid(player: Player, offset: Double): Boolean = player.location.y <= downHeightLimit + offset
-    fun inVoid(player: Player): Boolean = player.location.y <= downHeightLimit
+    fun inVoid(player: Player, offset: Double = 0.0): Boolean = player.rb.isInVoid(offset)
 
-    fun getEnabledTrolls(player: Player): MutableList<String> {
+    fun getEnabledTrolls(player: Player): MutableList<String> = getEnabledTrolls(player.rb)
+
+    fun getEnabledTrolls(player: RbPlayer): MutableList<String> {
         val enabled: MutableList<String> = mutableListOf()
         for (cmd in CommandManager.toggleTrolls) {
             val info: CommandInfo = cmd.info
@@ -42,49 +44,48 @@ object PlayerUtil {
         return enabled
     }
 
-    // using these methods will work even with active trolls that transform the
-    // player into, say, a potato
-    fun getVelocity(player: Player): Vector {
-        val potato = CommandManager.getCommand("potato") as? Potato
-        if (potato != null && potato.potatoes.containsKey(player.uniqueId))
-            return potato.potatoes[player.uniqueId]!!.first.velocity
-        return player.velocity
+    /**
+     * The head of a player. This is looked up by name only for a player who isn't known to the server, and only where
+     * there is something to look them up in
+     */
+    fun getHead(name: String): ItemStack = head(name, Bukkit.getPlayerExact(name)?.playerProfile)
+
+    fun getHead(player: OfflinePlayer): ItemStack {
+        val name = player.name ?: return ItemStack(Material.BARRIER)
+        return head(name, (player as? Player)?.playerProfile)
     }
 
-    fun setVelocity(player: Player, velocity: Vector) {
-        val potato = CommandManager.getCommand("potato") as? Potato
-        if (potato != null && potato.potatoes.containsKey(player.uniqueId)) {
-            potato.potatoes[player.uniqueId]!!.first.velocity = velocity
-            return
-        }
-        player.setVelocity(velocity)
-    }
-
-    fun teleportRetainVelocity(player: Player, location: Location) {
-        val velocity = getVelocity(player)
-        player.teleport(location)
-        setVelocity(player, velocity)
-    }
-
-    fun getHead(name: String): ItemStack {
+    private fun head(name: String, profile: PlayerProfile?): ItemStack {
         val head = if (PacketEvents.getAPI().serverManager.version.isOlderThan(ServerVersion.V_1_13))
             // This is not deprecated <1.13
             @Suppress("DEPRECATION")
             ItemStack(Reflection.getMaterial("SKULL_ITEM") ?: return ItemStack(Material.BARRIER), 1, 3.toShort())
         else
             ItemStack(Material.PLAYER_HEAD, 1)
-        val meta: SkullMeta = head.itemMeta as SkullMeta
-        // IGNORE DEPRECATION WARNING!!! setOwnerPlayer fetches skins sync!!!
-        @Suppress("DEPRECATION")
-        meta.owner = name
-        meta.setDisplayName("§f$name")
-        head.itemMeta = meta
-        return head
-    }
 
-    fun getHead(player: OfflinePlayer): ItemStack {
-        val name = player.name ?: return ItemStack(Material.BARRIER)
-        return getHead(name)
+        // Asking for a skin must never be able to stop the head from being made. A name that's looked up has to be
+        // something that exists, and on a server that isn't online-mode most of them have never had an account, so
+        // there is nothing to find (and no point asking). Those get the default head
+        val skinned = runCatching {
+            val meta = head.itemMeta as SkullMeta
+            meta.setDisplayName("§f$name")
+            when {
+                profile != null -> meta.ownerProfile = profile
+                // IGNORE DEPRECATION WARNING!!! setOwningPlayer fetches skins sync!!!
+                Bukkit.getOnlineMode() -> @Suppress("DEPRECATION")
+                meta.owner = name
+            }
+            head.itemMeta = meta
+        }
+
+        if (skinned.isFailure) {
+            LogUtil.info("&cCouldn't get the skin for the head of $name, using the default one: ${skinned.exceptionOrNull()}")
+            val meta = head.itemMeta as SkullMeta
+            meta.setDisplayName("§f$name")
+            head.itemMeta = meta
+        }
+
+        return head
     }
 
     fun isFireworkBoost(event: PlayerInteractEvent): Boolean {
@@ -137,7 +138,8 @@ object PlayerUtil {
     }
 
     // my method of "damaging" players that bypasses creative, godmode, etc. and has only a one-tick cooldown
-    fun packetDamage(player: Player, damage: Double, local: Boolean) {
+    fun packetDamage(rbPlayer: RbPlayer, damage: Double, local: Boolean) {
+        val player = rbPlayer.bukkit ?: return
         if (player.health <= 0)
             return
         val fatal = player.health - damage <= 0
@@ -153,10 +155,8 @@ object PlayerUtil {
             )
 
             if (local)
-                PacketEvents.getAPI().playerManager.sendPacket(player, damageEventPacket)
-            else player.world.players.forEach { p ->
-                PacketEvents.getAPI().playerManager.sendPacket(p, damageEventPacket)
-            }
+                rbPlayer.sendPacket(damageEventPacket)
+            else player.world.rbPlayers.sendPacket(damageEventPacket)
         } else {
             // the notchian server sends both animation & entity status packets
             val animationPacket = WrapperPlayServerEntityAnimation(player.entityId, WrapperPlayServerEntityAnimation.EntityAnimationType.HURT)
@@ -169,18 +169,15 @@ object PlayerUtil {
             // entity status 2 & 3 do play the hurt/death sounds, but only for the player being damaged
             if (!local)
                 for (p in Bukkit.getOnlinePlayers()) {
-                    if (p == player) continue
+                    if (p.uniqueId == rbPlayer.uuid) continue
 
                     p.playSound(player.location, "entity.player.${if (fatal) "death" else "hurt"}", 1f, 1f)
                 }
 
-            if (local) {
-                PacketEvents.getAPI().getPlayerManager().sendPacket(player, animationPacket)
-                PacketEvents.getAPI().getPlayerManager().sendPacket(player, statusPacket)
-            } else player.world.players.forEach { p ->
-                PacketEvents.getAPI().getPlayerManager().sendPacket(p, statusPacket)
-                PacketEvents.getAPI().getPlayerManager().sendPacket(p, animationPacket)
-            }
+            if (local)
+                rbPlayer.sendPacket(animationPacket, statusPacket)
+            else
+                player.world.rbPlayers.sendPacket(statusPacket, animationPacket)
         }
     }
 }

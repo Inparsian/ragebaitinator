@@ -4,16 +4,13 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.Particle
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Entity
-import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
-import java.util.*
 import kotlin.math.pow
 
 @CommandInfo(
@@ -21,23 +18,16 @@ import kotlin.math.pow
     category = CommandInfo.Category.HAZARDS,
     icon = Material.WIND_CHARGE,
     description = "Sends a tornado after a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Strength",
-            description = "The strength of the tornado (min 1, max 10)",
-            default = "3"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Tornado : BaseToggleTroll() {
-    private val twisters: MutableMap<UUID, Twister> = mutableMapOf()
+    private val strength = param<Int>("Strength", "The strength of the tornado (min 1, max 10)", default = 3, range = 1..10)
 
-    private class Twister(val chase: Entity, var location: Location, val strength: Int) {
+    override val syntax = withTarget(strength)
+
+    private class Twister(val chase: RbPlayer, var location: Location, val strength: Int) {
         var axis: Int = 0
         val pickupPoint: Location get() = location.clone().add(0.0, strength.toDouble() * 2, 0.0)
 
@@ -95,10 +85,7 @@ class Tornado : BaseToggleTroll() {
                 velocity.y = velocity.y.coerceIn(-5.0, 5.0)
                 velocity.z = velocity.z.coerceIn(-5.0, 5.0)
 
-                if (chase is Player)
-                    PlayerUtil.setVelocity(chase, velocity)
-                else
-                    chase.velocity = velocity
+                chase.velocity = velocity
             }
         }
 
@@ -110,28 +97,22 @@ class Tornado : BaseToggleTroll() {
         }
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val strength = (args.getOrNull(2)?.toIntOrNull() ?: 3).coerceIn(1, 10)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val strength = args[strength]
         val yaw = MathUtil.random(0.0, 360.0)
-        twisters[target.uniqueId] = Twister(target, target.location.clone().add(
+        setField(target, "twister", Twister(target, target.location.clone().add(
             MathUtil.rcos(yaw) * 10,
             0.0,
             MathUtil.rsin(yaw) * 10,
-        ), strength)
+        ), strength))
 
-        addTaskTimer(target, { twisters[target.uniqueId]?.tick() }, 0, 1, true)
+        setTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated", target)
             .toString()
-
-    override fun onRemovePlayer(player: Player, reason: String) {
-        twisters.remove(player.uniqueId)
-    }
 }

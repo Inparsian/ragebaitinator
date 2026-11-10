@@ -5,16 +5,16 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.entity.PlayerDeathEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -22,13 +22,8 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.WORLD,
     icon = Material.DIRT,
     description = "Buries a player alive.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ]
 )
 class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
-    private fun rollbackOwner(player: Player) = "bury:${player.uniqueId}"
-
     private fun is3x3(location: Location): Boolean {
         val block = location.block.location
         var xInRow = 0
@@ -38,7 +33,7 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return xInRow >= 3 && zInRow >= 3
     }
 
-    private fun alreadyBuried(target: Player): Boolean {
+    private fun alreadyBuried(target: RbPlayer): Boolean {
         if (!Bukkit.isPrimaryThread() && !target.location.chunk.isLoaded)
             // possible async chunk loading! we'll return true.
             return true
@@ -49,12 +44,12 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return solidsInRow == 4
     }
 
-    override fun getConditions(target: Player)
+    override fun getConditions(target: RbPlayer)
             = Conditions().notDead(target)
                 .notInVoid(target)
                 .put("This player must not already be buried.", "alreadyBuried", alreadyBuried(target))
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val location = target.location.clone()
         var buryLocation: Location? = null
         var solidsInRow = 0
@@ -84,8 +79,7 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         Blocks.place(rollbackOwner(target), fill.filter { !it.type.isSolid }.map { it to Material.STONE })
 
         target.teleport(buryLocation.clone().add(0.0, 1.0, 0.0))
-        return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA", target)
             .toString()
     }
 

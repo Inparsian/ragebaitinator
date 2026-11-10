@@ -4,30 +4,26 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Animals
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "repel",
     category = CommandInfo.Category.HAZARDS,
     icon = Material.POISONOUS_POTATO,
     description = "Why does everybody hate me? Is it because I'm ugly?",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Repel : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        addTaskTimer(target, {
-            val entities = LocationUtil.getEntitiesWithinRadius(target.location, 10.0)
-            for (entity in entities) {
-                if (entity == target) continue
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setTaskTimer(target, {
+            for (entity in target.nearbyEntities(10.0)) {
                 if (entity is Player || entity is Animals) {
                     val distance = target.location.distance(entity.location)
                     val velocity = entity.location.toVector().subtract(target.location.toVector())
@@ -39,21 +35,19 @@ class Repel : BaseToggleTroll() {
                     velocity.z = velocity.z.coerceAtMost(5.0)
                     if (distance < 6 && LocationUtil.isFinite(velocity)) {
                         if (entity is Player)
-                            PlayerUtil.setVelocity(entity, velocity)
+                            entity.rb.velocity = velocity
                         else
                             entity.velocity = velocity
                     }
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%", target)
             .toString()
 }

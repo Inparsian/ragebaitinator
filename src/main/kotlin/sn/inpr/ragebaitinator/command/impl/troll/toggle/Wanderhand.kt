@@ -2,57 +2,42 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerItemHeldEvent
 import sn.inpr.ragebaitinator.Main
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerItemHeldSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "wanderhand",
     category = CommandInfo.Category.INVENTORY,
     icon = Material.LEAD,
     description = "The hand has a mind of its own. Changing the selected hotbar slot sometimes skips a slot, or jumps to a random one.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Chance",
-            description = "The chance that a slot change goes wrong (min 0, max 1).",
-            default = "0.25"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
-    private val chances = ConcurrentHashMap<UUID, Double>()
+    private val chance = param<Double>("Chance", "The chance that a slot change goes wrong (min 0, max 1).", default = 0.25, range = 0.0..1.0)
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        chances[target.uniqueId] = (args.getOrNull(2)?.toDoubleOrNull() ?: 0.25).coerceIn(0.0, 1.0)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself")
-            .put("player", target.name)
+    override val syntax = withTarget(chance)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "chance", args[chance])
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hand will now wander off by itself", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hand stays where it's told")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s hand stays where it's told", target)
             .toString()
-
-    override fun onRemovePlayer(player: Player, reason: String) {
-        chances.remove(player.uniqueId)
-    }
 
     override fun onPlayerItemHeld(event: PlayerItemHeldEvent) {
         val player = event.player
-        val chance = chances[player.uniqueId] ?: return
+        val chance = getField<Double>(player, "chance") ?: return
         if (!MathUtil.randomBool(chance))
             return
 
@@ -72,7 +57,7 @@ class Wanderhand : BaseToggleTroll(), PlayerItemHeldSubscriber {
         // the server applies the slot that the client asked for after this event,
         // so it can only be changed after it
         Main.runTask {
-            if (player.isOnline && chances.containsKey(player.uniqueId))
+            if (player.isOnline && hasField(player, "chance"))
                 player.inventory.heldItemSlot = slot
         }
     }

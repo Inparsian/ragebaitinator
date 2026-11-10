@@ -8,37 +8,30 @@ import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerRespawnEvent
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerRespawnSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.Structure
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import java.util.*
 
 @CommandInfo(
     name = "cage",
     category = CommandInfo.Category.WORLD,
     icon = Material.IRON_BARS,
     description = "Puts a player in a cage.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "At Sender",
-            description = "Whether or not to put the cage at your feet/head.",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "void" ]
 )
 class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, BlockBreakSubscriber {
+    private val atSender = param<Boolean>("At Sender", "Whether or not to put the cage at your feet/head.", default = false)
+
+    override val syntax = withTarget(atSender)
+
     private val cage: Structure = Structure()
         .add(Material.COAL_BLOCK, 0, 0, 0)
         .add(Material.COAL_BLOCK, 0, 0, 1)
@@ -75,11 +68,8 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         .add(Material.GLASS_PANE, -1, 2, 1)
         .add(Material.GLASS_PANE, -1, 2, -1)
     private val maxY = LocationUtil.upHeightLimit - (cage.height + 1)
-    private val cages = mutableMapOf<UUID, Location>()
 
-    private fun rollbackOwner(uuid: UUID) = "cage:$uuid"
-
-    fun getViableLocation(player: Player): Location? {
+    fun getViableLocation(player: RbPlayer): Location? {
         val blockified = LocationUtil.blockify(player.location, true)
         if (blockified.y >= maxY) {
             // there's usually no intersection at world height, but we won't take chances
@@ -101,14 +91,14 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         return null
     }
 
-    override fun getConditions(target: Player): Conditions {
-        val intersection = !cages.containsKey(target.uniqueId) && getViableLocation(target) == null
+    override fun getConditions(target: RbPlayer): Conditions {
+        val intersection = !hasField(target, "cage") && getViableLocation(target) == null
         return Conditions().notInVoid(target)
             .put("The cage shouldn't be in the way of anything.", "intersection", intersection)
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val atSender = args.getOrNull(2)?.toBoolean() ?: false
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val atSender = args[atSender]
         val cageLocation = if (atSender && sender is Player) {
             val blockified = LocationUtil.blockify(sender.location, true)
             val feet = blockified.clone().add(0.0, -cage.height.toDouble(), 0.0)
@@ -125,37 +115,35 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             getViableLocation(target) ?: return "&cThe cage would hit something!"
         }
 
-        cage.build(rollbackOwner(target.uniqueId), cageLocation)
-        cages[target.uniqueId] = cageLocation
+        cage.build(rollbackOwner(target), cageLocation)
+        setField(target, "cage", cageLocation)
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free", target)
             .toString()
 
-    fun isOutsideCage(player: Player, to: Location): Boolean {
-        val cageLocation = cages[player.uniqueId] ?: return false
+    fun isOutsideCage(player: RbPlayer, to: Location): Boolean {
+        val cageLocation = getField<Location>(player, "cage") ?: return false
         return to.distance(cageLocation.clone().add(0.0, 1.0, 0.0)) > 1.25
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
-        event.cancelIf(isOutsideCage(event.player, event.to ?: return))
+        event.cancelIf(isOutsideCage(event.player.rb, event.to ?: return))
     }
 
     override fun onPlayerRespawn(event: PlayerRespawnEvent) {
-        if (cages.containsKey(event.player.uniqueId))
-            runTaskLater({ event.player.teleport(cages[event.player.uniqueId] ?: return@runTaskLater) }, 1)
+        if (hasField(event.player, "cage"))
+            runTaskLater({ event.player.teleport(getField<Location>(event.player, "cage") ?: return@runTaskLater) }, 1)
     }
 
     override fun onBlockBreak(event: BlockBreakEvent) {
         // prevent cages from being broken
-        for (cageLocation in cages.values) {
+        for (cageLocation in fieldValues<Location>("cage")) {
             for (vector in cage.vectors) {
                 val dist = cageLocation.block.location.add(vector).distance(event.block.location)
                 if (dist < 1.0) {
@@ -166,8 +154,8 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         }
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        if (cages.remove(player.uniqueId) != null)
-            cage.rollback(rollbackOwner(player.uniqueId))
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (hasField(player, "cage"))
+            cage.rollback(rollbackOwner(player))
     }
 }

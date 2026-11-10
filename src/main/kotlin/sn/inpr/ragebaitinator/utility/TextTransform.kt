@@ -99,6 +99,45 @@ object TextTransform {
     fun censor(message: String, chance: Double = 0.3, random: Random = Random.Default): String
         = Regex("""\S+""").replace(message) { if (random.nextDouble() < chance) "*".repeat(it.value.length) else it.value }
 
+    private val pirateWords = mapOf(
+        "hello" to "ahoy", "hi" to "ahoy", "hey" to "ahoy", "yes" to "aye", "yeah" to "aye", "yep" to "aye",
+        "no" to "nay", "nope" to "nay", "my" to "me", "your" to "yer", "you" to "ye", "you're" to "ye be",
+        "friend" to "matey", "friends" to "mateys", "buddy" to "matey", "is" to "be", "are" to "be", "am" to "be",
+        "the" to "th'", "of" to "o'", "to" to "t'", "for" to "fer", "there" to "thar", "money" to "doubloons",
+        "gold" to "booty", "treasure" to "booty", "stop" to "avast", "wait" to "avast", "boss" to "cap'n",
+        "admin" to "cap'n", "idiot" to "scallywag", "noob" to "landlubber", "drink" to "grog", "beer" to "grog",
+        "wow" to "shiver me timbers", "omg" to "blimey", "sorry" to "beggin' yer pardon", "thanks" to "thank ye",
+        "please" to "if ye please", "lol" to "yo ho ho", "kill" to "keelhaul", "dead" to "in Davy Jones' locker"
+    )
+    private val pirateEndings = listOf("arr!", "yarr!", "yo ho ho!", "har har!", "avast!", "ye scurvy dog!")
+
+    fun pirate(message: String, endingChance: Double = 0.35, random: Random = Random.Default): String {
+        val translated = wordRegex.replace(message) { match ->
+            val word = match.value
+            val replacement = pirateWords[word.lowercase()]
+                ?: if (word.length > 4 && word.endsWith("ing", ignoreCase = true)) word.dropLast(1) + "'" else return@replace word
+            matchCase(word, replacement)
+        }
+
+        return if (random.nextDouble() < endingChance) translated.trimEnd() + " " + pirateEndings.random(random) else translated
+    }
+
+    private fun matchCase(original: String, replacement: String): String = when {
+        original.length > 1 && original.all { !it.isLowerCase() } -> replacement.uppercase()
+        original.first().isUpperCase() -> replacement.replaceFirstChar { it.uppercaseChar() }
+        else -> replacement
+    }
+
+    fun stutter(message: String, chance: Double = 0.4, random: Random = Random.Default): String
+        = wordRegex.replace(message) { match ->
+            val word = match.value
+            if (random.nextDouble() >= chance)
+                return@replace word
+
+            val lead = word.first()
+            "$lead-".repeat(random.nextInt(1, 4)) + word
+        }
+
     fun typo(word: String, random: Random = Random.Default): String {
         if (word.length < 2)
             return word

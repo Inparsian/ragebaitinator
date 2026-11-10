@@ -2,35 +2,30 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "annoy",
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.VILLAGER_SPAWN_EGG,
     description = "Hrmm. Annoys a player with villager sounds.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Annoy : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        addTaskRandomTimer(target, {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setTaskRandomTimer(target, {
             target.playSound(target.location, "entity.villager.ambient", 1f, 1f)
-        }, 0, 100, 200, true)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now hearing voices in their head")
-            .put("player", target.name)
+        }, 0, 100, 200)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now hearing voices in their head", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c2%The voices of the villagers have left %c1%%player% %c2%alone... for now")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c2%The voices of the villagers have left %c1%%player% %c2%alone... for now", target)
             .toString()
 }

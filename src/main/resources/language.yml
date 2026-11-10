@@ -98,9 +98,9 @@ categories:
     description: "Everything else."
 
 gui:
-  # Messages that are sent in chat while the GUI is waiting for a value to be typed in.
-  # %field% is the name of the parameter, %completions% are the values that can be typed in, %value% is what was typed in,
-  # and %type% is the kind of value that was expected.
+  # Messages that are sent in chat while the GUI is waiting for something to be typed in.
+  # %field% is what is being asked for, %completions% are the values that can be typed in, %value% is what was typed in,
+  # %query% is what is being searched for, and %type% is the kind of value that was expected.
   messages:
     fieldPrompt: "%prefix% %c2%Please enter a value for %c1%%field%"
     fieldCompletions: "%prefix% %c2%Possible values: %c1%%completions%"
@@ -108,6 +108,9 @@ gui:
     fieldInvalidPlayer: "%prefix% &cPlayer(s) not found"
     fieldInvalid: "%prefix% &cInvalid %type%"
     fieldSet: "%prefix% %c2%Set %c1%%field% %c2%to %c1%%value%"
+    cancelHint: "%prefix% %c2%Type %c1%cancel %c2%to go back."
+    cancelled: "%prefix% %c2%Cancelled."
+    searchSet: "%prefix% %c2%Searching for %c1%%query%"
 
   # What the kinds of values that a parameter can have are called.
   types:
@@ -118,8 +121,9 @@ gui:
     float: "Float"
     double: "Double"
     player: "Player"
+    enum: "Choice"
 
-  # Items that are on every menu with pages.
+  # Items that are on every menu with pages. The page is in the middle of the bottom row.
   common:
     back:
       name: "%c1%Back"
@@ -133,6 +137,13 @@ gui:
       name: "%c1%Next Page"
     lastPage:
       name: "%c1%Last Page"
+    # %page% and %pages% are the page that's open and how many there are.
+    page:
+      name: "%c3%Page %c1%%page%%c3%/%c1%%pages%"
+
+  selection:
+    # What a number of players that are managed together are called. %count% is how many there are.
+    many: "%count% players"
 
   main:
     title: "Ragebaitinator"
@@ -140,6 +151,13 @@ gui:
       name: "%c1%Players"
       lore:
         - "%c3%Manage players."
+    overview:
+      name: "%c1%Overview"
+      # %players% is how many players have a troll on.
+      lore:
+        - "%c3%See who is being trolled right now."
+        - ""
+        - "%c1%%players% %c3%player(s) have trolls on."
     history:
       name: "%c1%History"
       # %count% is how many commands have been executed.
@@ -164,98 +182,165 @@ gui:
     title: "Players (%page%/%pages%)"
     head:
       name: "%c2%%player%"
-      # %enabled%, %disabled% and %total% are how many toggle trolls are on, off and there are. %trolls% is the name of every
-      # toggle troll, in the color of the state it's in (see gui.troll.name)
+      # This is the name of a player who has been chosen, which a number of players can be to manage them together.
+      selectedName: "&a%player%"
+      # %enabled% and %total% are how many toggle trolls are on and there are. %trolls% are the ones that are on, as many as
+      # fit, in the color of the state they're in (see gui.troll.name).
       lore:
-        - "%c3%Trolls (&a%enabled%%c3%:&c%disabled%%c3%:%c2%%total%%c3%):"
+        - "%c3%Trolls on: &a%enabled%%c3%/%c2%%total%"
         - "%trolls%"
-      # These are only added when the player isn't the one whose menu it is.
+      # What is listed when none are on, and what is added to the list when there are too many. %count% is how many more there are.
+      none: "%c2%None"
+      more: "%c3%...and %c2%%count% %c3%more"
+      # These are only added to a player who has been chosen, and to one who isn't the one whose menu it is.
+      selected:
+        - ""
+        - "&aSelected"
       manage:
         - ""
-        - "%c3%Click to manage this player."
+        - "%c3%Left click to manage this player."
+        - "%c3%Right click to select this player."
+    # What is done with the players that have been chosen. %count% is how many there are.
+    selection:
+      all:
+        name: "%c1%Select Everyone"
+        lore:
+          - "%c3%Selects every player that is online."
+      clear:
+        name: "%c1%Clear Selection"
+        lore:
+          - "%c3%Selects nobody."
+      continue:
+        name: "&aContinue"
+        lore:
+          - "%c3%Manage the %c1%%count% %c3%player(s) that you"
+          - "%c3%selected, all at once."
 
   player:
-    # %player% is the player the menu is about.
+    # %player% is the player the menu is about, or how many there are if it's about more than one.
     title: "%player%"
+    # What stands in for the head of a player when there are a number of them. %count% is how many there are, %enabled% is
+    # how many toggle trolls are on for any of them, and %players% are their names.
+    group:
+      name: "%c2%%count% Players"
+      lore:
+        - "%players%"
+        - ""
+        - "%c3%Toggle trolls on for any of them: %c2%%enabled%"
+    browse:
+      name: "%c1%Browse Trolls"
+      lore:
+        - "%c3%Find a troll to use."
+    active:
+      name: "%c1%Active Trolls"
+      # %count% is how many toggle trolls are on.
+      lore:
+        - "%c3%The trolls that are on right now."
+        - ""
+        - "%c3%On: %c2%%count%"
     pardon:
       name: "%c1%Pardon"
       lore:
-        - "%c3%Disables all persistent trolls for this player."
-    troll:
-      name: "%c1%Troll"
-      lore:
-        - "%c3%Trolls this player."
+        - "%c3%Disables all persistent trolls."
 
-  categories:
-    title: "Trolls"
-    item:
-      # %category% is the name of the category (see categories). In the lore, %description% is its description, %count% is how
-      # many trolls it has, and %enabled% and %toggles% are how many toggle trolls of it are on for the player, and
-      # how many there are. %player% is the player the menu is about.
-      name: "%c1%%category%"
+  # The menu with every troll in it. At the top are the tabs, one for each way of looking at them.
+  browser:
+    # %target% is who the menu is about, %tab% is what's being looked at (see tabs), and %page% and %pages% are the page
+    # that's open and how many there are.
+    title: "%target% » %tab% (%page%/%pages%)"
+    tab:
+      # %tab% is the name of the tab.
+      name: "%c1%%tab%"
+      selectedName: "&a&l%tab%"
+      view: "%c3%Click to view."
+      viewing: "&aViewing."
+    # What the tabs are called. The name is on the tab, and the title is in the title of the menu. Each category has the
+    # name and description it has in categories. In the lore, %description% is the description, %count% is how many trolls
+    # there are, %enabled% and %toggles% are how many toggle trolls of a category are on and there are, and %target% is who
+    # the menu is about.
+    tabs:
+      active:
+        name: "&aActive"
+        title: "Active"
+        description: "Everything that is on right now."
+        lore:
+          - "%description%"
+          - ""
+          - "%c3%Trolls on for %c2%%target%%c3%: %c2%%count%"
+      all:
+        name: "%c2%All Trolls"
+        title: "All Trolls"
+        description: "Every troll, in alphabetical order."
+        lore:
+          - "%description%"
+          - ""
+          - "%c3%Trolls: %c2%%count%"
+      category:
+        lore:
+          - "%description%"
+          - ""
+          - "%c3%Trolls: %c2%%count%"
+          - "%c3%On for %c2%%target%%c3%: %c2%%enabled%%c3%/%c2%%toggles%"
+      # %query% is what is being searched for.
+      search:
+        title: "Search: %query%"
+    search:
+      name: "%c1%Search"
       lore:
-        - "%description%"
-        - ""
-        - "%c3%Trolls: %c2%%count%"
-        - "%c3%Enabled on %c2%%player%%c3%: %c2%%enabled%%c3%/%c2%%toggles%"
-        - ""
-        - "%c3%Click to view."
-    all:
-      # The title is what the menu with every troll in it is called, in place of the name of a category.
-      title: "All Trolls"
-      name: "%c2%All Trolls"
-      # %count% is how many trolls there are.
+        - "%c3%Find trolls by name or description."
+      # What the player is told is being asked for, when they're asked what to search for.
+      field: "a search term"
+    clear:
+      name: "%c1%Clear Search"
       lore:
-        - "%c3%Every troll, in alphabetical order."
-        - ""
-        - "%c3%Trolls: %c2%%count%"
-        - ""
-        - "%c3%Click to view."
-
-  trolls:
-    # %category% is the name of the category, or the title of the one with every troll (see gui.categories.all).
-    title: "%category% (%page%/%pages%)"
+        - "%c3%Goes back to every troll."
+    # This is shown in place of the trolls when there are none to show.
+    empty:
+      name: "%c2%Nothing here"
+      active:
+        - "%c3%No trolls are on for %c2%%target%%c3%."
+      search:
+        - "%c3%No troll matches %c2%%query%%c3%."
+      none:
+        - "%c3%There are no trolls to show."
 
   # How a troll is shown, both in the lists of them and on the menu of its parameters.
   troll:
-    # %troll% is the name of the troll.
+    # %troll% is the name of the troll. A toggle has the second name when it's on for some of the players being managed together,
+    # and not all of them.
     name:
       enabled: "&a%troll%"
       disabled: "&c%troll%"
+      partial: "&e%troll%"
       once: "&6%troll%"
     # %state% is one of the states below.
     type:
       toggle: "%c3%Type: %c1%Toggle %c3%(%state%%c3%)"
       once: "%c3%Type: &6One-time"
+    # %on% and %total% are how many of the players being managed together a toggle is on for, and how many there are.
     state:
       enabled: "&aEnabled"
       disabled: "&cDisabled"
-    # %condition% is the condition, which the troll can't be used without while it's in the second state.
-    conditions:
-      header: "%c3%Conditions:"
-      none: "%c2%None"
-      met: "%c3%- &a%condition%"
-      unmet: "%c3%- &c%condition%"
-    # %name% is the name of the parameter, %type% is what kind of value it is, and %default% and %required% are
-    # added when it has a default value or isn't optional. %value% is the default value.
-    parameters:
-      header: "%c3%Additional Parameters:"
-      none: "%c2%None"
-      line: "%c3%- %c1%%name% %c3%: %c2%%type%%default%%required%"
-      default: " %c3%(%c2%%value%%c3%)"
-      defaultTrue: " %c3%(&2%value%%c3%)"
-      defaultFalse: " %c3%(&4%value%%c3%)"
-      required: " &c(Required)"
+      partial: "&eEnabled for %on%/%total%"
+    # This is only shown when a troll can't be used on somebody. %reason% is the condition that isn't met, %player% is who it
+    # isn't met for when it's more than one, and %count% is how many more reasons there are than are listed.
+    blocked:
+      header: "&cCan't be used right now:"
+      line: "%c3%- &c%reason%"
+      many: "%c3%- &c%player%: %reason%"
+      immune: "Immune to this troll"
+      more: "%c3%...and %c2%%count% %c3%more"
     click:
       toggle: "%c3%Left click to toggle."
       execute: "%c3%Left click to execute."
-      toggleDefaults: "%c3%Right click to toggle with default parameters."
-      executeDefaults: "%c3%Right click to execute with default parameters."
+      options: "%c3%Right click for options."
+      configure: "%c3%Click to fill in its parameters."
+      partial: "%c3%Some of them don't have it on yet, so this switches it on for them."
 
   # The menu where the parameters of a troll are filled in.
   parameters:
-    # %troll% is the name of the troll.
-    title: "%troll%"
+    # %troll% is the name of the troll and %target% is who it's for.
+    title: "%troll% » %target%"
     item:
       # %name% is the name of the parameter. The names for a true and false value are for parameters that are either.
       name: "%c1%%name%"
@@ -270,6 +355,11 @@ gui:
       noDescription: "%c2%No description."
       optional: "&aYes"
       required: "&cNo"
+      # %min% and %max% are the limits of a number, and %default% is what a parameter is if it's left alone.
+      range:
+        - "%c3%Range: %c2%%min% %c3%to %c2%%max%"
+      default:
+        - "%c3%Default: %c2%%default%"
       # %value% is the value it has now.
       value:
         - "%c3%Current Value"
@@ -277,11 +367,63 @@ gui:
       noValue:
         - "%c3%Current Value"
         - "&4None"
+      # The choices of a parameter that has a list of them, with the one it has now in the second color.
+      choices: "%c3%Choices:"
+      choice: "%c3%- %c2%%value%"
+      choiceCurrent: "&a- %value%"
+    # What can be done with a parameter, which depends on what kind it is. %step% is how much a click changes a number by.
+    controls:
+      boolean:
+        - "%c3%Click to switch."
+      number:
+        - "%c3%Left click: %c2%+%step%"
+        - "%c3%Right click: %c2%-%step%"
+        - "%c3%Hold shift to change it ten times as much."
+        - "%c3%Press Q to type a value."
+      choice:
+        - "%c3%Left click for the next choice."
+        - "%c3%Right click for the one before."
+      text:
+        - "%c3%Click to type a value."
+    reset:
+      name: "%c1%Reset to Defaults"
+      lore:
+        - "%c3%Puts every parameter back to its default."
     confirm:
       name: "&aConfirm"
+      # %command% is the command that will be run.
+      lore:
+        - "%c3%Runs:"
+        - "%c2%/rb %command%"
     # This is what the confirm item is while a parameter that's needed doesn't have a value.
     confirmBlocked:
       name: "&4Confirm"
+      lore:
+        - "%c3%Fill in every required parameter first."
+
+  # Who is being trolled right now.
+  overview:
+    # %page% and %pages% are the page that's open and how many there are.
+    title: "Overview (%page%/%pages%)"
+    # %players% is how many players have a troll on, and %trolls% is how many trolls are on in all.
+    summary:
+      name: "%c1%Overview"
+      lore:
+        - "%c3%Players with trolls on: %c2%%players%"
+        - "%c3%Trolls on in total: %c2%%trolls%"
+    head:
+      manage:
+        - ""
+        - "%c3%Left click to see what is on."
+        - "%c3%Right click to manage them."
+    pardonAll:
+      name: "%c1%Pardon Everyone"
+      lore:
+        - "%c3%Disables all persistent trolls for everyone here."
+    empty:
+      name: "%c2%Nobody is being trolled"
+      lore:
+        - "%c3%No troll is on for anyone right now."
 
   history:
     title: "History (%page%/%pages%)"

@@ -2,39 +2,35 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "invert",
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.COMPARATOR,
     description = "Up is down, down is up... Makes sense...",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Invert : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        addTaskTimer(target, {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setTaskTimer(target, {
             if (target.flySpeed >= 0) target.flySpeed *= -1
-        }, 0, 1, true)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted")
-            .put("player", target.name)
+        }, 0, 1)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (player.flySpeed < 0) player.flySpeed *= -1
     }
 }

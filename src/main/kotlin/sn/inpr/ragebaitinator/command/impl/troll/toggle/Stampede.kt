@@ -11,12 +11,13 @@ import org.bukkit.entity.Creature
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
-import java.util.*
 
 private const val PURSUIT_SPEED_MULTIPLIER = 2.4
 
@@ -25,20 +26,15 @@ private const val PURSUIT_SPEED_MULTIPLIER = 2.4
     category = CommandInfo.Category.HAZARDS,
     icon = Material.COW_SPAWN_EGG,
     description = "Unleashes a herd of cows on a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "From Shooter",
-            description = "Should the cows be spawned from the shooter?",
-            default = "false"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
+    private val fromShooter = param<Boolean>("From Shooter", "Should the cows be spawned from the shooter?", default = false)
+
+    override val syntax = withTarget(fromShooter)
+
     class CowNavigation(cow: Cow) {
         private val navigation: Any
         private val moveTo: Method
@@ -64,10 +60,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }
     }
 
-    val herds: MutableMap<UUID, MutableSet<Creature>> = mutableMapOf()
-
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val fromShooter = args.getOrNull(2)?.toBoolean() ?: false
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val fromShooter = args[fromShooter]
         val herdLocation = if (sender is Player && fromShooter && sender.world == target.world)
             sender.location.clone()
         else
@@ -75,13 +69,13 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         val positions = safePositions(herdLocation, target.location)
         if (positions.size < 6) {
-            removePlayer(target, "No safe herd spawn")
+            removePlayer(target, RemoveReason.FAILED)
             return "&cCould not find enough safe ground for the herd."
         }
 
         val herd = mutableSetOf<Creature>()
         val navigators = mutableMapOf<Creature, CowNavigation>()
-        herds[target.uniqueId] = herd
+        setField(target, "herd", herd)
         try {
             for (position in positions) {
                 val cow = position.world!!.spawn(position, Cow::class.java)
@@ -89,13 +83,13 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 navigators[cow] = CowNavigation(cow)
             }
         } catch (_: Exception) {
-            removePlayer(target, "Herd spawning failed")
+            removePlayer(target, RemoveReason.FAILED)
             return "&cCould not spawn the herd or initialize cow navigation on this server."
         }
 
         var ticks = 0
-        addTaskTimer(target, {
-            val herd = herds[target.uniqueId] ?: return@addTaskTimer
+        setTaskTimer(target, {
+            val herd = getField<MutableSet<Creature>>(target, "herd") ?: return@setTaskTimer
             val refreshRoute = ticks++ % 10 == 0
             try {
                 for (cow in herd.toList()) {
@@ -111,7 +105,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                     }
 
                     // damage
-                    if (cow.location.distanceSquared(target.location) <= 1.0) {
+                    val bukkitTarget = target.bukkit
+                    if (bukkitTarget != null && cow.location.distanceSquared(target.location) <= 1.0) {
                         val damageSource = DamageSource.builder(DamageType.MOB_ATTACK)
                             .withCausingEntity(cow)
                             .withDirectEntity(cow)
@@ -119,7 +114,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                             .build()
                         val event = EntityDamageByEntityEvent(
                             cow,
-                            target,
+                            bukkitTarget,
                             EntityDamageEvent.DamageCause.ENTITY_ATTACK,
                             damageSource,
                             1.0
@@ -131,31 +126,29 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
                     if (refreshRoute) navigators[cow]?.moveTo(target.location)
                 }
-                if (herd.isEmpty()) removePlayer(target, "Herd is gone")
+                if (herd.isEmpty()) removePlayer(target, RemoveReason.DONE)
             } catch (exception: Exception) {
                 Bukkit.getLogger().warning("Stampede navigation failed for ${target.name}: $exception")
-                removePlayer(target, "Herd navigation failed")
+                removePlayer(target, RemoveReason.FAILED)
                 sender.sendMessage("Stampede stopped because cow navigation failed.")
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        herds.remove(player.uniqueId)?.forEach { it.remove() }
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        getField<MutableSet<Creature>>(player, "herd")?.forEach { it.remove() }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val creature = event.entity as? Creature ?: return
-        event.cancelIf(herds.values.any { creature in it })
+        event.cancelIf(fieldValues<MutableSet<Creature>>("herd").any { creature in it })
     }
 
     private fun safePositions(origin: Location, target: Location): List<Location> {
@@ -174,7 +167,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                     val bz = origin.blockZ + z
                     if (by <= world.minHeight || by + 1 >= world.maxHeight) continue
                     val support = world.getBlockAt(bx, by - 1, bz)
-                    if (!support.type.isOccluding || support.type == org.bukkit.Material.MAGMA_BLOCK) continue
+                    if (!support.type.isOccluding || support.type == Material.MAGMA_BLOCK) continue
                     if (!world.getBlockAt(bx, by, bz).isEmpty || !world.getBlockAt(bx, by + 1, bz).isEmpty) continue
                     positions.add(Location(world, bx + 0.5, by.toDouble(), bz + 0.5))
                     if (positions.size == 6) return positions

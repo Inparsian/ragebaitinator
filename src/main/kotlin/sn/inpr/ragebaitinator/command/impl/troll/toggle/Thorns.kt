@@ -8,33 +8,29 @@ import org.bukkit.damage.DamageType
 import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
     name = "thorns",
     category = CommandInfo.Category.COMBAT,
     icon = Material.CACTUS,
     description = "Makes any damage a player deals return to them.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "harmless" ]
 )
 class Thorns : BaseToggleTroll(), EntityDamageByEntitySubscriber {
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String
-        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now take damage when they hit someone")
-            .put("player", target.name)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now take damage when they hit someone", target)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer take damage when they hit someone")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer take damage when they hit someone", target)
             .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {

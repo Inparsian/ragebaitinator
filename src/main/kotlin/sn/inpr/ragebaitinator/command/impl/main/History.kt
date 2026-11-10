@@ -4,9 +4,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.configuration
 import sn.inpr.ragebaitinator.Main.Companion.runTaskAsync
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.PlayerName
 import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
@@ -16,37 +17,33 @@ import sn.inpr.ragebaitinator.utility.TimeUtil
 @CommandInfo(
     name = "history",
     description = "View command history.",
-    syntax = [
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Page",
-            description = "The page number.",
-            default = "1"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.PLAYER,
-            purpose = "Player",
-            description = "The player(s) to view the command history of. Leave blank to view all command history. Specify '!!' to view the command history for console."
-        )
-    ]
 )
 class History : BaseCommand() {
+    private val page = param<Int>("Page", "The page number.", default = 1)
+    private val player = optional<PlayerName>(
+        "Player",
+        "The player(s) to view the command history of. Leave blank to view all command history. Specify '!!' to view the command history for console."
+    )
+
+    override val syntax = listOf(page, player)
+
     private val pageSize: Int get() = configuration.intOr("commands.history.pageSize", 10)
 
     override fun process(
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
         runTaskAsync {
-            val history = if (args.size > 2) {
-                if (args[2] == "!!") {
+            val who = args[player]?.value
+            val history = if (who != null) {
+                if (who == "!!") {
                     CommandHistory.getConsoleHistory()
                 } else {
                     // always prioritize exact if it is in the database
-                    CommandHistory.getHistory(args[2]).ifEmpty {
-                        val targets = targetPlayers(sender, args[2])
+                    CommandHistory.getHistory(who).ifEmpty {
+                        val targets = targetPlayers(sender, who)
                         targets.flatMap { CommandHistory.getHistory(it.name) }
                     }
                 }
@@ -55,7 +52,7 @@ class History : BaseCommand() {
             }
 
             val pages = MathUtil.pages(history.size, pageSize)
-            val page = args.getOrNull(1)?.toIntOrNull()?.coerceIn(1..pages) ?: 1
+            val page = args[page].coerceIn(1..pages)
             val paginated = history.chunked(pageSize)[page - 1]
 
             if (paginated.isNotEmpty()) {

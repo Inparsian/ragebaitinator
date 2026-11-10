@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.item.ItemStack
 import com.github.retrooper.packetevents.protocol.item.type.ItemTypes
@@ -17,11 +16,14 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryType
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -29,9 +31,6 @@ import java.util.concurrent.ConcurrentHashMap
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.CARVED_PUMPKIN,
     description = "Can't see a thing. Puts a (client-side) pumpkin on a player's head.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -40,40 +39,33 @@ class Pumpkinhead : BaseToggleTroll(), PacketEventSendSubscriber, InventoryClick
     private companion object {
         const val HELMET_MENU_SLOT = 5
         const val HELMET_INVENTORY_SLOT = 39
-        const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
     private val wearers = ConcurrentHashMap.newKeySet<Int>()
     private fun pumpkin(): ItemStack = ItemStack.builder().type(ItemTypes.CARVED_PUMPKIN).amount(1).build()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         wearers.add(target.entityId)
         show(target, pumpkin())
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has a pumpkin on their head", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has taken the pumpkin off", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         wearers.remove(player.entityId)
-        if (player.isOnline && reason != "logout")
-            show(player, SpigotConversionUtil.fromBukkitItemStack(player.inventory.helmet ?: org.bukkit.inventory.ItemStack(Material.AIR)))
+        if (player.isOnline && reason != RemoveReason.LOGOUT)
+            show(player, SpigotConversionUtil.fromBukkitItemStack(player.helmet ?: org.bukkit.inventory.ItemStack(Material.AIR)))
     }
 
-    private fun show(player: Player, helmet: ItemStack) {
-        val api = PacketEvents.getAPI().playerManager
-        api.sendPacket(player, WrapperPlayServerSetPlayerInventory(HELMET_INVENTORY_SLOT, helmet))
+    private fun show(player: RbPlayer, helmet: ItemStack) {
+        player.sendPacket(WrapperPlayServerSetPlayerInventory(HELMET_INVENTORY_SLOT, helmet))
 
         val equipment = WrapperPlayServerEntityEquipment(player.entityId, listOf(Equipment(EquipmentSlot.HELMET, helmet)))
-        val location = player.location
-        for (viewer in player.world.players)
-            if (viewer != player && viewer.canSee(player) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED)
-                api.sendPacket(viewer, equipment)
+        player.viewers(includeSelf = false).sendPacket(equipment)
     }
 
     // the server doesn't know about the pumpkin, so every time it says what is on the player's head, it has to be

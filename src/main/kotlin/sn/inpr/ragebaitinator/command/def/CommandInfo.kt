@@ -10,7 +10,6 @@ annotation class CommandInfo(
     val description: String = "No description",
     val category: Category = Category.MISC,
     val icon: Material = Material.BOOK,
-    val syntax: Array<CommandSyntax> = [],
     val aliases: Array<String> = [],
     val attributes: Array<Attribute> = [],
     val incompatible: Array<String> = [] // trolls that are incompatible with this troll. they will be automatically removed when this troll is added

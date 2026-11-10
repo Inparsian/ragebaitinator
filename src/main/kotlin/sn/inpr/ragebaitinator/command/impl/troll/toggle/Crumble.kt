@@ -1,59 +1,49 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.util.Vector3i
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockBreakAnimation
-import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
 
 @CommandInfo(
     name = "crumble",
     category = CommandInfo.Category.WORLD,
     icon = Material.CRACKED_STONE_BRICKS,
     description = "Naturally \"breaks\" blocks around a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "Local",
-            description = "Whether this should only be visible to the player.",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Crumble : BaseToggleTroll() {
+    private val local = param<Boolean>("Local", "Whether this should only be visible to the player.", default = true)
+
+    override val syntax = withTarget(local)
+
     data class CrumbleState(val entityId: Int, val stage: Byte, val vector: Vector)
 
-    val blocks: MutableMap<UUID, MutableSet<CrumbleState>> = mutableMapOf()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        if (args[local]) addFlag(target, "local")
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        if (args.getOrNull(2)?.toBooleanStrictOrNull() ?: true)
-            addFlag(target, "local")
+        setField(target, "blocks", mutableSetOf<CrumbleState>())
 
-        blocks.putIfAbsent(target.uniqueId, mutableSetOf())
-
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             val blockified = LocationUtil.blockify(target.location, false).toVector()
             val sphere = LocationUtil.sphere(blockified, 4.5)
             for (vector in sphere) {
-                val block = blocks[target.uniqueId]?.firstOrNull { it.vector == vector }
+                val block = getField<MutableSet<CrumbleState>>(target, "blocks")?.firstOrNull { it.vector == vector }
                 var [entityId, stage] = if (block != null) {
                     val delta = if (MathUtil.randomBool(0.2)) 1 else 0
                     val newStage = (block.stage + delta).toByte()
                     if (newStage < 9)
-                        blocks[target.uniqueId]?.removeIf { it.vector == vector }
+                        getField<MutableSet<CrumbleState>>(target, "blocks")?.removeIf { it.vector == vector }
                     else
                         continue
                     Pair(block.entityId, newStage)
@@ -63,33 +53,31 @@ class Crumble : BaseToggleTroll() {
 
                 val vector3i = Vector3i(vector.x.toInt(), vector.y.toInt(), vector.z.toInt())
                 val packet = WrapperPlayServerBlockBreakAnimation(entityId, vector3i, stage)
-                if (hasFlag(target.uniqueId, "local"))
-                    PacketEvents.getAPI().playerManager.sendPacket(target, packet)
+                if (hasFlag(target, "local"))
+                    target.sendPacket(packet)
                 else
-                    Bukkit.getOnlinePlayers().forEach { PacketEvents.getAPI().playerManager.sendPacket(it, packet) }
+                    RbPlayer.online.sendPacket(packet)
 
                 val state = CrumbleState(entityId, stage, vector)
-                blocks[target.uniqueId]?.add(state)
+                getField<MutableSet<CrumbleState>>(target, "blocks")?.add(state)
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
-        blocks.remove(target.uniqueId)?.forEach { state ->
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
+        takeField<MutableSet<CrumbleState>>(target, "blocks")?.forEach { state ->
             val vector3i = Vector3i(state.vector.x.toInt(), state.vector.y.toInt(), state.vector.z.toInt())
             val packet = WrapperPlayServerBlockBreakAnimation(state.entityId, vector3i, -1)
-            if (hasFlag(target.uniqueId, "local"))
-                PacketEvents.getAPI().playerManager.sendPacket(target, packet)
+            if (hasFlag(target, "local"))
+                target.sendPacket(packet)
             else
-                Bukkit.getOnlinePlayers().forEach { PacketEvents.getAPI().playerManager.sendPacket(it, packet) }
+                RbPlayer.online.sendPacket(packet)
         }
 
-        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%")
-            .put("player", target.name)
+        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)
             .toString()
     }
 }

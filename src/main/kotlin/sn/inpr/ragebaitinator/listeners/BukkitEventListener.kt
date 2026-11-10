@@ -8,18 +8,22 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.entity.*
-import org.bukkit.event.inventory.FurnaceStartSmeltEvent
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.inventory.InventoryDragEvent
+import org.bukkit.event.inventory.*
 import org.bukkit.event.player.*
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.gui.GuiHandler
 
 fun interface PlayerJoinSubscriber { fun onPlayerJoin(event: PlayerJoinEvent) }
 fun interface PlayerQuitSubscriber { fun onPlayerQuit(event: PlayerQuitEvent) }
 fun interface AsyncPlayerChatSubscriber { fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) }
 fun interface PlayerMoveSubscriber { fun onPlayerMove(event: PlayerMoveEvent) }
+/**
+ * Gets teleports after every troll and plugin has had its say. Canceled teleports never get here, so this is for
+ * reacting to a teleport that is really going to happen
+ */
+fun interface PlayerTeleportMonitorSubscriber { fun onPlayerTeleportMonitor(event: PlayerTeleportEvent) }
 fun interface PlayerVelocitySubscriber { fun onPlayerVelocity(event: PlayerVelocityEvent) }
 fun interface PlayerInteractSubscriber { fun onPlayerInteract(event: PlayerInteractEvent) }
 fun interface BlockBreakSubscriber { fun onBlockBreak(event: BlockBreakEvent) }
@@ -55,9 +59,11 @@ fun interface AreaEffectCloudApplySubscriber { fun onAreaEffectCloudApply(event:
 fun interface FurnaceStartSmeltSubscriber { fun onFurnaceStartSmelt(event: FurnaceStartSmeltEvent) }
 fun interface PlayerDropItemSubscriber { fun onPlayerDropItem(event: PlayerDropItemEvent) }
 fun interface EntityChangeBlockSubscriber { fun onEntityChangeBlock(event: EntityChangeBlockEvent) }
+fun interface InventoryOpenSubscriber { fun onInventoryOpen(event: InventoryOpenEvent) }
+fun interface InventoryCloseSubscriber { fun onInventoryClose(event: InventoryCloseEvent) }
 
 object BukkitEventListener : Listener {
-    fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: String) {
+    fun removeToggleTrollsWithAttribute(player: Player, attribute: CommandInfo.Attribute, reason: RemoveReason) {
         CommandManager.toggleTrolls
             .filter { it.info.attributes.contains(attribute) }
             .forEach { it.removePlayer(player, reason) }
@@ -104,6 +110,8 @@ object BukkitEventListener : Listener {
             if (command is FurnaceStartSmeltSubscriber && event is FurnaceStartSmeltEvent) command.onFurnaceStartSmelt(event)
             if (command is PlayerDropItemSubscriber && event is PlayerDropItemEvent) command.onPlayerDropItem(event)
             if (command is EntityChangeBlockSubscriber && event is EntityChangeBlockEvent) command.onEntityChangeBlock(event)
+            if (command is InventoryOpenSubscriber && event is InventoryOpenEvent) command.onInventoryOpen(event)
+            if (command is InventoryCloseSubscriber && event is InventoryCloseEvent) command.onInventoryClose(event)
         }
 
         for (menu in GuiHandler.menus.values) {
@@ -113,8 +121,8 @@ object BukkitEventListener : Listener {
 
         // remove corresponding attributes
         when (event) {
-            is PlayerQuitEvent -> removeToggleTrollsWithAttribute(event.player, CommandInfo.Attribute.LOGOUT, "logout")
-            is EntityDeathEvent -> removeToggleTrollsWithAttribute(event.entity as? Player ?: return, CommandInfo.Attribute.DEATH, "death")
+            is PlayerQuitEvent -> removeToggleTrollsWithAttribute(event.player, CommandInfo.Attribute.LOGOUT, RemoveReason.LOGOUT)
+            is EntityDeathEvent -> removeToggleTrollsWithAttribute(event.entity as? Player ?: return, CommandInfo.Attribute.DEATH, RemoveReason.DEATH)
         }
     }
 
@@ -130,6 +138,11 @@ object BukkitEventListener : Listener {
     fun onPlayerTeleport(event: PlayerTeleportEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerMove(event: PlayerMoveEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onPlayerTeleportMonitor(event: PlayerTeleportEvent) {
+        for (command in CommandManager.commands)
+            if (command is PlayerTeleportMonitorSubscriber) command.onPlayerTeleportMonitor(event)
+    }
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onPlayerVelocity(event: PlayerVelocityEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -196,4 +209,8 @@ object BukkitEventListener : Listener {
     fun onPlayerDropItem(event: PlayerDropItemEvent) = interceptBukkitEvent(event)
     @EventHandler(priority = EventPriority.HIGHEST)
     fun onEntityChangeBlock(event: EntityChangeBlockEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryOpen(event: InventoryOpenEvent) = interceptBukkitEvent(event)
+    @EventHandler(priority = EventPriority.HIGHEST)
+    fun onInventoryClose(event: InventoryCloseEvent) = interceptBukkitEvent(event)
 }

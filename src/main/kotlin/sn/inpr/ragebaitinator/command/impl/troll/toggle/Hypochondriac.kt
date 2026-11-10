@@ -1,77 +1,65 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateHealth
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "hypochondriac",
     category = CommandInfo.Category.ILLUSIONS,
     icon = Material.REDSTONE,
     description = "It's probably nothing. Every so often, a player's health bar says they're about to die.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Hypochondriac : BaseToggleTroll() {
-    // everyone whose health bar is lying to them right now
-    private val scared = ConcurrentHashMap.newKeySet<UUID>()
-
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         scheduleScare(target)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a clean bill of health")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a clean bill of health", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        if (scared.remove(player.uniqueId) && reason != "logout")
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (removeFlag(player, "scared") && reason != RemoveReason.LOGOUT)
             showRealHealth(player)
     }
 
-    private fun scheduleScare(player: Player) {
-        addTask(player, { scare(player) }, MathUtil.random(100L, 400L))
+    private fun scheduleScare(player: RbPlayer) {
+        setTask(player, { scare(player) }, MathUtil.random(100L, 400L))
     }
 
-    private fun scare(player: Player) {
+    private fun scare(player: RbPlayer) {
         // a health of 0 would put up the death screen, and there's no point if they're already hurt that badly
-        if (!player.isOnline || player.isDead || player.health <= 4.0) {
+        if (player.isDead || player.health <= 4.0) {
             scheduleScare(player)
             return
         }
 
-        scared.add(player.uniqueId)
-        PacketEvents.getAPI().playerManager.sendPacket(
-            player,
+        addFlag(player, "scared")
+        player.sendPacket(
             WrapperPlayServerUpdateHealth(MathUtil.random(1f, 4f), player.foodLevel, player.saturation)
         )
-        addTask(player, {
-            if (scared.remove(player.uniqueId))
+        setTask(player, {
+            if (removeFlag(player, "scared"))
                 showRealHealth(player)
             scheduleScare(player)
         }, MathUtil.random(30L, 80L))
     }
 
-    private fun showRealHealth(player: Player) {
-        if (player.isOnline && !player.isDead)
-            PacketEvents.getAPI().playerManager.sendPacket(
-                player,
+    private fun showRealHealth(player: RbPlayer) {
+        if (!player.isDead)
+            player.sendPacket(
                 WrapperPlayServerUpdateHealth(player.health.toFloat(), player.foodLevel, player.saturation)
             )
     }

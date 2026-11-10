@@ -11,33 +11,29 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.inventory.ItemStack
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "slowundo",
     category = CommandInfo.Category.WORLD,
     icon = Material.CLOCK,
     description = "Gradually undoes the block changes a player makes.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Interval",
-            description = "The amount of ticks between each undone block change.",
-            default = "40"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
+    private val interval = param<Int>("Interval", "The amount of ticks between each undone block change.", default = 40, range = 1..1200)
+
+    override val syntax = withTarget(interval)
+
     private companion object {
         // anything past this undoes the oldest change right away instead of letting the queue grow
         const val MAX_PENDING = 512
@@ -51,28 +47,23 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         val exp: Int = 0
     )
 
-    private val pending = ConcurrentHashMap<UUID, ArrayDeque<Change>>()
-
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val interval = (args.getOrNull(2)?.toIntOrNull() ?: 40).coerceIn(1, 1200).toLong()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val interval = args[interval].toLong()
         val queue = ArrayDeque<Change>()
-        pending[target.uniqueId] = queue
-
-        addTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
-        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone")
-            .put("player", target.name)
+        setField(target, "pending", queue)
+        setTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
+        return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone", target)
             .toString()
 
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they
     // get what those blocks would have dropped instead
-    override fun onRemovePlayer(player: Player, reason: String) {
-        val queue = pending.remove(player.uniqueId) ?: return
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        val queue = takeField<ArrayDeque<Change>>(player, "pending") ?: return
         for (change in queue)
             release(change)
     }
@@ -107,7 +98,7 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
     }
 
     private fun track(player: Player, change: Change) {
-        val queue = pending[player.uniqueId] ?: return
+        val queue = getField<ArrayDeque<Change>>(player, "pending") ?: return
         queue.addLast(change)
         if (queue.size > MAX_PENDING)
             undo(queue.pollFirst())

@@ -7,53 +7,48 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerMoveEvent
 import org.bukkit.event.player.PlayerTeleportEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
-import java.util.*
 
 @CommandInfo(
     name = "void",
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.END_PORTAL_FRAME,
     description = "Banishes a player into the void.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.DEATH, CommandInfo.Attribute.LOGOUT
     ],
     incompatible = [ "cage" ]
 )
 class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
-    private val locations = mutableMapOf<UUID, Location>()
-
-    fun get65536(player: Player): Location {
+    fun get65536(player: RbPlayer): Location {
         val location = player.location.clone()
         location.y = -65536.0
         return location
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        locations[target.uniqueId] = target.location
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "location", target.location)
         target.teleport(get65536(target))
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String {
-        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned from the void")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String {
+        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned from the void", target)
             .toString()
     }
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         player.fallDistance = 0f // prevents an oopsie
-        locations.remove(player.uniqueId)?.let { player.teleport(it) }
+        takeField<Location>(player, "location")?.let { player.teleport(it) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
@@ -65,6 +60,6 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
         if (event is PlayerTeleportEvent)
             event.cancelIf(hasPlayer(event.player) && inVoid(event.player, -2.0))
         else if (hasPlayer(event.player) && !inVoid(event.player, -2.0))
-            event.player.teleport(get65536(event.player))
+            event.player.teleport(get65536(event.player.rb))
     }
 }

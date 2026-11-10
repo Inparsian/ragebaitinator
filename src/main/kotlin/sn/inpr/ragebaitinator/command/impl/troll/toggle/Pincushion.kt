@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes
@@ -8,11 +7,13 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.sendPacket
 import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
@@ -20,58 +21,46 @@ import java.util.concurrent.ConcurrentHashMap
     category = CommandInfo.Category.COMBAT,
     icon = Material.SWEET_BERRIES,
     description = "Looks like they lost a fight with a skeleton. Sticks fake arrows or bee stingers in a player, which everyone can see.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.STRING,
-            purpose = "Type",
-            description = "What is stuck in them: arrows, stingers or both.",
-            strictCompletion = true,
-            completions = ["arrows", "stingers", "both"],
-            default = "arrows"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Count",
-            description = "How many of each (min 1, max 100).",
-            default = "20"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
+    @Suppress("unused")
+    enum class Kind { ARROWS, STINGERS, BOTH }
+
+    private val type = param<Kind>("Type", "What is stuck in them: arrows, stingers or both.", default = Kind.ARROWS)
+    private val count = param<Int>("Count", "How many of each (min 1, max 100).", default = 20, range = 1..100)
+
+    override val syntax = withTarget(type, count)
+
     private companion object {
         const val ARROW_COUNT_INDEX = 12
         const val STINGER_COUNT_INDEX = 13
-        const val VIEW_DISTANCE_SQUARED = 128.0 * 128.0
     }
 
     private data class Stuck(val arrows: Int, val stingers: Int)
     private val stuck = ConcurrentHashMap<Int, Stuck>()
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val type = args.getOrNull(2)?.lowercase() ?: "arrows"
-        val count = (args.getOrNull(3)?.toIntOrNull() ?: 20).coerceIn(1, 100)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val type = args[type]
+        val count = args[count]
         stuck[target.entityId] = Stuck(
-            if (type == "stingers") 0 else count,
-            if (type == "stingers" || type == "both") count else 0
+            if (type == Kind.STINGERS) 0 else count,
+            if (type != Kind.ARROWS) count else 0
         )
         broadcast(target)
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         stuck.remove(player.entityId)
-        if (player.isOnline && reason != "logout")
+        if (player.isOnline && reason != RemoveReason.LOGOUT)
             broadcast(player)
     }
 
@@ -80,16 +69,12 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
         EntityData(STINGER_COUNT_INDEX, EntityDataTypes.INT, stuck.stingers)
     )
 
-    private fun broadcast(player: Player) {
+    private fun broadcast(player: RbPlayer) {
         val packet = WrapperPlayServerEntityMetadata(
             player.entityId,
             metadata(stuck[player.entityId] ?: Stuck(0, 0))
         )
-        val location = player.location
-        for (viewer in player.world.players) {
-            if (viewer == player || (viewer.canSee(player) && viewer.location.distanceSquared(location) <= VIEW_DISTANCE_SQUARED))
-                PacketEvents.getAPI().playerManager.sendPacket(viewer, packet)
-        }
+        player.viewers().sendPacket(packet)
     }
 
     override fun onPacketSend(event: PacketSendEvent) {

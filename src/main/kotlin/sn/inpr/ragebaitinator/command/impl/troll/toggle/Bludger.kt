@@ -6,10 +6,12 @@ import org.bukkit.entity.Player
 import org.bukkit.entity.Projectile
 import org.bukkit.entity.Snowball
 import org.bukkit.event.entity.ProjectileHitEvent
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.ProjectileHitSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
@@ -17,24 +19,17 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.HAZARDS,
     icon = Material.FIRE_CHARGE,
     description = "Sends a homing fireball after a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.BOOLEAN,
-            purpose = "From Shooter",
-            description = "Should the Bludger come from the shooter?",
-            default = "true"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
 )
 class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
-    private val bludgers: MutableMap<Player, Projectile> = mutableMapOf()
+    private val fromShooter = param<Boolean>("From Shooter", "Should the Bludger come from the shooter?", default = true)
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        val fromShooter = args.getOrNull(2)?.toBoolean() ?: true
+    override val syntax = withTarget(fromShooter)
+
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        val fromShooter = args[fromShooter]
         val bludgerLocation = if (sender is Player && fromShooter)
             sender.eyeLocation.clone().add(sender.eyeLocation.direction.multiply(2))
         else {
@@ -49,13 +44,13 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
             bludger.velocity = velocity
         bludger.fireTicks = 1_000_000
         bludger.setGravity(false)
-        bludgers[target] = bludger
+        setField(target, "bludger", bludger)
 
-        addTaskTimer(target, {
-            if (bludgers.containsKey(target)) {
+        setTaskTimer(target, {
+            if (hasField(target, "bludger")) {
                 // the bludger shalt not have a foot fetish
                 val plusOne = target.location.clone().add(0.0, 1.0, 0.0)
-                val targetBludger = bludgers[target]!!
+                val targetBludger = getField<Projectile>(target, "bludger")!!
                 val targetVelocity = plusOne
                     .subtract(targetBludger.location)
                     .toVector()
@@ -69,33 +64,29 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
                 if (bludger.location.distance(plusOne) <= 0.3)
                     kaboom(target, bludger)
             } else {
-                removeTask(target.uniqueId)
+                removeTasks(target)
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being chased by a flying fire ball thing")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being chased by a flying fire ball thing", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        bludgers.remove(player)?.remove()
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        getField<Projectile>(player, "bludger")?.remove()
     }
 
-    fun kaboom(target: Player, projectile: Projectile) {
+    fun kaboom(target: RbPlayer, projectile: Projectile) {
         LocationUtil.createSafeExplosion(projectile.location, 4.0f)
         removePlayer(target)
     }
 
     override fun onProjectileHit(event: ProjectileHitEvent) {
-        if (bludgers.containsValue(event.entity)) {
-            val target = bludgers.entries.first { it.value == event.entity }.key
-            kaboom(target, event.entity)
-        }
+        val target = fieldEntries<Projectile>("bludger").firstOrNull { it.second == event.entity }?.first ?: return
+        kaboom(target, event.entity)
     }
 }

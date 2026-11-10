@@ -5,56 +5,42 @@ import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerToggleSneakEvent
 import org.bukkit.util.Vector
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.PlayerToggleSneakSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
-import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 @CommandInfo(
     name = "jittery",
     category = CommandInfo.Category.MOVEMENT,
     icon = Material.COCOA_BEANS,
     description = "Sneaking is hard after four coffees.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-        CommandSyntax(
-            type = CommandSyntax.Type.DOUBLE,
-            purpose = "Power",
-            description = "The power of the lurch.",
-            default = "0.6"
-        )
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
 )
 class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
+    private val power = param<Double>("Power", "The power of the lurch.", default = 0.6, range = 0.0..5.0)
+
+    override val syntax = withTarget(power)
+
     private companion object {
         const val SEARCH_RADIUS = 6
         // anything shallower than this isn't really a hole
         const val HOLE_DEPTH = 3
     }
 
-    private val powers = ConcurrentHashMap<UUID, Double>()
-
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        powers[target.uniqueId] = args.getOrNull(2)?.toDoubleOrNull()?.coerceIn(0.0, 5.0) ?: 0.6
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking")
-            .put("player", target.name)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "power", args[power])
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down", target)
             .toString()
-
-    override fun onRemovePlayer(player: Player, reason: String) {
-        powers.remove(player.uniqueId)
-    }
 
     // finds the closest column nearby that's lava, or a drop of at least HOLE_DEPTH blocks, and returns the direction to it
     private fun findHazard(player: Player): Vector? {
@@ -98,7 +84,7 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
         if (event.isCancelled || !event.isSneaking || !hasPlayer(event.player))
             return
 
-        val power = powers[event.player.uniqueId] ?: 0.6
+        val power = getField<Double>(event.player, "power") ?: 0.6
         // if there's nothing dangerous around, any direction will do
         val direction = findHazard(event.player) ?: MathUtil.random(0.0, 360.0).let { Vector(MathUtil.rcos(it), 0.0, MathUtil.rsin(it)) }
         event.player.velocity = direction.multiply(power).setY(power / 2)

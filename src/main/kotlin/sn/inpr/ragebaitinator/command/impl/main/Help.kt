@@ -4,10 +4,10 @@ import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.Main.Companion.configuration
 import sn.inpr.ragebaitinator.command.CommandManager
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -15,49 +15,44 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 @CommandInfo(
     name = "help",
     description = "You are reading it, duh doy",
-    syntax = [
-        CommandSyntax(
-            type = CommandSyntax.Type.STRING,
-            purpose = "Category",
-            // these are 'all' and the keys of CommandInfo.Category
-            completions = ["all", "explosives", "hazards", "world", "movement", "inventory", "combat", "survival", "chat", "illusions", "misc"],
-            description = "The category of trolls to list, or all commands"
-        ),
-        CommandSyntax(
-            type = CommandSyntax.Type.INTEGER,
-            purpose = "Page",
-            description = "The page to display",
-            default = "1"
-        )
-    ]
 )
 class Help : BaseCommand() {
+    private val category = optional<String>(
+        "Category",
+        "The category of trolls to list, or all commands",
+        // these are 'all' and the keys of CommandInfo.Category
+        completions = listOf("all", "explosives", "hazards", "world", "movement", "inventory", "combat", "survival", "chat", "illusions", "misc"),
+    )
+    private val page = param<Int>("Page", "The page to display", default = 1)
+
+    override val syntax = listOf(category, page)
+
     private val pageSize: Int get() = configuration.intOr("commands.help.pageSize", 10)
 
     override fun process(
         sender: CommandSender,
         command: Command,
         label: String,
-        args: Array<out String>
+        args: Args
     ): Boolean {
         val allowed = CommandManager.commands.filter {
             sender.hasPermission("ragebaitinator.commands.${it.info.name.lowercase()}")
         }
 
-        val first = args.getOrNull(1)
+        val first = args[category]
         val legacyPage = first?.toIntOrNull()
         when {
             first == null -> overview(sender, allowed)
             // this used to take nothing but a page
             legacyPage != null -> listAll(sender, allowed, legacyPage)
-            first.equals("all", true) -> listAll(sender, allowed, args.getOrNull(2)?.toIntOrNull() ?: 1)
+            first.equals("all", true) -> listAll(sender, allowed, args[page])
             else -> {
                 val category = CommandInfo.Category.entries.firstOrNull { it.key.equals(first, true) }
                 if (category == null) {
                     val placeholders = placeholdersOr("unknownCategory", "%prefix% &cUnknown category. Use %c1%/rb help %c3%to see them all")
                     send(sender, placeholders)
                 } else {
-                    listCategory(sender, category, allowed, args.getOrNull(2)?.toIntOrNull() ?: 1)
+                    listCategory(sender, category, allowed, args[page])
                 }
             }
         }

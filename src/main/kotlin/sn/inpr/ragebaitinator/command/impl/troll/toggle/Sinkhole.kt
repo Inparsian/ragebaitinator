@@ -8,14 +8,11 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
-import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
-import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
-import sn.inpr.ragebaitinator.command.def.Conditions
+import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
 import kotlin.math.absoluteValue
 
@@ -24,9 +21,6 @@ import kotlin.math.absoluteValue
     category = CommandInfo.Category.WORLD,
     icon = Material.SUSPICIOUS_SAND,
     description = "Conjures a sinkhole beneath a player.",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT, CommandInfo.Attribute.DEATH
     ]
@@ -39,9 +33,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         val rollbackOwner: String = "sinkhole:${UUID.randomUUID()}"
     )
 
-    private val sinkholes: MutableMap<UUID, SinkholeState> = mutableMapOf()
-
-    fun floorBelowPlayer(player: Player): Boolean {
+    fun floorBelowPlayer(player: RbPlayer): Boolean {
         if (!Bukkit.isPrimaryThread() && !player.location.chunk.isLoaded)
         // err we dunno really
             return false
@@ -59,14 +51,14 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         return false
     }
 
-    override fun getConditions(target: Player) = Conditions()
+    override fun getConditions(target: RbPlayer) = Conditions()
         .notDead(target)
         .notInVoid(target)
         .put("There must be a floor below the player.", "noFloor", !floorBelowPlayer(target))
 
-    fun sink(cylinder: Set<Vector>, player: Player) {
+    fun sink(cylinder: Set<Vector>, player: RbPlayer) {
         player.isFlying = false
-        val owner = sinkholes[player.uniqueId]?.rollbackOwner ?: return
+        val owner = getField<SinkholeState>(player, "sinkhole")?.rollbackOwner ?: return
         val blocks = cylinder.map { it.toLocation(player.world).block }.filter { it.type.isSolid }
         if (blocks.isEmpty())
             return
@@ -75,27 +67,27 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         runTaskLater({ Blocks.release(owner, blocks) }, 60L)
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String {
-        sinkholes[target.uniqueId] = SinkholeState(target.location, target.location)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+        setField(target, "sinkhole", SinkholeState(target.location, target.location))
 
         val initCylinder = LocationUtil.cylinder(target.location.toVector().add(Vector(0.0, -2.0, 0.0)), 2.0, 3)
         sink(initCylinder, target)
 
-        addTaskTimer(target, {
-            if (sinkholes.containsKey(target.uniqueId)) {
-                if (PlayerUtil.inVoid(target) || !floorBelowPlayer(target)) {
-                    removePlayer(target, "done")
-                    return@addTaskTimer
+        setTaskTimer(target, {
+            if (hasField(target, "sinkhole")) {
+                if (target.isInVoid() || !floorBelowPlayer(target)) {
+                    removePlayer(target, RemoveReason.DONE)
+                    return@setTaskTimer
                 }
 
-                val sinkhole = sinkholes[target.uniqueId]!!
+                val sinkhole = getField<SinkholeState>(target, "sinkhole")!!
                 val holeLocation = sinkhole.startLocation.toVector().setY(target.location.y).toLocation(target.world)
 
                 if (target.location.y < sinkhole.pastPlayerLocation.y) {
                     sink(LocationUtil.cylinder(holeLocation.toVector().add(Vector(0.0, -3.0, 0.0)), 2.0, 4), target)
                     sinkhole.pastPlayerLocation = target.location
                 } else if (target.location.y > sinkhole.pastPlayerLocation.y) {
-                    PlayerUtil.teleportRetainVelocity(target, sinkhole.pastPlayerLocation.clone().add(0.0, -1.0, 0.0))
+                    target.teleportRetainVelocity(sinkhole.pastPlayerLocation.clone().add(0.0, -1.0, 0.0))
                 }
 
                 val diffX = (target.location.x - holeLocation.x).absoluteValue
@@ -105,32 +97,30 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
                     newLocation.y = target.location.y
                     newLocation.yaw = target.location.yaw
                     newLocation.pitch = target.location.pitch
-                    PlayerUtil.teleportRetainVelocity(target, newLocation)
+                    target.teleportRetainVelocity(newLocation)
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
-        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been sent on a journey to the center of the earth")
-            .put("player", target.name)
+        return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been sent on a journey to the center of the earth", target)
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: Player): String
-        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned back to the surface")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned back to the surface", target)
             .toString()
 
-    override fun onRemovePlayer(player: Player, reason: String) {
-        if (!arrayOf("done", "death").contains(reason)) {
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        if (reason != RemoveReason.DONE && reason != RemoveReason.DEATH) {
             player.fallDistance = 0f
-            player.teleport(sinkholes[player.uniqueId]?.startLocation ?: player.location)
+            player.teleport(getField<SinkholeState>(player, "sinkhole")?.startLocation ?: player.location)
         }
 
-        sinkholes.remove(player.uniqueId)?.let { Blocks.release(it.rollbackOwner) }
+        takeField<SinkholeState>(player, "sinkhole")?.let { Blocks.release(it.rollbackOwner) }
     }
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         val uuid = (event.entity as? Player ?: return).uniqueId
-        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && sinkholes.containsKey(uuid))
+        event.cancelIf(event.cause == EntityDamageEvent.DamageCause.FALL && hasField(uuid, "sinkhole"))
     }
 }

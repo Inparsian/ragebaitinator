@@ -9,10 +9,11 @@ import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
+import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.CommandSyntax
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
+import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
 // Another one of my favorites. Cause of Kotlin I can do way more than the old iteration
@@ -22,9 +23,6 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     category = CommandInfo.Category.CHAT,
     icon = Material.LANTERN,
     description = "Be careful what you wish for :)",
-    syntax = [
-        CommandSyntax(CommandSyntax.Type.PLAYER, optional = false),
-    ],
     attributes = [
         CommandInfo.Attribute.LOGOUT
     ]
@@ -79,14 +77,12 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
         }
     }
 
-    override fun init(sender: CommandSender, target: Player, args: Array<out String>): String =
-        placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition")
-            .put("player", target.name)
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String =
+        placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition", target)
             .toString()
 
-    override fun deinit(sender: CommandSender, target: Player): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can no longer manifest words into reality")
-            .put("player", target.name)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can no longer manifest words into reality", target)
             .toString()
 
     override fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
