@@ -18,9 +18,9 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Annoy : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskRandomTimer(target, {
+        setTaskRandomTimer(target, {
             target.playSound(target.location, "entity.villager.ambient", 1f, 1f)
-        }, 0, 100, 200, true)
+        }, 0, 100, 200)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now hearing voices in their head", target)
             .toString()
     }

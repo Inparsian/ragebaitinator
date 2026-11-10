@@ -32,8 +32,8 @@ class Rewind : BaseToggleTroll() {
         val speed = args[speed]
         setField(target, "entry", RewindEntry(originalOffset, originalOffset, speed))
 
-        addTaskTimer(target, {
-            val entry = getField<RewindEntry>(target, "entry") ?: return@addTaskTimer
+        setTaskTimer(target, {
+            val entry = getField<RewindEntry>(target, "entry") ?: return@setTaskTimer
             val dayOffset = if (entry.currentTime <= -target.world.fullTime) 24000 else 0
             val deducted = entry.currentTime + dayOffset - entry.speed
 
@@ -43,7 +43,7 @@ class Rewind : BaseToggleTroll() {
             target.setPlayerTime(deducted, true)
             target.sendPacket(WrapperPlayServerTimeUpdate(target.world.time, target.playerTime))
             setField(target, "entry", RewindEntry(entry.originalTime, deducted, speed))
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick", target)
             .put("speed", speed.absoluteValue.toString())

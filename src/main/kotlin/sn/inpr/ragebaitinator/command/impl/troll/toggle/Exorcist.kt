@@ -34,7 +34,7 @@ class Exorcist : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         if (args[local]) addFlag(target, "local")
 
-        addTaskRandomTimer(target, {
+        setTaskRandomTimer(target, {
             for (entity in target.nearbyEntities(64.0)) {
                 if (entity !is LivingEntity || entity is ArmorStand)
                     continue
@@ -60,7 +60,7 @@ class Exorcist : BaseToggleTroll() {
                     player.rb.sendPacket(animation, look, head)
                 }
             }
-        }, 0, 1, 3, true)
+        }, 0, 1, 3)
 
         return placeholdersOr("init", "%prefix% %c2%Entities around %c1%%player% %c2%are now spazzing out", target)
             .toString()

@@ -58,7 +58,7 @@ abstract class BaseCommand {
         completionAliases: List<String> = emptyList(),
     ): Param<T> = Param(T::class, purpose, description, true, completions, strictCompletion, completionAliases, default)
 
-    /** A number that is moved into [range] when it's outside of it */
+    /** A number that is moved into [range] when it's outside it */
     protected inline fun <reified T> param(
         purpose: String,
         description: String = "",
@@ -208,8 +208,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     // concurrent maps can't hold null, so this stands in for it
     private object NullValue
 
-    internal val tasks: Map<RbPlayer, BukkitTask>
-        field = mutableMapOf()
+    private val tasks: MutableMap<RbPlayer, MutableMap<String, BukkitTask>> = mutableMapOf()
 
     fun broadcastGuiUpdate() {
         GuiHandler.menus.values
@@ -274,7 +273,7 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun hasPlayer(player: RbPlayer): Boolean = players.containsKey(player)
     fun hasPlayer(player: Player): Boolean = hasPlayer(player.rb)
     fun hasPlayer(uuid: UUID): Boolean = hasPlayer(RbPlayer(uuid))
-    /** Whether this is a player this troll is toggled on. It's not if it isn't a player, or isn't anybody */
+    /** Whether this is a player this troll is toggled on. It's not if it isn't a player or isn't anybody */
     fun hasPlayer(entity: Entity?): Boolean = entity?.asRb?.let { hasPlayer(it) } == true
 
     private fun fieldsOf(player: RbPlayer): MutableMap<String, Any>? = players[player] ?: detached[player]
@@ -324,13 +323,15 @@ abstract class BaseToggleTroll : BaseTroll() {
 
     open fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {}
 
-    fun removeTask(player: RbPlayer): Unit? = tasks.remove(player)?.cancel()
-    fun removeTask(uuid: UUID): Unit? = removeTask(RbPlayer(uuid))
+    fun hasTask(player: RbPlayer, key: String = "default"): Boolean = tasks[player]?.containsKey(key) ?: false
+    fun removeTasks(player: RbPlayer): Unit? = tasks.remove(player)?.values?.forEach { it.cancel() }
+    fun removeTask(player: RbPlayer, key: String = "default"): Unit? = tasks[player]?.remove(key)?.cancel()
+    fun removeTask(uuid: UUID, key: String = "default"): Unit? = removeTask(RbPlayer(uuid), key)
     fun removePlayer(player: RbPlayer, reason: RemoveReason): Boolean {
         // the player stops counting as toggled before onRemovePlayer runs, which relies on that, but the fields stay
         // readable until it's done
         val fields = players.remove(player) ?: return false
-        removeTask(player)
+        removeTasks(player)
         detached[player] = fields
         try {
             onRemovePlayer(player, reason)
@@ -352,34 +353,61 @@ abstract class BaseToggleTroll : BaseTroll() {
         return true
     }
 
-    fun addTask(player: RbPlayer, runnable: Runnable, delay: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(player))
+    fun setTask(player: RbPlayer, key: String, runnable: Runnable, delay: Long): BukkitTask? {
+        if (!hasPlayer(player))
             return null
-        removeTask(player)
-        val t = runTaskLater(runnable, delay)
-        this.tasks[player] = t
+        removeTask(player, key)
+        val t = runTaskLater({
+            if (hasPlayer(player))
+                runnable.run()
+        }, delay)
+        if (this.tasks.containsKey(player))
+            this.tasks[player]!![key] = t
+        else
+            this.tasks[player] = mutableMapOf(key to t)
         return t
     }
 
-    fun addTask(uuid: UUID, runnable: Runnable, delay: Long): BukkitTask? {
-        return addTask(RbPlayer(uuid), runnable, delay)
-    }
+    fun setTask(player: RbPlayer, runnable: Runnable, delay: Long): BukkitTask? = setTask(player, "default", runnable, delay)
+    fun setTask(uuid: UUID, runnable: Runnable, delay: Long): BukkitTask? = setTask(RbPlayer(uuid), "default", runnable, delay)
 
-    fun addTaskTimer(player: RbPlayer, runnable: Runnable, delay: Long, period: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(player))
+    fun setTaskTimer(player: RbPlayer, key: String, runnable: Runnable, delay: Long, period: Long): BukkitTask? {
+        if (!hasPlayer(player))
             return null
-        removeTask(player)
-        val t = runTaskTimer(runnable, delay, period)
-        this.tasks[player] = t
+        removeTask(player, key)
+        val t = runTaskTimer({
+            if (hasPlayer(player))
+                runnable.run()
+            else
+                removeTask(player, key)
+        }, delay, period)
+        if (this.tasks.containsKey(player))
+            this.tasks[player]!![key] = t
+        else
+            this.tasks[player] = mutableMapOf(key to t)
         return t
     }
 
-    fun addTaskRandomTimer(player: RbPlayer, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long, ignorePlayerCheck: Boolean = false): BukkitTask? {
-        if (!ignorePlayerCheck && !hasPlayer(player))
+    fun setTaskTimer(player: RbPlayer, runnable: Runnable, delay: Long, period: Long): BukkitTask?
+        = setTaskTimer(player, "default", runnable, delay, period)
+
+    fun setTaskRandomTimer(player: RbPlayer, key: String, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long): BukkitTask? {
+        if (!hasPlayer(player))
             return null
-        removeTask(player)
-        val t = runTaskRandomTimer(runnable, delay, minPeriod, maxPeriod)
-        this.tasks[player] = t
+        removeTask(player, key)
+        val t = runTaskRandomTimer({
+            if (hasPlayer(player))
+                runnable.run()
+            else
+                removeTask(player, key)
+        }, delay, minPeriod, maxPeriod)
+        if (this.tasks.containsKey(player))
+            this.tasks[player]!![key] = t
+        else
+            this.tasks[player] = mutableMapOf(key to t)
         return t
     }
+
+    fun setTaskRandomTimer(player: RbPlayer, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long): BukkitTask?
+        = setTaskRandomTimer(player, "default", runnable, delay, minPeriod, maxPeriod)
 }

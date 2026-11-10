@@ -23,10 +23,10 @@ class Grue : BaseToggleTroll(), PlayerMoveSubscriber {
     fun mark(player: RbPlayer) {
         if (!hasFlag(player, "inDark")) {
             addFlag(player, "inDark")
-            addTask(player, {
+            setTask(player, {
                 if (player.location.block.lightLevel <= 2)
                     player.health = 0.0
-            }, 60, true)
+            }, 60)
         }
     }
 

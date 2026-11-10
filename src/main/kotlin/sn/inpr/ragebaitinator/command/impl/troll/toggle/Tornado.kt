@@ -106,7 +106,7 @@ class Tornado : BaseToggleTroll() {
             MathUtil.rsin(yaw) * 10,
         ), strength))
 
-        addTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1, true)
+        setTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas", target)
             .toString()

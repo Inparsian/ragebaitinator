@@ -46,7 +46,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
         bludger.setGravity(false)
         setField(target, "bludger", bludger)
 
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             if (hasField(target, "bludger")) {
                 // the bludger shalt not have a foot fetish
                 val plusOne = target.location.clone().add(0.0, 1.0, 0.0)
@@ -64,9 +64,9 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
                 if (bludger.location.distance(plusOne) <= 0.3)
                     kaboom(target, bludger)
             } else {
-                removeTask(target)
+                removeTasks(target)
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being chased by a flying fire ball thing", target)
             .toString()

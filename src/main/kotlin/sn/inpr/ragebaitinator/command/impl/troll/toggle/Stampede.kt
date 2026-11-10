@@ -88,8 +88,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }
 
         var ticks = 0
-        addTaskTimer(target, {
-            val herd = getField<MutableSet<Creature>>(target, "herd") ?: return@addTaskTimer
+        setTaskTimer(target, {
+            val herd = getField<MutableSet<Creature>>(target, "herd") ?: return@setTaskTimer
             val refreshRoute = ticks++ % 10 == 0
             try {
                 for (cow in herd.toList()) {
@@ -132,7 +132,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 removePlayer(target, RemoveReason.FAILED)
                 sender.sendMessage("Stampede stopped because cow navigation failed.")
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry", target)
             .toString()

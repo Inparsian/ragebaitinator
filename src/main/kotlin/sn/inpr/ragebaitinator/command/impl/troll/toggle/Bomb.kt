@@ -56,7 +56,7 @@ class Bomb : BaseToggleTroll() {
         val ammo = args[projectile]
         setField(target, "ammo", ammo)
 
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             val yaw = MathUtil.random(0.0, 360.0)
             val location = target.location.clone().add(0.0, target.eyeHeight / 2.0, 0.0)
             val projectile = target.world.spawn(location.clone().add(
@@ -66,7 +66,7 @@ class Bomb : BaseToggleTroll() {
             ), ammo.type)
             val velocity = location.toVector().subtract(projectile.location.toVector()).normalize().multiply(1.25)
             projectile.velocity = velocity
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr(ammo.initKey, ammo.initText).put("player", target.name).toString()
     }

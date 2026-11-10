@@ -122,11 +122,11 @@ class Potato : BaseToggleTroll(),
         sendFakeGameMode(target, GameMode.SPECTATOR)
         target.sendPacket(WrapperPlayServerCamera(potato.entityId))
 
-        addTaskTimer(target, {
-            val [potato] = getField<Pair<Item, PlayerSnapshot>>(target, "potato") ?: return@addTaskTimer
+        setTaskTimer(target, {
+            val [potato] = getField<Pair<Item, PlayerSnapshot>>(target, "potato") ?: return@setTaskTimer
             if (!potato.isValid) {
                 respawnPotato(target, player.location)
-                return@addTaskTimer
+                return@setTaskTimer
             }
 
             // sync the player's location with the potato's location to prevent unloading
@@ -137,7 +137,7 @@ class Potato : BaseToggleTroll(),
             if (chunkDistance > 0 || yDistance > 2)
                 player.teleport(potato.location)
             potato.pickupDelay = Int.MAX_VALUE
-        }, 0, 2, true)
+        }, 0, 2)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living in a potato battery", target)
             .toString()

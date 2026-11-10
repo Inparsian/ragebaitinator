@@ -9,7 +9,6 @@ import org.bukkit.event.player.PlayerMoveEvent
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
@@ -27,11 +26,11 @@ class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber {
     fun check(player: RbPlayer, block: Block) {
         if (hasPlayer(player)) {
             if (block.type.toString().contains("WATER")) {
-                if (!tasks.containsKey(player)) {
-                    addTaskTimer(player, {
+                if (!hasTask(player)) {
+                    setTaskTimer(player, {
                         val source = DamageSource.builder(DamageType.LAVA).build()
                         player.damage(3.0, source)
-                    }, 0, 10, false)
+                    }, 0, 10)
                 }
             } else {
                 removeTask(player)
@@ -46,10 +45,6 @@ class Aquaphobia : BaseToggleTroll(), PlayerMoveSubscriber {
     override fun deinit(sender: CommandSender, target: RbPlayer): String
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of aquagenic urticaria", target)
             .toString()
-
-    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
-        removeTask(player)
-    }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {
         check(event.player.rb, event.to?.block ?: return)

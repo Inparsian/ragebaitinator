@@ -23,11 +23,11 @@ import sn.inpr.ragebaitinator.utility.MathUtil
 )
 class Lost : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             val x = (target.location.x + MathUtil.random(-10.0, 10.0)).toInt()
             val z = (target.location.z + MathUtil.random(-10.0, 10.0)).toInt()
             target.sendPacket(WrapperPlayServerSpawnPosition(Vector3i(x, 0, z)))
-        }, 0, 1, true)
+        }, 0, 1)
         return placeholdersOr("init", "%prefix% %c2%An unknown force is now interfering with %c1%%player%%c2%'s compass", target)
             .toString()
     }

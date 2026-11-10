@@ -20,7 +20,7 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Magnet : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             for (entity in target.nearbyEntities(30.0)) {
                 if (entity is Enemy || entity is TNTPrimed) {
                     val distance = target.location.distance(entity.location)
@@ -33,7 +33,7 @@ class Magnet : BaseToggleTroll() {
                     }
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c2%Unpleasant entities are now being attracted to %c1%%player%", target)
             .toString()

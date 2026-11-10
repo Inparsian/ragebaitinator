@@ -70,7 +70,7 @@ class Radiation : BaseToggleTroll() {
         if (args[animals]) addFlag(target, "animals")
         if (args[plants]) addFlag(target, "plants")
 
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             if (hasFlag(target, "plants")) {
                 val sphere = LocationUtil.sphere(target.location.toVector(), 5.0)
                 val changes = mutableListOf<Pair<Block, Material>>()
@@ -101,7 +101,7 @@ class Radiation : BaseToggleTroll() {
                     }
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now emitting a gajillion sieverts of radiation", target)
             .toString()

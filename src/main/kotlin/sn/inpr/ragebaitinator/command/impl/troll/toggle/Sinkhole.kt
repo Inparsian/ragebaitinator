@@ -73,11 +73,11 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         val initCylinder = LocationUtil.cylinder(target.location.toVector().add(Vector(0.0, -2.0, 0.0)), 2.0, 3)
         sink(initCylinder, target)
 
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             if (hasField(target, "sinkhole")) {
                 if (target.isInVoid() || !floorBelowPlayer(target)) {
                     removePlayer(target, RemoveReason.DONE)
-                    return@addTaskTimer
+                    return@setTaskTimer
                 }
 
                 val sinkhole = getField<SinkholeState>(target, "sinkhole")!!
@@ -100,7 +100,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
                     target.teleportRetainVelocity(newLocation)
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been sent on a journey to the center of the earth", target)
             .toString()

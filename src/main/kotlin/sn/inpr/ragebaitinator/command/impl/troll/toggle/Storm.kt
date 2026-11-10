@@ -42,7 +42,7 @@ class Storm : BaseToggleTroll(), PacketEventSendSubscriber {
         brew(target)
         if (seconds > 0) {
             val interval = (seconds.coerceIn(1.0, 60.0) * 20).toLong()
-            addTaskRandomTimer(target, { flash(target) }, interval / 2, interval / 2, interval * 3 / 2)
+            setTaskRandomTimer(target, { flash(target) }, interval / 2, interval / 2, interval * 3 / 2)
         }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in the middle of a storm", target)
             .toString()

@@ -26,7 +26,7 @@ class Derp : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val seconds = args[interval]
         val period = (seconds * 20).toLong()
-        addTaskTimer(target, { spasm(target) }, period, period)
+        setTaskTimer(target, { spasm(target) }, period, period)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s head is now spasming", target)
             .toString()
     }

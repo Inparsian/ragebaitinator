@@ -61,7 +61,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
     }
 
     private fun scheduleSleep(player: RbPlayer, delay: Long = MathUtil.random(MIN_AWAKE, MAX_AWAKE)) {
-        addTask(player, { fallAsleep(player) }, delay)
+        setTask(player, { fallAsleep(player) }, delay)
     }
 
     private fun fallAsleep(player: RbPlayer) {
@@ -74,7 +74,7 @@ class Narcolepsy : BaseToggleTroll(), PlayerMoveSubscriber, PlayerInteractSubscr
 
         addFlag(player, "asleep")
         broadcast(player, true)
-        addTask(player, {
+        setTask(player, {
             wake(player)
             scheduleSleep(player)
         }, MathUtil.random(MIN_ASLEEP, MAX_ASLEEP))

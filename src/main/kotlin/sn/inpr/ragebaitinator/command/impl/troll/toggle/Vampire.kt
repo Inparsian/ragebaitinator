@@ -26,7 +26,7 @@ class Vampire : BaseToggleTroll(), PlayerMoveSubscriber {
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, { vampireTick(target) }, 0, 10, true)
+        setTaskTimer(target, { vampireTick(target) }, 0, 10)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now combust under sunlight", target)
             .toString()
     }

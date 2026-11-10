@@ -42,7 +42,7 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
     fun markDamaged(uuid: UUID) {
         addFlag(uuid, "damaged")
         // in case a player somehow doesn't get unmarked
-        addTask(uuid, { removeFlag(uuid, "damaged") }, 20)
+        setTask(uuid, { removeFlag(uuid, "damaged") }, 20)
     }
 
     override fun onPacketSend(event: PacketSendEvent) {

@@ -32,16 +32,16 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val highest = getHighestLocation(target.location) ?: return "&cCould not find a location to fall from"
         setField(target, "location", highest.add(0.0, 20.0, 0.0))
-        addTaskTimer(target, {
-            val newLocation = getField<Location>(target, "location") ?: return@addTaskTimer
+        setTaskTimer(target, {
+            val newLocation = getField<Location>(target, "location") ?: return@setTaskTimer
             val currentLocation = target.location
             if (currentLocation.world != newLocation.world || currentLocation.y < newLocation.y - 15 || target.isOnGround) {
-                val highest = getHighestLocation(currentLocation) ?: return@addTaskTimer
+                val highest = getHighestLocation(currentLocation) ?: return@setTaskTimer
                 val destination = highest.add(0.0, 20.0, 0.0).setDirection(currentLocation.direction)
                 setField(target, "location", destination)
                 target.teleportRetainVelocity(destination)
             }
-        }, 0, 1, true)
+        }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever", target)
             .toString()
     }

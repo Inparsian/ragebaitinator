@@ -25,10 +25,10 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setField(target, "homing", mutableSetOf<Entity>())
-        addTaskTimer(target, {
-            if (!hasField(target, "homing")) return@addTaskTimer
+        setTaskTimer(target, {
+            if (!hasField(target, "homing")) return@setTaskTimer
 
-            val projectiles = getField<MutableSet<Entity>>(target, "homing")?.iterator() ?: return@addTaskTimer
+            val projectiles = getField<MutableSet<Entity>>(target, "homing")?.iterator() ?: return@setTaskTimer
             while (projectiles.hasNext()) {
                 val projectile = projectiles.next()
                 if (projectile.isOnGround || projectile.isDead) {
@@ -46,7 +46,7 @@ class Loyalty : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSub
                         .add(direction.normalize().multiply(speed * 0.4))
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
         return placeholdersOr("init", "%prefix% %c2%Any projectile %c1%%player% %c2%shoots will now home in on them", target)
             .toString()
     }

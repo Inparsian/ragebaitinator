@@ -21,12 +21,12 @@ class DiveBomb : BaseToggleTroll() {
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             if (target.isGliding)
                 target.velocity = Vector(0.0, -5.0, 0.0)
             else
                 removePlayer(target, RemoveReason.DONE)
-        }, 0, 1, true)
+        }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now dive-bombing", target)
             .toString()
     }

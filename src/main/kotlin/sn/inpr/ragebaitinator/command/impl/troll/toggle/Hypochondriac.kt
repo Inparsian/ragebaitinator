@@ -36,7 +36,7 @@ class Hypochondriac : BaseToggleTroll() {
     }
 
     private fun scheduleScare(player: RbPlayer) {
-        addTask(player, { scare(player) }, MathUtil.random(100L, 400L))
+        setTask(player, { scare(player) }, MathUtil.random(100L, 400L))
     }
 
     private fun scare(player: RbPlayer) {
@@ -50,7 +50,7 @@ class Hypochondriac : BaseToggleTroll() {
         player.sendPacket(
             WrapperPlayServerUpdateHealth(MathUtil.random(1f, 4f), player.foodLevel, player.saturation)
         )
-        addTask(player, {
+        setTask(player, {
             if (removeFlag(player, "scared"))
                 showRealHealth(player)
             scheduleScare(player)

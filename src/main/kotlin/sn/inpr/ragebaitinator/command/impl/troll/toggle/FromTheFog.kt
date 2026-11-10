@@ -91,7 +91,7 @@ class FromTheFog : BaseToggleTroll() {
 
     private fun scheduleAppearance(player: RbPlayer, delay: Long? = null) {
         val interval = (getField<Int>(player, "interval") ?: 90) * 20.0
-        addTask(player, { appear(player) }, delay ?: MathUtil.random(interval * 0.5, interval * 1.5).toLong())
+        setTask(player, { appear(player) }, delay ?: MathUtil.random(interval * 0.5, interval * 1.5).toLong())
     }
 
     private fun findSpot(player: RbPlayer): Location? {
@@ -168,7 +168,7 @@ class FromTheFog : BaseToggleTroll() {
             WrapperPlayServerEntityHeadLook(figure.entityId, yaw)
         )
 
-        addTaskTimer(player, { watch(player) }, CHECK_PERIOD, CHECK_PERIOD)
+        setTaskTimer(player, { watch(player) }, CHECK_PERIOD, CHECK_PERIOD)
     }
 
     private fun isLookedAt(player: RbPlayer, figure: Figure): Boolean {

@@ -33,14 +33,14 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
     fun isMarked(entity: Entity) = entity.persistentDataContainer.has(markKey, PersistentDataType.BYTE)
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             val distance = MathUtil.random(3.0, 5.0)
             val yaw = MathUtil.random(0.0, 360.0)
             val [x, y, z] = Triple(MathUtil.rcos(yaw) * distance, 14.0, MathUtil.rsin(yaw) * distance)
             val squid = target.world.spawn(target.location.add(x, y, z), Squid::class.java)
             mark(squid)
             runTaskLater(squid::remove, 100)
-        }, 0, 2, true)
+        }, 0, 2)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in an area with a 100% chance of squid rain", target)
             .toString()

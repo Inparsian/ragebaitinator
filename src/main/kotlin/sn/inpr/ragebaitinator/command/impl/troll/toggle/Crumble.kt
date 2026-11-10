@@ -34,7 +34,7 @@ class Crumble : BaseToggleTroll() {
 
         setField(target, "blocks", mutableSetOf<CrumbleState>())
 
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             val blockified = LocationUtil.blockify(target.location, false).toVector()
             val sphere = LocationUtil.sphere(blockified, 4.5)
             for (vector in sphere) {
@@ -61,7 +61,7 @@ class Crumble : BaseToggleTroll() {
                 val state = CrumbleState(entityId, stage, vector)
                 getField<MutableSet<CrumbleState>>(target, "blocks")?.add(state)
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%", target)
             .toString()

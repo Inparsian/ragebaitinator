@@ -44,12 +44,12 @@ class AlienHand : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         if (args[local]) addFlag(target, "local")
 
-        addTaskRandomTimer(target, {
+        setTaskRandomTimer(target, {
             if (hasFlag(target, "local"))
                 swing(target, target)
             else
                 Bukkit.getOnlinePlayers().forEach { player -> swing(target, player.rb) }
-        }, MathUtil.random(40L, 60L), 120, 160, true)
+        }, MathUtil.random(40L, 60L), 120, 160)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has Alien Hand Syndrome", target)
             .toString()

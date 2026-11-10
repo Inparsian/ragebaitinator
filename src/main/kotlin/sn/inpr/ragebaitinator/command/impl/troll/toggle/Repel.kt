@@ -22,7 +22,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
 )
 class Repel : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             for (entity in target.nearbyEntities(10.0)) {
                 if (entity is Player || entity is Animals) {
                     val distance = target.location.distance(entity.location)
@@ -41,7 +41,7 @@ class Repel : BaseToggleTroll() {
                     }
                 }
             }
-        }, 0, 1, true)
+        }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%", target)
             .toString()

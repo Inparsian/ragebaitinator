@@ -26,7 +26,7 @@ class Starve : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val ticks = args[ticks]
         return if (ticks > 0) {
-            addTaskTimer(target, {
+            setTaskTimer(target, {
                 if (target.saturation > 0)
                     target.saturation = 0f
 
@@ -34,7 +34,7 @@ class Starve : BaseToggleTroll() {
                     target.foodLevel--
                 else
                     removePlayer(target, RemoveReason.DONE)
-            }, 0, ticks, true)
+            }, 0, ticks)
             placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hunger is now decreasing every %c1%%ticks% %c2%tick(s)")
                 .put("player", target.name)
                 .put("ticks", ticks.toString())

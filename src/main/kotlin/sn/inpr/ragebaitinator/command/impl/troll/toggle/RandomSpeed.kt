@@ -31,7 +31,7 @@ class RandomSpeed : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         // the walking and flying speeds they had before
         setField(target, "originalSpeeds", target.walkSpeed to target.flySpeed)
-        addTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)
+        setTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s speed will now change at random", target)
             .toString()
     }

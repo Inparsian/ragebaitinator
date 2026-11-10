@@ -19,9 +19,9 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Invert : BaseToggleTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        addTaskTimer(target, {
+        setTaskTimer(target, {
             if (target.flySpeed >= 0) target.flySpeed *= -1
-        }, 0, 1, true)
+        }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted", target)
             .toString()
     }

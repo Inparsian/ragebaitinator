@@ -51,8 +51,7 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         val interval = args[interval].toLong()
         val queue = ArrayDeque<Change>()
         setField(target, "pending", queue)
-
-        addTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
+        setTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone", target)
             .toString()
     }
