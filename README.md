@@ -24,12 +24,13 @@ Here are just some of them:
 - Simulate actual client network lag by delaying packet transmission with true FIFO queuing
 - Haunt players with a client-side Herobrine
 - Harness the power of the Texan atmosphere to summon tornadoes to chase players
-- Turn a player into a potato by moving their camera into an item entity
-- Make a player fall asleep on the spot with fake sleeping poses, without ever putting them in a bed
-- Hide every other player, their tab list entries, and their chat from a player
-- Show fake blocks that only the player can see, like a floor that turns to gold, or diamond veins that turn out to be stone
-- Give a player a health bar that lies to them
-- Rewrite what players say as they say it: UwUspeak, pig latin, MD5 hashes, scrambled words, or silence everyone but themselves
+- Turn players into potatoes
+- Make players randomly fall asleep
+- Chat trolls: UwUspeak, pig latin, scrambled words, pirate, and more
+
+## Download
+
+The only official download source for Ragebaitinator is on [Spigot](https://www.spigotmc.org/resources/ragebaitinator.140517/).
 
 ## Building & Running
 
