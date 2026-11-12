@@ -30,7 +30,7 @@ Here are just some of them:
 
 ## Download
 
-The only official download source for Ragebaitinator is on [Spigot](https://www.spigotmc.org/resources/ragebaitinator.140517/).
+The only official download source for Ragebaitinator is on [Spigot](https://www.spigotmc.org/resources/ragebaitinator.140517/) (and soon Modrinth).
 
 ## Building & Running
 
