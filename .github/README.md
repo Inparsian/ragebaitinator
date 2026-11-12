@@ -8,6 +8,8 @@ A Spigot plugin for 26.1+ that allows you to piss off people in block game
 - Extremely configurable
 - Block rollback system that rolls back block changes even after a crash
 
+[showcase video](https://www.youtube.com/watch?v=so8fs-452_U)
+
 ## Notes
 
 - This is a re-code of my old private Troll plugin (in Java) from 2022. About 90 of the commands and the inventory GUI handler came from it
