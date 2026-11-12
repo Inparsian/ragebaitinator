@@ -34,10 +34,6 @@ The only official download source for Ragebaitinator is on [Spigot](https://www.
 
 ## Building & Running
 
-A compiled .jar for Ragebaitinator is not currently available. However, you can build the plugin from source code.
-
-Ensure you at least have PacketEvents on your server; otherwise Ragebaitinator will not work.
-
 ### Building
 
 You will need:
