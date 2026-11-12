@@ -68,6 +68,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         .add(Material.GLASS_PANE, -1, 2, 1)
         .add(Material.GLASS_PANE, -1, 2, -1)
     private val maxY = LocationUtil.upHeightLimit - (cage.height + 1)
+    private val maxYRange = LocationUtil.downHeightLimit.toDouble()..maxY.toDouble()
 
     fun getViableLocation(player: RbPlayer): Location? {
         val blockified = LocationUtil.blockify(player.location, true)
@@ -101,18 +102,22 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         val atSender = args[atSender]
         val cageLocation = if (atSender && sender is Player) {
             val blockified = LocationUtil.blockify(sender.location, true)
-            val feet = blockified.clone().add(0.0, -cage.height.toDouble(), 0.0)
-            val head = blockified.clone().add(0.0, 2.0, 0.0)
-            feet.y = feet.y.coerceIn(LocationUtil.downHeightLimit.toDouble(), cage.height.toDouble())
-            head.y = head.y.coerceIn(LocationUtil.downHeightLimit.toDouble(), cage.height.toDouble())
+            val feet = blockified.clone().add(0.0, -cage.height.toDouble(), 0.0).apply { y = y.coerceIn(maxYRange) }
+            val head = blockified.clone().add(0.0, 2.0, 0.0).apply { y = y.coerceIn(maxYRange) }
             if (!cage.intersects(feet))
                 feet
-            else if (cage.intersects(head))
+            else if (!cage.intersects(head))
                 head
-            else
-                return "&cThe cage would hit something!"
+            else {
+                removePlayer(target)
+                return placeholdersOr("intersectError", "%prefix% &cThe cage would hit something!").toString()
+            }
         } else {
-            getViableLocation(target) ?: return "&cThe cage would hit something!"
+            val location = getViableLocation(target)
+            if (location != null) location else {
+                removePlayer(target)
+                return placeholdersOr("intersectError", "%prefix% &cThe cage would hit something!").toString()
+            }
         }
 
         cage.build(rollbackOwner(target), cageLocation)
