@@ -353,6 +353,11 @@ abstract class BaseToggleTroll : BaseTroll() {
         return true
     }
 
+    fun errPlaceholdersOr(key: String, default: String, target: RbPlayer): Placeholders {
+        removePlayer(target, RemoveReason.FAILED)
+        return placeholdersOr(key, default, target)
+    }
+
     fun setTask(player: RbPlayer, key: String, runnable: Runnable, delay: Long): BukkitTask? {
         if (!hasPlayer(player))
             return null

@@ -108,16 +108,10 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
                 feet
             else if (!cage.intersects(head))
                 head
-            else {
-                removePlayer(target)
-                return placeholdersOr("intersectError", "%prefix% &cThe cage would hit something!").toString()
-            }
+            else
+                return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target).toString()
         } else {
-            val location = getViableLocation(target)
-            if (location != null) location else {
-                removePlayer(target)
-                return placeholdersOr("intersectError", "%prefix% &cThe cage would hit something!").toString()
-            }
+            getViableLocation(target) ?: return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target).toString()
         }
 
         cage.build(rollbackOwner(target), cageLocation)

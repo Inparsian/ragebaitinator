@@ -1,9 +1,7 @@
 package sn.inpr.ragebaitinator.command.impl.troll.toggle
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTimeUpdate
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
-import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -39,9 +37,12 @@ class Rewind : BaseToggleTroll() {
 
             // player time is retained, but it takes 20 ticks to update
             // PlayOutUpdateTime packets update in the next client tick, but it's reverted after 20 ticks
-            // so we use both to ensure that changes are swift and retained
+            //
+            // at least that's how it was for older versions, but Bukkit setPlayerTime nowadays updates the player
+            // time instantly instead of in the next 20 ticks because it sends TIME_UPDATE now, so i've removed
+            // the redundant packet send. if it takes a second to update it's probably on a protocol version where
+            // time updates work differently
             target.setPlayerTime(deducted, true)
-            target.sendPacket(WrapperPlayServerTimeUpdate(target.world.time, target.playerTime))
             setField(target, "entry", RewindEntry(entry.originalTime, deducted, speed))
         }, 0, 1)
 
@@ -62,8 +63,5 @@ class Rewind : BaseToggleTroll() {
             player.resetPlayerTime()
         else
             player.setPlayerTime(entry.originalTime, true)
-        runTaskLater({
-            player.sendPacket(WrapperPlayServerTimeUpdate(player.world.time, player.playerTime))
-        }, 1)
     }
 }

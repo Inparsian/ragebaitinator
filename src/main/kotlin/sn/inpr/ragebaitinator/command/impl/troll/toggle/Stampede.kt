@@ -68,10 +68,8 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
             target.location.clone()
 
         val positions = safePositions(herdLocation, target.location)
-        if (positions.size < 6) {
-            removePlayer(target, RemoveReason.FAILED)
-            return "&cCould not find enough safe ground for the herd."
-        }
+        if (positions.size < 6)
+            return errPlaceholdersOr("noSafeLocation", "%prefix% &cCould not find enough safe ground for the herd.", target).toString()
 
         val herd = mutableSetOf<Creature>()
         val navigators = mutableMapOf<Creature, CowNavigation>()
@@ -83,8 +81,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 navigators[cow] = CowNavigation(cow)
             }
         } catch (_: Exception) {
-            removePlayer(target, RemoveReason.FAILED)
-            return "&cCould not spawn the herd or initialize cow navigation on this server."
+            return errPlaceholdersOr("spawnFailed", "%prefix% &cCould not spawn the herd or initialize cow navigation on this server.", target).toString()
         }
 
         var ticks = 0
