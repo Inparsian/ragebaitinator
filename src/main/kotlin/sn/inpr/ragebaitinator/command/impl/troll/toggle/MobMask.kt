@@ -10,7 +10,6 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSp
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Mob
-import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -29,35 +28,45 @@ import java.util.concurrent.ConcurrentHashMap
     ]
 )
 class MobMask : BaseToggleTroll(), PacketEventSendSubscriber {
-    private val type = param<String>("Type", "The mob that every other mob looks like (like creeper or pig).", default = "creeper")
+    private val type = param<String>(
+        purpose = "Type",
+        description = "The mob that every other mob looks like (like creeper or pig).",
+        default = "creeper",
+        completions = getMobsAsStrings(),
+        strictCompletion = true
+    )
 
     override val syntax = withTarget(type)
 
     private companion object {
         const val LAST_SHARED_INDEX = 15
+        const val MC_NAMESPACE = "minecraft:"
 
         // a lookup by name wants the namespace in some versions of PacketEvents, and not in others
-        fun resolve(name: String): EntityType? {
-            val bare = name.lowercase().removePrefix("minecraft:")
-            return listOf("minecraft:$bare", bare).firstNotNullOfOrNull { runCatching { EntityTypes.getByName(it) }.getOrNull() }
-        }
+        fun resolve(name: String): EntityType?
+            = listOf("$MC_NAMESPACE$name", name).firstNotNullOfOrNull { runCatching { EntityTypes.getByName(it) }.getOrNull() }
+
+        fun getMobsAsStrings(): List<String>
+            = EntityTypes.values().filter { EntityTypes.isTypeInstanceOf(it, EntityTypes.ABSTRACT_INSENTIENT) }
+                .map { it.toString().lowercase().removePrefix("staticentitytype[$MC_NAMESPACE").removeSuffix("]") }
+                .filter { !it.startsWith("abstract_") }
 
         fun isMob(type: EntityType): Boolean = EntityTypes.isTypeInstanceOf(type, EntityTypes.ABSTRACT_INSENTIENT)
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        val name = args[type]
+        val name = args[type].lowercase().removePrefix(MC_NAMESPACE)
         val mask = resolve(name)?.takeIf { isMob(it) }
-        if (mask == null) {
-            removePlayer(target, RemoveReason.FAILED)
-            return "&c'$name' is not a mob."
-        }
+        if (mask == null)
+            return errPlaceholdersOr("invalidMob", "%prefix% &c'%name%' is not a valid mob.", target)
+                .put("name", name)
+                .toString()
 
         setField(target, "mask", mask)
         setField(target, "masked", ConcurrentHashMap.newKeySet<Int>())
         resend(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now sees every mob as a %c1%%mask%", target)
-            .put("mask", name.lowercase().removePrefix("minecraft:"))
+            .put("mask", name.lowercase().removePrefix(MC_NAMESPACE))
             .toString()
     }
 
@@ -72,11 +81,9 @@ class MobMask : BaseToggleTroll(), PacketEventSendSubscriber {
 
     // hiding and showing an entity makes the server send it over again, going through the masking this time
     private fun resend(player: RbPlayer) {
-        val body = player.bukkit ?: return
-        val plugin = Main.instance()
         for (mob in player.nearbyEntities(80.0).filterIsInstance<Mob>()) {
-            body.hideEntity(plugin, mob)
-            body.showEntity(plugin, mob)
+            player.hideEntity(mob)
+            player.showEntity(mob)
         }
     }
 

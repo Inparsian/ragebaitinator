@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -140,7 +141,7 @@ class Apocalypse : BaseToggleTroll() {
             return null
         if ((0 until SPAWN_HEIGHT).any { world.getBlockAt(x, y + it, z).let { block -> !block.isPassable || harmful(block) } })
             return null
-        if (feet.lightFromBlocks > MAX_BLOCK_LIGHT || feet.lightFromSky > MAX_SKY_LIGHT)
+        if (feet.lightFromBlocks > MAX_BLOCK_LIGHT || LocationUtil.getInternalSkyLight(feet) > MAX_SKY_LIGHT)
             return null
 
         val spot = Location(world, x + 0.5, y.toDouble(), z + 0.5)

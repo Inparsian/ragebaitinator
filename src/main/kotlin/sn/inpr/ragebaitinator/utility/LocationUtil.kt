@@ -3,6 +3,8 @@ package sn.inpr.ragebaitinator.utility
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.manager.server.ServerVersion
 import org.bukkit.Location
+import org.bukkit.World
+import org.bukkit.block.Block
 import org.bukkit.entity.Entity
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.type.RbPlayer
@@ -49,6 +51,26 @@ object LocationUtil {
             location.blockX + factor, location.blockY + factor, location.blockZ + factor,
             location.yaw, location.pitch
         )
+    }
+
+    fun getSkyDarkening(world: World): Int {
+        val clear = when(val time = (world.time % 24000).toInt()) {
+            in 0 until 12040 -> 15
+            in 12040..13670 -> 15 - ((time - 12040) * 11 + 815) / 1630
+            in 13671..22330 -> 4
+            in 22331..23961 -> 4 + ((time - 22331) * 11 + 815) / 1630
+            else -> 15
+        }
+        if (world.isThundering) return minOf(clear, 10)
+        if (world.hasStorm()) return minOf(clear, 12)
+        return clear
+    }
+
+    fun getInternalSkyLight(block: Block): Int {
+        val sky = block.lightFromSky.toInt()
+        if (block.world.environment != World.Environment.NORMAL) return 0
+        val darkening = getSkyDarkening(block.world)
+        return darkening - (15 - sky)
     }
 
     fun getHighestBlockBelow(location: Location): Location? {

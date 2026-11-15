@@ -3,6 +3,7 @@
 package sn.inpr.ragebaitinator
 
 import com.github.retrooper.packetevents.PacketEvents
+import com.github.retrooper.packetevents.event.PacketListenerAbstract
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
@@ -48,10 +49,12 @@ class Main : JavaPlugin() {
         = RandomTimer(instance(), runnable, minTicks, maxTicks, delay)
     }
 
+    private var listener: PacketListenerAbstract? = null
+
     override fun onLoad() {
         configuration = Config("config.yml")
         language = LanguageConfig("language.yml")
-        PacketEvents.getAPI().eventManager.registerListener(PacketListener())
+        listener = PacketListener()
     }
 
     override fun onEnable() {
@@ -73,6 +76,8 @@ class Main : JavaPlugin() {
                     PAPIExpansion().register()
                     info("&aPlaceholderAPI integration complete")
                 }
+
+                PacketEvents.getAPI().eventManager.registerListener(listener)
 
                 getCommand("ragebaitinator")?.setExecutor(CommandManager)
                 CommandManager.registerCommands()
@@ -97,6 +102,7 @@ class Main : JavaPlugin() {
                 player.closeInventory()
         }
 
+        PacketEvents.getAPI().eventManager.unregisterListener(listener)
         info("Goodbye!")
     }
 }

@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
+import sn.inpr.ragebaitinator.utility.LocationUtil
 
 @CommandInfo(
     name = "vampire",
@@ -21,7 +22,7 @@ import sn.inpr.ragebaitinator.type.rb
 )
 class Vampire : BaseToggleTroll(), PlayerMoveSubscriber {
     fun vampireTick(player: RbPlayer) {
-        if (hasPlayer(player) && player.location.block.lightFromSky >= 12)
+        if (hasPlayer(player) && LocationUtil.getInternalSkyLight(player.location.block) >= 12)
             player.fireTicks = player.fireTicks.coerceAtLeast(100)
     }
 

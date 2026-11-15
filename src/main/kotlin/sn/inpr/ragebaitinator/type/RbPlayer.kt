@@ -32,7 +32,11 @@ val Projectile.shooterRb: RbPlayer? get() = (shooter as? Player)?.rb
 /** Everyone in this world */
 val World.rbPlayers: List<RbPlayer> get() = players.map { it.rb }
 
+/** Sends every packet in the specified list in the order they are specified */
 fun Iterable<RbPlayer>.sendPacket(vararg packets: PacketWrapper<*>) = forEach { it.sendPacket(*packets) }
+
+/** Refreshes every player in this list for [player] */
+fun Iterable<RbPlayer>.refreshFor(player: RbPlayer) = forEach { player.refreshPlayer(it) }
 
 /** A Ragebaitinator player */
 @JvmInline
@@ -56,6 +60,9 @@ value class RbPlayer(val uuid: UUID) {
     fun sendPacketSilently(packet: PacketWrapper<*>) = packetEventsUser?.sendPacketSilently(packet)
     /** Sends every packet silently in the specified list in the order they are specified */
     fun sendPacketSilently(vararg packets: PacketWrapper<*>) = packets.forEach { sendPacketSilently(it) }
+    // bytes
+    fun sendPacketSilently(buffer: Any?) = packetEventsUser?.sendPacketSilently(buffer)
+    fun receivePacketSilently(buffer: Any?) = packetEventsUser?.receivePacketSilently(buffer)
 
     /**
      * The underlying Bukkit player. Fall back to this if there is no equivalent
@@ -145,6 +152,7 @@ value class RbPlayer(val uuid: UUID) {
     val isSwimming: Boolean get() = bukkit?.isSwimming == true
     val isSneaking: Boolean get() = bukkit?.isSneaking == true
     val isInsideVehicle: Boolean get() = bukkit?.isInsideVehicle == true
+    @Suppress("DEPRECATION")
     val isOnGround: Boolean get() = bukkit?.isOnGround == true
 
     // Perspective
@@ -155,7 +163,6 @@ value class RbPlayer(val uuid: UUID) {
         set(value) { bukkit?.compassTarget = value }
 
     // Per-player time
-    val playerTime: Long get() = bukkit?.playerTime ?: 0L
     val playerTimeOffset: Long get() = bukkit?.playerTimeOffset ?: 0L
     fun setPlayerTime(time: Long, relative: Boolean) = bukkit?.setPlayerTime(time, relative)
     fun resetPlayerTime() = bukkit?.resetPlayerTime()
@@ -208,13 +215,17 @@ value class RbPlayer(val uuid: UUID) {
     }
 
     /** Hides [other] from this player */
-    fun hidePlayer(other: RbPlayer) {
-        other.bukkit?.let { bukkit?.hidePlayer(Main.instance(), it) }
-    }
+    fun hidePlayer(other: RbPlayer) = other.bukkit?.let { bukkit?.hidePlayer(Main.instance(), it) }
     /** Shows [other] to this player */
-    fun showPlayer(other: RbPlayer) {
-        other.bukkit?.let { bukkit?.showPlayer(Main.instance(), it) }
-    }
+    fun showPlayer(other: RbPlayer) = other.bukkit?.let { bukkit?.showPlayer(Main.instance(), it) }
+    /** Hides then re-shows [other] to this player */
+    fun refreshPlayer(other: RbPlayer) { hidePlayer(other); showPlayer(other) }
+    /** Hides [other] from this player */
+    fun hideEntity(other: Entity) = bukkit?.hideEntity(Main.instance(), other)
+    /** Shows [other] to this player */
+    fun showEntity(other: Entity) = bukkit?.showEntity(Main.instance(), other)
+    /** Gets if [other] is visible to this player */
+    fun canSee(other: RbPlayer): Boolean = bukkit?.let { viewer -> other.bukkit?.let { viewer.canSee(it) } } == true
 
     /** Whether this player is at the bottom of the world or lower, [offset] blocks aside */
     fun isInVoid(offset: Double = 0.0): Boolean = location.y <= LocationUtil.downHeightLimit + offset

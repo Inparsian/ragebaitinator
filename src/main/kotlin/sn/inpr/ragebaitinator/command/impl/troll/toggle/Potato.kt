@@ -24,10 +24,7 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.listeners.*
-import sn.inpr.ragebaitinator.type.PlayerSnapshot
-import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.type.rb
-import sn.inpr.ragebaitinator.type.sendPacket
+import sn.inpr.ragebaitinator.type.*
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
@@ -163,10 +160,7 @@ class Potato : BaseToggleTroll(),
                 player.velocity = velocity
             }
             player.sendPacket(WrapperPlayServerCamera(player.bodyEntityId))
-            player.others.forEach {
-                it.hidePlayer(player)
-                it.showPlayer(player)
-            }
+            player.others.refreshFor(player)
         }
     }
 

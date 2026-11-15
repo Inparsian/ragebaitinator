@@ -3,6 +3,7 @@ package sn.inpr.ragebaitinator.command.impl.troll.toggle
 import com.github.retrooper.packetevents.PacketEvents
 import com.github.retrooper.packetevents.event.*
 import com.github.retrooper.packetevents.protocol.ConnectionState
+import com.github.retrooper.packetevents.protocol.PacketSide
 import com.github.retrooper.packetevents.wrapper.PacketWrapper
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.ByteBufUtil
@@ -46,6 +47,7 @@ class Lag : BaseToggleTroll() {
 
     override val syntax = withTarget(rtt, jitter)
 
+    private var listener: PacketListenerAbstract? = LagPacketListener(this)
     // Shared scheduler for each duplex
     private val scheduler = Executors.newSingleThreadScheduledExecutor()
 
@@ -56,19 +58,24 @@ class Lag : BaseToggleTroll() {
         override fun onPacketReceive(event: PacketReceiveEvent?) = parent.interceptEvent(event)
     }
 
-    private class OrderedPacketQueue(val scheduler: ScheduledExecutorService) {
-        private class Entry(val deadline: Long, val send: () -> Unit)
+    private class OrderedPacketQueue(val scheduler: ScheduledExecutorService, val player: RbPlayer) {
+        private class Entry(val deadline: Long, val player: RbPlayer, val side: PacketSide, val bytes: ByteArray) {
+            fun send() = when (side) {
+                PacketSide.SERVER -> player.sendPacketSilently(Unpooled.wrappedBuffer(bytes))
+                PacketSide.CLIENT -> player.receivePacketSilently(Unpooled.wrappedBuffer(bytes))
+            }
+        }
 
         private val pending = ArrayDeque<Entry>()
         private var scheduled: ScheduledFuture<*>? = null
         private var closed = false
 
         @Synchronized
-        fun enqueue(delayMs: Long, send: () -> Unit): Boolean {
+        fun enqueue(delayMs: Long, side: PacketSide, bytes: ByteArray): Boolean {
             if (closed)
                 return false
             val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(delayMs.coerceAtLeast(0))
-            pending.addLast(Entry(deadline, send))
+            pending.addLast(Entry(deadline, player, side, bytes))
             if (scheduled == null) {
                 try {
                     scheduleHead()
@@ -82,25 +89,24 @@ class Lag : BaseToggleTroll() {
 
         private fun scheduleHead() {
             val delay = (pending.first.deadline - System.nanoTime()).coerceAtLeast(0)
-            scheduled = scheduler.schedule({ deliverHead() }, delay, TimeUnit.NANOSECONDS)
+            scheduled = scheduler.schedule(::deliverHead, delay, TimeUnit.NANOSECONDS)
         }
 
         @Synchronized
         private fun deliverHead() {
             scheduled = null
-            if (closed || pending.isEmpty())
-                return
-            try {
-                pending.removeFirst().send()
-            } finally {
-                if (pending.isNotEmpty()) {
-                    try {
-                        scheduleHead()
-                    } catch (_: RejectedExecutionException) {
-                        drain()
+            if (!closed && pending.isNotEmpty())
+                try {
+                    pending.removeFirst().send()
+                } finally {
+                    if (pending.isNotEmpty()) {
+                        try {
+                            scheduleHead()
+                        } catch (_: RejectedExecutionException) {
+                            drain()
+                        }
                     }
                 }
-            }
         }
 
         @Synchronized
@@ -116,27 +122,22 @@ class Lag : BaseToggleTroll() {
         }
     }
 
-    private class Session(
-        val rtt: Long,
-        val jitter: Long,
-        val inbound: OrderedPacketQueue,
-        val outbound: OrderedPacketQueue
-    )
+    private class Session(val rtt: Long, val jitter: Long, val queue: OrderedPacketQueue)
 
     init {
-        PacketEvents.getAPI().eventManager.registerListener(LagPacketListener(this))
+        PacketEvents.getAPI().eventManager.registerListener(listener)
     }
 
     override fun onDisable() {
-        fieldValues<Session>("session").forEach { session -> session.inbound.close(); session.outbound.close() }
         scheduler.shutdownNow()
+        PacketEvents.getAPI().eventManager.unregisterListener(listener)
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val rtt = args[rtt]
         val jitter = args[jitter]
-        val [inbound, outbound] = Pair(OrderedPacketQueue(scheduler), OrderedPacketQueue(scheduler))
-        setField(target, "session", Session(rtt, jitter, inbound, outbound))
+        val queue = OrderedPacketQueue(scheduler, target)
+        setField(target, "session", Session(rtt, jitter, queue))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi", target)
             .toString()
     }
@@ -146,10 +147,7 @@ class Lag : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
-        getField<Session>(player, "session")?.let { session ->
-            session.inbound.close()
-            session.outbound.close()
-        }
+        getField<Session>(player, "session")?.queue?.close()
     }
 
     // Whatever a listener changes through a wrapper (Velocity, for one) isn't written back into the event's buffer until
@@ -201,13 +199,7 @@ class Lag : BaseToggleTroll() {
         val uuid = event.user.uuid ?: return
         val session = getField<Session>(uuid, "session") ?: return
         val packet = snapshot(event)
-        if (session.inbound.enqueue(jitteryOneTripDelay(uuid)) {
-            when (event) {
-                is PacketReceiveEvent -> event.user.receivePacketSilently(Unpooled.wrappedBuffer(packet))
-                is PacketSendEvent -> event.user.sendPacketSilently(Unpooled.wrappedBuffer(packet))
-            }
-        }) {
+        if (session.queue.enqueue(jitteryOneTripDelay(uuid), event.packetType.side, packet))
             event.isCancelled = true
-        }
     }
 }

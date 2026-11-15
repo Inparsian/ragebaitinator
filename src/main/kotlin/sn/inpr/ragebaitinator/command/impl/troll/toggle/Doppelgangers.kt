@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.refreshFor
 
 @CommandInfo(
     name = "doppelgangers",
@@ -23,7 +24,7 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 )
 class Doppelgangers : BaseToggleTroll(), PacketEventSendSubscriber {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        resend(target)
+        target.others.filter { target.canSee(it) }.refreshFor(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now sees everyone else as themselves", target)
             .toString()
     }
@@ -34,20 +35,8 @@ class Doppelgangers : BaseToggleTroll(), PacketEventSendSubscriber {
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (player.isOnline && reason != RemoveReason.LOGOUT)
-            resend(player)
+            player.others.filter { player.canSee(it) }.refreshFor(player)
     }
-
-    private fun resend(player: RbPlayer) {
-        for (other in player.others) {
-            if (!player.canSee(other))
-                continue
-
-            player.hidePlayer(other)
-            player.showPlayer(other)
-        }
-    }
-
-    private fun RbPlayer.canSee(other: RbPlayer): Boolean = bukkit?.let { viewer -> other.bukkit?.let { viewer.canSee(it) } } == true
 
     override fun onPacketSend(event: PacketSendEvent) {
         if (players.isEmpty() || event.packetType != PacketType.Play.Server.PLAYER_INFO_UPDATE)

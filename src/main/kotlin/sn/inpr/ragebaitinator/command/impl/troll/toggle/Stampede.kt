@@ -126,8 +126,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 if (herd.isEmpty()) removePlayer(target, RemoveReason.DONE)
             } catch (exception: Exception) {
                 Bukkit.getLogger().warning("Stampede navigation failed for ${target.name}: $exception")
-                removePlayer(target, RemoveReason.FAILED)
-                sender.sendMessage("Stampede stopped because cow navigation failed.")
+                sender.sendMessage(errPlaceholdersOr("navigationFailed", "%prefix% Stampede stopped because cow navigation failed.", target).toString())
             }
         }, 0, 1)
 

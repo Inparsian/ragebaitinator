@@ -15,6 +15,7 @@ import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.refreshFor
 
 @CommandInfo(
     name = "deserted",
@@ -44,11 +45,7 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (reason == RemoveReason.LOGOUT || !player.isOnline)
             return
-
-        for (other in player.others) {
-            player.hidePlayer(other)
-            player.showPlayer(other)
-        }
+        player.others.refreshFor(player)
     }
 
     override fun onPacketSend(event: PacketSendEvent) {
