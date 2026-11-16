@@ -22,7 +22,7 @@
 # mustBeAPlayer
 # The error message when a player-only command is used by a non-player.
 #
-# playerNotFound
+# noPlayersFound
 # The error message when a player is not found.
 #
 # immune
