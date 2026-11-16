@@ -3,10 +3,7 @@ package sn.inpr.ragebaitinator.database
 import org.bukkit.Bukkit
 import sn.inpr.ragebaitinator.Main
 import java.io.File
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.ResultSet
-import java.sql.SQLException
+import java.sql.*
 
 object SQLite {
     var connection: Connection? = null
@@ -56,10 +53,14 @@ object SQLite {
         return connection
     }
 
+    fun prepare(statement: String, callback: (PreparedStatement) -> Unit): Unit = transaction { connection ->
+        connection.prepareStatement(statement).use { callback(it) }
+    }
+
+    /** One shot for simple op */
     fun perform(statement: String): Boolean {
         try {
-            val preparedStatement = connection?.prepareStatement(statement) ?: return false
-            return preparedStatement.execute()
+            return connection?.prepareStatement(statement)?.use { it.execute() } ?: false
         } catch (exception: SQLException) {
             exception.printStackTrace()
             return false
@@ -67,12 +68,11 @@ object SQLite {
     }
 
     fun execute(statement: String): ResultSet? {
-        try {
-            val preparedStatement = connection?.prepareStatement(statement) ?: return null
-            return preparedStatement.executeQuery()
+        return try {
+            connection?.prepareStatement(statement)?.executeQuery()
         } catch (exception: SQLException) {
             exception.printStackTrace()
-            return null
+            null
         }
     }
 
