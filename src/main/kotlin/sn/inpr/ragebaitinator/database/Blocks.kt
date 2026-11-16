@@ -135,25 +135,23 @@ object Blocks : Listener {
     }
 
     private fun persist(rows: List<Triple<Position, Original, Material>>) {
-        SQLite.transaction { connection ->
-            connection.prepareStatement(
-                "INSERT INTO blocks (world, x, y, z, block_data, block_entity, placed) VALUES (?, ?, ?, ?, ?, ?, ?) " +
-                "ON CONFLICT (world, x, y, z) DO UPDATE SET " +
-                "block_data = excluded.block_data, block_entity = excluded.block_entity, " +
-                "placed = excluded.placed || ',' || placed, released_at = NULL"
-            ).use { statement ->
-                rows.forEach { [position, original, material] ->
-                    statement.setPosition(position)
-                    statement.setString(5, original.blockData)
-                    if (original.blockEntity != null)
-                        statement.setBytes(6, original.blockEntity)
-                    else
-                        statement.setNull(6, Types.BLOB)
-                    statement.setString(7, material.name)
-                    statement.addBatch()
-                }
-                statement.executeBatch()
+        SQLite.prepare(
+            "INSERT INTO blocks (world, x, y, z, block_data, block_entity, placed) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                    "ON CONFLICT (world, x, y, z) DO UPDATE SET " +
+                    "block_data = excluded.block_data, block_entity = excluded.block_entity, " +
+                    "placed = excluded.placed || ',' || placed, released_at = NULL"
+        ) { statement ->
+            rows.forEach { [position, original, material] ->
+                statement.setPosition(position)
+                statement.setString(5, original.blockData)
+                if (original.blockEntity != null)
+                    statement.setBytes(6, original.blockEntity)
+                else
+                    statement.setNull(6, Types.BLOB)
+                statement.setString(7, material.name)
+                statement.addBatch()
             }
+            statement.executeBatch()
         }
     }
 
@@ -280,7 +278,7 @@ object Blocks : Listener {
             }
         }
 
-        runCatching { connection?.close() }
+        val _ = runCatching { connection?.close() }
         connection = null
     }
 

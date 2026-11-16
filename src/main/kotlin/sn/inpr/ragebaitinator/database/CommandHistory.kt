@@ -39,7 +39,12 @@ object CommandHistory {
 
     @Synchronized
     fun addCommand(playerName: String, command: String) {
-        perform("INSERT INTO command_history (player, command, timestamp) VALUES ('$playerName', '$command', ${System.currentTimeMillis()});")
+        SQLite.prepare("INSERT INTO command_history (player, command, timestamp) VALUES (?, ?, ?);") { statement ->
+            statement.setString(1, playerName)
+            statement.setString(2, command)
+            statement.setLong(3, System.currentTimeMillis())
+            statement.execute()
+        }
         history.addFirst(CommandHistoryEntry(playerName, command, System.currentTimeMillis()))
     }
 
