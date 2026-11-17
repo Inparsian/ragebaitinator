@@ -99,10 +99,12 @@ object PlayerUtil {
         } else false
     }
 
-    fun targetSuggestions(typed: String = ""): List<String> = Bukkit.getOnlinePlayers().map { it.name } +
-            listOf("@a", "@e", "@r", "@s", "trolled", "troll=", "random=", "radius=", "world=") +
-            (if (typed.startsWith("world=", true)) Bukkit.getWorlds().map { "world=${it.name}" } else emptyList()) +
-            (if (typed.startsWith("troll=", true)) CommandManager.toggleTrolls.map { "troll=${it.info.name}" } else emptyList())
+    fun targetSuggestions(typed: String = ""): List<String> = buildList {
+        Bukkit.getOnlinePlayers().mapTo(this) { it.name }
+        addAll(listOf("@a", "@e", "@r", "@s", "trolled", "troll=", "random=", "radius=", "world="))
+        addAll(if (typed.startsWith("world=", true)) Bukkit.getWorlds().map { "world=${it.name}" } else emptyList())
+        addAll(if (typed.startsWith("troll=", true)) CommandManager.toggleTrolls.map { "troll=${it.info.name}" } else emptyList())
+    }
 
     // works even without a source
     fun targetPlayers(input: String, source: Permissible? = null): List<Player> {
@@ -175,7 +177,7 @@ object PlayerUtil {
     }
 
     // my method of "damaging" players that bypasses creative, godmode, etc. and has only a one-tick cooldown
-    fun packetDamage(rbPlayer: RbPlayer, damage: Double, local: Boolean) {
+    fun packetDamage(rbPlayer: RbPlayer, damage: Double, local: Boolean = false) {
         val player = rbPlayer.bukkit ?: return
         if (player.health <= 0)
             return
@@ -203,18 +205,18 @@ object PlayerUtil {
             // deal with this possibly looking weird for the time being
             val statusPacket = WrapperPlayServerEntityStatus(player.entityId, 2)
 
-            // entity status 2 & 3 do play the hurt/death sounds, but only for the player being damaged
-            if (!local)
-                for (p in Bukkit.getOnlinePlayers()) {
-                    if (p.uniqueId == rbPlayer.uuid) continue
-
-                    p.playSound(player.location, "entity.player.${if (fatal) "death" else "hurt"}", 1f, 1f)
-                }
-
             if (local)
                 rbPlayer.sendPacket(animationPacket, statusPacket)
             else
                 player.world.rbPlayers.sendPacket(statusPacket, animationPacket)
         }
+
+        // neither packet plays the hurt/death sound for anyone else
+        if (!local)
+            for (p in Bukkit.getOnlinePlayers()) {
+                if (p.uniqueId == rbPlayer.uuid) continue
+
+                p.playSound(player.location, "entity.player.${if (fatal) "death" else "hurt"}", 1f, 1f)
+            }
     }
 }
