@@ -5,9 +5,9 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion
 import org.bukkit.Bukkit
 import org.bukkit.OfflinePlayer
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.Log.info
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.CommandManager
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 object PAPI {

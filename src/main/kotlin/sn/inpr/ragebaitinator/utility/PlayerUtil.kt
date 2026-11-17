@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.permissions.Permissible
 import org.bukkit.profile.PlayerProfile
+import sn.inpr.ragebaitinator.Log
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
@@ -27,6 +28,11 @@ import sn.inpr.ragebaitinator.type.rbPlayers
 import sn.inpr.ragebaitinator.type.sendPacket
 
 object PlayerUtil {
+    private const val TROLL = "troll="
+    private const val RANDOM = "random="
+    private const val RADIUS = "radius="
+    private const val WORLD = "world="
+
     // the maximum double that you can damage a player (i think). any higher will cause a weird glitch
     // that nullifies player damage until the server is restarted.
     const val MAX_POSSIBLE_DAMAGE: Double = 170_141_173_319_264_430_000_000_000_000_000_000_000.0
@@ -80,7 +86,7 @@ object PlayerUtil {
         }
 
         if (skinned.isFailure) {
-            LogUtil.info("&cCouldn't get the skin for the head of $name, using the default one: ${skinned.exceptionOrNull()}")
+            Log.info("&cCouldn't get the skin for the head of $name, using the default one: ${skinned.exceptionOrNull()}")
             val meta = head.itemMeta as SkullMeta
             meta.setDisplayName("§f$name")
             head.itemMeta = meta
@@ -101,9 +107,9 @@ object PlayerUtil {
 
     fun targetSuggestions(typed: String = ""): List<String> = buildList {
         Bukkit.getOnlinePlayers().mapTo(this) { it.name }
-        addAll(listOf("@a", "@e", "@r", "@s", "trolled", "troll=", "random=", "radius=", "world="))
-        addAll(if (typed.startsWith("world=", true)) Bukkit.getWorlds().map { "world=${it.name}" } else emptyList())
-        addAll(if (typed.startsWith("troll=", true)) CommandManager.toggleTrolls.map { "troll=${it.info.name}" } else emptyList())
+        addAll(listOf("@a", "@e", "@r", "@s", "trolled", TROLL, RANDOM, RADIUS, WORLD))
+        addAll(if (typed.startsWith(WORLD, true)) Bukkit.getWorlds().map { "$WORLD${it.name}" } else emptyList())
+        addAll(if (typed.startsWith(TROLL, true)) CommandManager.toggleTrolls.map { "$TROLL${it.info.name}" } else emptyList())
     }
 
     // works even without a source
@@ -123,8 +129,8 @@ object PlayerUtil {
                     online.filter { player -> CommandManager.toggleTrolls.any { it.hasPlayer(player) } }
 
                 // everybody who has this troll on them
-                token.startsWith("troll=") -> {
-                    val troll = CommandManager.getCommand(token.removePrefix("troll=")) as? BaseToggleTroll
+                token.startsWith(TROLL) -> {
+                    val troll = CommandManager.getCommand(token.removePrefix(TROLL)) as? BaseToggleTroll
                     if (troll == null)
                         emptyList()
                     else online.filter { troll.hasPlayer(it) }
@@ -147,22 +153,22 @@ object PlayerUtil {
                     listOfNotNull(online.randomOrNull())
 
                 // random X players
-                token.startsWith("random=") -> {
-                    val count = token.removePrefix("random=").toIntOrNull() ?: 0
+                token.startsWith(RANDOM) -> {
+                    val count = token.removePrefix(RANDOM).toIntOrNull() ?: 0
                     if (count <= 0)
                         emptyList()
                     else online.shuffled().take(count)
                 }
 
                 // all players in a world (excl. sender)
-                token.startsWith("world=") -> {
-                    val world = token.removePrefix("world=")
+                token.startsWith(WORLD) -> {
+                    val world = token.removePrefix(WORLD)
                     online.filter { it != source && it.world.name.equals(world, true) }
                 }
 
                 // all players in X radius from sender, excl. sender
-                token.startsWith("radius=") -> {
-                    val radius = token.removePrefix("radius=").toIntOrNull() ?: 0
+                token.startsWith(RADIUS) -> {
+                    val radius = token.removePrefix(RADIUS).toIntOrNull() ?: 0
                     if (source !is Player)
                         emptyList()
                     else online.filter {

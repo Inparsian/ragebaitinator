@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.plugin.java.JavaPlugin
+import sn.inpr.ragebaitinator.Log.info
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.database.Blocks
@@ -18,7 +19,6 @@ import sn.inpr.ragebaitinator.integrations.PAPIExpansion
 import sn.inpr.ragebaitinator.listeners.BukkitEventListener
 import sn.inpr.ragebaitinator.listeners.PacketListener
 import sn.inpr.ragebaitinator.type.RandomTimer
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import sn.inpr.ragebaitinator.utility.TimeUtil
 
 class Main : JavaPlugin() {

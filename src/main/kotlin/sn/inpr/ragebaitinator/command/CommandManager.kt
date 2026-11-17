@@ -5,13 +5,13 @@ import org.bukkit.command.CommandExecutor
 import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
+import sn.inpr.ragebaitinator.Log.info
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.gui.CommandHistorySubscriber
 import sn.inpr.ragebaitinator.gui.GuiHandler
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import sn.inpr.ragebaitinator.utility.Reflection
 
 object CommandManager : CommandExecutor, TabCompleter {

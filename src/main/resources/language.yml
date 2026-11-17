@@ -10,6 +10,12 @@
 # That is, instead of using raw color codes, use the colors defined in this config with their short placeholders.
 # %c1% represents the primary color, %c2% represents the secondary color, and so on.
 #
+# Hex colors and hex gradients are also supported (3-digit & 6-digit).
+# You can use as many colors as you want for gradients.
+# For a red hex color code, type %#ff0000%
+# For a red to green gradient, type %#ff0000,#00ff00%
+# For a rainbow gradient, type %#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00%
+#
 # PAPI placeholders are also supported here.
 #
 # You will have to look at the source code for messages that are undocumented, but here are some of the ones you

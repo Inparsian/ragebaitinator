@@ -17,6 +17,7 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseTroll
+import sn.inpr.ragebaitinator.utility.HexUtil
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
@@ -98,7 +99,7 @@ value class RbPlayer(val uuid: UUID) {
         }
 
     /** Sends a color-formatted message to this player */
-    fun send(message: String) = bukkit?.sendMessage(ChatColor.translateAlternateColorCodes('&', message))
+    fun send(message: String) = bukkit?.sendMessage(HexUtil.hexifyAndColorCode(message))
     fun send(placeholders: Placeholders) = send(placeholders.toString())
     fun teleport(location: Location): Boolean? = bukkit?.teleport(location)
     /** Teleports this player whilst retaining its velocity */
