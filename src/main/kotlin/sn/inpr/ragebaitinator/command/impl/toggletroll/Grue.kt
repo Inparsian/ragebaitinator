@@ -12,7 +12,7 @@ import sn.inpr.ragebaitinator.type.rb
 
 @CommandInfo(
     name = "grue",
-    category = CommandInfo.Category.ILLUSIONS,
+    category = CommandInfo.Category.HAZARDS,
     icon = Material.COAL,
     description = "What are you talking about? The dark can't hurt you!",
     attributes = [

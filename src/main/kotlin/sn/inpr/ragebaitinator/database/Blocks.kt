@@ -9,9 +9,9 @@ import org.bukkit.event.Listener
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.inventory.BlockInventoryHolder
 import org.bukkit.util.BlockVector
+import sn.inpr.ragebaitinator.Log.info
 import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.Main.Companion.runTaskTimer
-import sn.inpr.ragebaitinator.utility.LogUtil.info
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.sql.Connection

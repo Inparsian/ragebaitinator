@@ -1,6 +1,5 @@
 package sn.inpr.ragebaitinator.utility
 
-import org.bukkit.ChatColor
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.integrations.PAPI
@@ -9,7 +8,7 @@ import sn.inpr.ragebaitinator.type.RbPlayer
 
 object ChatUtil {
     fun send(sender: CommandSender, target: Player?, message: String) {
-        var message = ChatColor.translateAlternateColorCodes('&', message)
+        var message = HexUtil.hexifyAndColorCode(message)
         if (PAPI.present)
             message = PAPI.parse(target, message)
         sender.sendMessage(message)

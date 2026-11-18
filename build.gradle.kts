@@ -16,7 +16,6 @@ dependencies {
     // everything we require
     compileOnly("org.spigotmc:spigot-api:26.1.1-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("io.github.classgraph:classgraph:4.8.199")
     compileOnly("com.github.retrooper:packetevents-spigot:2.14.0")
 
     // integrations

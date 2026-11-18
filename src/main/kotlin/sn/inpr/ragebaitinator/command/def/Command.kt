@@ -254,7 +254,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                 }
 
                 val had = this.hasPlayer(target)
-                if (!had) players[target] = ConcurrentHashMap()
+                if (!had) setPlayer(target)
                 val message = if (had) deinit(sender, target) else init(sender, target, args)
                 if (had)
                     removePlayer(target, RemoveReason.TOGGLED)
@@ -327,6 +327,8 @@ abstract class BaseToggleTroll : BaseTroll() {
     fun removeTasks(player: RbPlayer): Unit? = tasks.remove(player)?.values?.forEach { it.cancel() }
     fun removeTask(player: RbPlayer, key: String = "default"): Unit? = tasks[player]?.remove(key)?.cancel()
     fun removeTask(uuid: UUID, key: String = "default"): Unit? = removeTask(RbPlayer(uuid), key)
+
+    fun setPlayer(player: RbPlayer) { players[player] = ConcurrentHashMap() }
     fun removePlayer(player: RbPlayer, reason: RemoveReason): Boolean {
         // the player stops counting as toggled before onRemovePlayer runs, which relies on that, but the fields stay
         // readable until it's done

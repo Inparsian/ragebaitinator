@@ -1,38 +1,38 @@
 package sn.inpr.ragebaitinator.gui
 
-import org.bukkit.ChatColor
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.Main.Companion.language
+import sn.inpr.ragebaitinator.utility.HexUtil.hexifyAndColorCode
 import sn.inpr.ragebaitinator.utility.TypeUtil
 
 object GuiText {
     private val onlyAPlaceholder = Regex("^%([^%]+)%$")
     private val placeholder = Regex("%([^%]+)%")
 
-    fun color(text: String): String = ChatColor.translateAlternateColorCodes('&', text)
-
-    // the same ones that every other message has. these are only looked up when a message has them in it, since live
-    // menus build every item they have again each tick
+    // the same ones that every other message has
     private fun builtIn(name: String): String? = when (name) {
-        "prefix" -> color(language.prefix)
-        "c1" -> color(language.primaryColor)
-        "c2" -> color(language.secondaryColor)
-        "c3" -> color(language.tertiaryColor)
-        "version" -> Main.instance().description.version
-        "plugin" -> Main.instance().description.name
+        "prefix" -> language.prefix
+        "c1" -> language.primaryColor
+        "c2" -> language.secondaryColor
+        "c3" -> language.tertiaryColor
+        "version" -> protect(Main.instance().description.version)
+        "plugin" -> protect(Main.instance().description.name)
         else -> null
     }
 
-    // the template is what gets its colors translated, and not what's put into it. a command or a name that happens to
-    // have an & in it should be shown as it is
+    // what is put into a message is shown as it is
+    private const val AMPERSAND = '\uE000'
+    private const val PERCENT = '\uE001'
+
+    private fun protect(value: String): String = value.replace('&', AMPERSAND).replace('%', PERCENT)
+    private fun restore(text: String): String = text.replace(AMPERSAND, '&').replace(PERCENT, '%')
     private fun fill(template: String, values: Array<out Pair<String, String>>): String
-        = placeholder.replace(color(template)) { match ->
+        = restore(hexifyAndColorCode(placeholder.replace(template) { match ->
             val name = match.groupValues[1]
-            values.firstOrNull { it.first == name }?.second ?: builtIn(name) ?: match.value
-        }
+            values.firstOrNull { it.first == name }?.second?.let { protect(it) } ?: builtIn(name) ?: match.value
+        }))
 
     fun text(key: String, vararg values: Pair<String, String>): String = fill(language.stringOr(key, ""), values)
-
     fun lines(key: String, vararg values: Pair<String, String>, multiline: Map<String, List<String>> = emptyMap()): MutableList<String> {
         val raw = language.stringOr(key, "")
         val result = mutableListOf<String>()
@@ -51,5 +51,5 @@ object GuiText {
     }
 
     fun wrap(text: String, length: Int = 50): List<String>
-        = TypeUtil.splitAtLength(color(text), length, color(language.secondaryColor))
+        = TypeUtil.splitAtLength(text, length, language.secondaryColor).map { hexifyAndColorCode(it) }
 }

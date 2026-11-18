@@ -6,7 +6,6 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.type.RbPlayer
-import sn.inpr.ragebaitinator.utility.PlayerUtil
 
 @CommandInfo(
     name = "fakedamage",
@@ -16,7 +15,7 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
 )
 class FakeDamage : BaseTroll() {
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        PlayerUtil.packetDamage(target, 0.0, false)
+        target.packetDamage(0.0, true)
         return placeholdersOr("init", "%prefix% %c2%Sent fake damage to %c1%%player%", target)
             .toString()
     }

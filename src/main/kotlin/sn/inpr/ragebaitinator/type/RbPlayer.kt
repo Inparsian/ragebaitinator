@@ -17,7 +17,9 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.Main
 import sn.inpr.ragebaitinator.command.CommandManager
 import sn.inpr.ragebaitinator.command.def.BaseTroll
+import sn.inpr.ragebaitinator.utility.HexUtil
 import sn.inpr.ragebaitinator.utility.LocationUtil
+import sn.inpr.ragebaitinator.utility.PlayerUtil
 import java.util.*
 
 /** Shorthand for converting a Bukkit player to a Ragebaitinator player */
@@ -97,7 +99,7 @@ value class RbPlayer(val uuid: UUID) {
         }
 
     /** Sends a color-formatted message to this player */
-    fun send(message: String) = bukkit?.sendMessage(ChatColor.translateAlternateColorCodes('&', message))
+    fun send(message: String) = bukkit?.sendMessage(HexUtil.hexifyAndColorCode(message))
     fun send(placeholders: Placeholders) = send(placeholders.toString())
     fun teleport(location: Location): Boolean? = bukkit?.teleport(location)
     /** Teleports this player whilst retaining its velocity */
@@ -129,6 +131,8 @@ value class RbPlayer(val uuid: UUID) {
     fun damage(amount: Double, source: Entity? = null) {
         if (source != null) bukkit?.damage(amount, source) else bukkit?.damage(amount)
     }
+    /** Sends damage to the player using packets */
+    fun packetDamage(damage: Double, local: Boolean = false) = PlayerUtil.packetDamage(this, damage, local)
 
     // Movement & abilities
     var flySpeed: Float
