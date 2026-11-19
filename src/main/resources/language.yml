@@ -25,18 +25,18 @@
 # The command usage message sent if not enough arguments are provided.
 # %command% is the command name, %syntax% is the command syntax.
 #
-# mustBeAPlayer
-# The error message when a player-only command is used by a non-player.
+# noPermission: The error message when the sender attempts to use a command they don't have permission to use.
 #
-# noPlayersFound
-# The error message when a player is not found.
+# commandNotFound: The error message when a non-existent command is run.
 #
-# immune
-# The error message when the targeted player is immune to a troll.
+# mustBeAPlayer: The error message when a player-only command is used by a non-player.
+#
+# noPlayersFound: The error message when a player is not found.
+#
+# immune: The error message when the targeted player is immune to a troll.
 # %player% is the targeted player's name, %command% is the command name.
 #
-# conditionsFail
-# The error message when the conditions for a troll are not met.
+# conditionsFail: The error message when the conditions for a troll are not met.
 # %message% is the error message for the first condition that failed.
 #
 # commands.reload.success

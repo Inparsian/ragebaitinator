@@ -6,6 +6,7 @@ import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.Cancellable
 import org.bukkit.event.Event
+import org.bukkit.event.player.PlayerEvent
 import org.bukkit.scheduler.BukkitTask
 import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
@@ -36,7 +37,9 @@ abstract class BaseCommand {
         }
     }
 
-    abstract fun process(sender: CommandSender, command: Command, label: String, args: Args): Boolean
+    fun String.placeholders() = Placeholders(this)
+
+    abstract fun process(sender: CommandSender, command: Command, label: String, args: Args)
     open fun onDisable() {}
     open fun onInstantiate() {}
     open fun onReload() {}
@@ -44,6 +47,8 @@ abstract class BaseCommand {
     val info: CommandInfo
         get() = this::class.java.getAnnotation(CommandInfo::class.java)
             ?: error("${this::class.simpleName} is missing @CommandInfo")
+
+    fun hasPermission(sender: CommandSender) = sender.hasPermission("ragebaitinator.commands.${info.name.lowercase()}")
 
     /** The arguments this command takes, in the order they're typed. They are what [Args] is asked about. */
     open val syntax: List<Parameter<*>> = emptyList()
@@ -123,8 +128,7 @@ abstract class BaseCommand {
     fun languageOr(key: String, default: String) = language.getString("commands.${info.name}.$key") ?: default
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
-    fun placeholdersOr(key: String, default: String, player: RbPlayer) = Placeholders(languageOr(key, default))
-        .put("player", player.name)
+    fun placeholdersOr(key: String, default: String, player: RbPlayer) = placeholdersOr(key, default).put("player", player.name)
 
     // what a command and its parameters are described as can be changed in the language file, and are described by what
     // they were declared with otherwise
@@ -149,24 +153,16 @@ abstract class BaseTroll : BaseCommand() {
 
     open fun init(sender: CommandSender, target: RbPlayer, args: Args): String? = null
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
-        val playerArguments = syntax
-            .filter { it.type == Targets::class }
-            .map { args.input(it)?.let { input -> targetPlayers(sender, input) } ?: return false }
-        val targets = playerArguments.firstOrNull()?.map { it.rb } ?: return false
-        if (playerArguments.all { it.isNotEmpty() }) {
-            val allTargets = playerArguments.flatten().map { it.rb }.distinctBy { it.uuid }
-            for (target in allTargets) {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
+        val allTargets = syntax.filter { !it.optional }.filterIsInstance<Param<Targets>>().map { args.getOrNull(it) }
+        if (allTargets.all { it != null }) {
+            val allTargets = allTargets.map { it!! } // ugh
+            allTargets.forEach { targets -> targets.forEach { target ->
                 if (target.isImmune(this)) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
                     send(sender, target, placeholders)
-                    return true
+                    return
                 }
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
@@ -174,26 +170,22 @@ abstract class BaseTroll : BaseCommand() {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)
-                    return true
+                    return
                 }
-            }
+            }}
 
-            targets.forEach { target ->
+            allTargets.first().forEach { target ->
                 val message = init(sender, target, args)
                 if (message != null)
                     send(sender, target, message)
             }
         } else {
-            send(sender, Placeholders(language.playerNotFound))
+            send(sender, language.playerNotFound.placeholders())
         }
-
-        return true
     }
 }
 
-/**
- * This troll transforms a player into another entity.
- */
+/** This troll transforms a player into another entity. */
 fun interface TransformsPlayer {
     fun transformation(player: RbPlayer): Entity?
 }
@@ -211,6 +203,8 @@ abstract class BaseToggleTroll : BaseTroll() {
 
     private val tasks: MutableMap<RbPlayer, MutableMap<String, BukkitTask>> = mutableMapOf()
 
+    fun PlayerEvent.cancelIfHasFlag(flag: String) = cancelIf(hasFlag(player, flag))
+
     fun broadcastGuiUpdate() {
         GuiHandler.menus.values
             .filter { it is TrollToggleSubscriber }
@@ -219,22 +213,16 @@ abstract class BaseToggleTroll : BaseTroll() {
 
     open fun deinit(sender: CommandSender, target: RbPlayer): String? = null
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
-        val targets: List<RbPlayer> = targetPlayers(sender, args.input(targetParam) ?: return false)
-            .map { it.rb }
-        if (targets.isNotEmpty()) {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
+        val targets = args.getOrNull(targetParam)
+        if (targets != null) {
             targets.forEach { target ->
-                if (target.hasPermission("ragebaitinator.immune.${this.info.name}")) {
+                if (target.isImmune(this)) {
                     val placeholders = placeholdersOr("immune", "%prefix% &c%player% is immune to %command%!", target)
                         .put("command", this.info.name)
                     send(sender, target, placeholders)
                     removePlayer(target, RemoveReason.IMMUNE)
-                    return true
+                    return
                 }
 
                 val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
@@ -242,7 +230,7 @@ abstract class BaseToggleTroll : BaseTroll() {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
                         .put("message", firstHitCondition.humanReadable)
                     send(sender, target, placeholders)
-                    return true
+                    return
                 }
 
                 for (incompatibleTroll in this.info.incompatible) {
@@ -265,10 +253,8 @@ abstract class BaseToggleTroll : BaseTroll() {
                     send(sender, target, message)
             }
         } else {
-            send(sender, Placeholders(language.playerNotFound))
+            send(sender, language.playerNotFound.placeholders())
         }
-
-        return true
     }
 
     fun hasPlayer(player: RbPlayer): Boolean = players.containsKey(player)
@@ -356,24 +342,33 @@ abstract class BaseToggleTroll : BaseTroll() {
         return true
     }
 
+    fun errPlaceholders(text: String, target: RbPlayer): Placeholders {
+        removePlayer(target, RemoveReason.FAILED)
+        return text.placeholders()
+    }
+
     fun errPlaceholdersOr(key: String, default: String, target: RbPlayer): Placeholders {
         removePlayer(target, RemoveReason.FAILED)
         return placeholdersOr(key, default, target)
+    }
+
+    private fun putTask(player: RbPlayer, key: String, task: BukkitTask): BukkitTask {
+        if (this.tasks.containsKey(player))
+            this.tasks[player]!![key] = task
+        else
+            this.tasks[player] = mutableMapOf(key to task)
+        return task
     }
 
     fun setTask(player: RbPlayer, key: String, runnable: Runnable, delay: Long): BukkitTask? {
         if (!hasPlayer(player))
             return null
         removeTask(player, key)
-        val t = runTaskLater({
+        val task = runTaskLater({
             if (hasPlayer(player))
                 runnable.run()
         }, delay)
-        if (this.tasks.containsKey(player))
-            this.tasks[player]!![key] = t
-        else
-            this.tasks[player] = mutableMapOf(key to t)
-        return t
+        return putTask(player, key, task)
     }
 
     fun setTask(player: RbPlayer, runnable: Runnable, delay: Long): BukkitTask? = setTask(player, "default", runnable, delay)
@@ -383,17 +378,13 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (!hasPlayer(player))
             return null
         removeTask(player, key)
-        val t = runTaskTimer({
+        val task = runTaskTimer({
             if (hasPlayer(player))
                 runnable.run()
             else
                 removeTask(player, key)
         }, delay, period)
-        if (this.tasks.containsKey(player))
-            this.tasks[player]!![key] = t
-        else
-            this.tasks[player] = mutableMapOf(key to t)
-        return t
+        return putTask(player, key, task)
     }
 
     fun setTaskTimer(player: RbPlayer, runnable: Runnable, delay: Long, period: Long): BukkitTask?
@@ -403,17 +394,13 @@ abstract class BaseToggleTroll : BaseTroll() {
         if (!hasPlayer(player))
             return null
         removeTask(player, key)
-        val t = runTaskRandomTimer({
+        val task = runTaskRandomTimer({
             if (hasPlayer(player))
                 runnable.run()
             else
                 removeTask(player, key)
         }, delay, minPeriod, maxPeriod)
-        if (this.tasks.containsKey(player))
-            this.tasks[player]!![key] = t
-        else
-            this.tasks[player] = mutableMapOf(key to t)
-        return t
+        return putTask(player, key, task)
     }
 
     fun setTaskRandomTimer(player: RbPlayer, runnable: Runnable, delay: Long, minPeriod: Long, maxPeriod: Long): BukkitTask?

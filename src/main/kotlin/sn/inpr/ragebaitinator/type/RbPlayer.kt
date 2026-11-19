@@ -232,7 +232,7 @@ value class RbPlayer(val uuid: UUID) {
     fun isInVoid(offset: Double = 0.0): Boolean = location.y <= LocationUtil.downHeightLimit + offset
 
     fun hasPermission(permission: String) = bukkit?.hasPermission(permission) == true
-    fun isImmune(troll: BaseTroll) = hasPermission("ragebaitinator.immune.${troll.info.name}")
+    fun isImmune(troll: BaseTroll) = hasPermission("ragebaitinator.immune.${troll.info.name.lowercase()}")
 
     override fun toString() = "RbPlayer(${name})"
 }

@@ -22,23 +22,12 @@ class Info : BaseCommand() {
 
     override val syntax = listOf(target)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
-        if (args.input(target) == null)
-            return false
-
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val targets = args.getOrNull(target)
-        if (targets == null) {
-            send(sender, Placeholders(language.playerNotFound))
-            return true
-        }
-
-        targets.forEach { send(sender, it, describe(it)) }
-        return true
+        if (targets == null)
+            send(sender, language.playerNotFound.placeholders())
+        else
+            targets.forEach { send(sender, it, describe(it)) }
     }
 
     private fun describe(player: RbPlayer): Placeholders {

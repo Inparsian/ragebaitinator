@@ -10,7 +10,6 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
-import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -33,13 +32,11 @@ class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber 
         val place = args[place]
 
         return if (!mine && !place) {
-            removePlayer(target)
-            Placeholders(language.bothFalse).toString()
+            errPlaceholders(language.bothFalse, target).toString()
         } else {
             if (mine) addFlag(target, "mine")
             if (place) addFlag(target, "place")
-            placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer make block changes")
-                .put("player", target.name)
+            placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer make block changes", target)
                 .toString()
         }
     }
@@ -48,11 +45,6 @@ class NoChanges : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber 
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to make block changes", target)
             .toString()
 
-    override fun onBlockBreak(event: BlockBreakEvent) {
-        event.cancelIf(hasFlag(event.player, "mine"))
-    }
-    
-    override fun onBlockPlace(event: BlockPlaceEvent) {
-        event.cancelIf(hasFlag(event.player, "place"))
-    }
+    override fun onBlockBreak(event: BlockBreakEvent) = event.cancelIf(hasFlag(event.player, "mine"))
+    override fun onBlockPlace(event: BlockPlaceEvent) = event.cancelIf(hasFlag(event.player, "place"))
 }

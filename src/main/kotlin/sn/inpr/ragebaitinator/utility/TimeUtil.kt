@@ -12,9 +12,7 @@ object TimeUtil {
 
     private val bean: ThreadMXBean get() = ManagementFactory.getThreadMXBean()
     val cpuTimeSupported: Boolean get() = bean.isCurrentThreadCpuTimeSupported
-    /**
-     * A CPU time value that will fall back to nano time if the JVM does not support CPU time
-     */
+    /** A CPU time value that will fall back to nano time if the JVM does not support CPU time */
     val cpuTime: Long get() = if (cpuTimeSupported) bean.currentThreadCpuTime else System.nanoTime()
 
     fun formatNano(nanoTime: Long): String = String.format("%s%s%s%s",
@@ -33,9 +31,7 @@ object TimeUtil {
 
     fun epochToDate(epoch: Long): String = SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(Date(epoch))
 
-    /**
-     * Returns the time in nanoseconds it took to run the given Runnable
-     */
+    /** Returns the time in nanoseconds it took to run the given Runnable */
     fun timeTask(runnable: Runnable): Long {
         val preRun = cpuTime
         runnable.run()

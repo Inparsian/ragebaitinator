@@ -16,19 +16,17 @@ object LocationUtil {
     // The vertical height limit was extended 64 blocks in both directions starting in 1.18
     val downHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) -64 else 0
     val upHeightLimit = if (PacketEvents.getAPI().serverManager.version.isNewerThanOrEquals(ServerVersion.V_1_18)) 319 else 255
-    // The max altitude a player can be teleported to. Any higher than this will cause them to be rubber-banded back
-    const val MAX_PLAYER_ALTITUDE = 20_000_000.0
+
+    private fun vectorRelativeYaw(baseYaw: Float, radians: Int, distance: Double): Vector {
+        val yaw: Double = baseYaw.toDouble() + radians
+        return Vector(-rsin(yaw) * distance, 0.0, rcos(yaw) * distance)
+    }
 
     fun vectorRelativeYaw(player: RbPlayer, radians: Int, distance: Double): Vector
         = vectorRelativeYaw(player.location.yaw, radians, distance)
 
     fun vectorRelativeYaw(entity: Entity, radians: Int, distance: Double): Vector
         = vectorRelativeYaw(entity.location.yaw, radians, distance)
-
-    private fun vectorRelativeYaw(baseYaw: Float, radians: Int, distance: Double): Vector {
-        val yaw: Double = baseYaw.toDouble() + radians
-        return Vector(-rsin(yaw) * distance, 0.0, rcos(yaw) * distance)
-    }
 
     fun locationRelativeYaw(player: RbPlayer, radians: Int, distance: Double): Location
         = vectorRelativeYaw(player, radians, distance).toLocation(player.world).add(player.location)

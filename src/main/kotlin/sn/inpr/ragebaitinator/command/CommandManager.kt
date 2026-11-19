@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender
 import org.bukkit.command.TabCompleter
 import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Log.info
+import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.CommandHistory
 import sn.inpr.ragebaitinator.gui.CommandHistorySubscriber
@@ -54,28 +55,35 @@ object CommandManager : CommandExecutor, TabCompleter {
         info("Registered ${commands.size} commands")
     }
 
-    fun getCommand(name: String?): BaseCommand? {
-        return if (name != null) commands.firstOrNull { it.info.name.equals(name, ignoreCase = true) } else null
-    }
+    fun getCommand(name: String): BaseCommand?
+        = commands.firstOrNull { it.info.name.equals(name, true) }
+    fun getAllowedCommand(name: String, sender: CommandSender)
+        = commands.firstOrNull { it.info.name.equals(name, true) && it.hasPermission(sender) }
 
     override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
         if (args.isNotEmpty() && commands.any { it.info.name == args.first() }) {
             val first = commands.first { it.info.name == args.first() }
-            if (!first.process(sender, command, label, Args(args, first, sender)))
-                first.sendUsage(sender)
-            else {
-                val everything = "${command.label} ${args.joinToString(" ")}"
-                if (sender is Player)
-                    CommandHistory.addCommand(sender.name, everything)
-                else
-                    CommandHistory.addConsoleCommand(everything)
+            if (first.hasPermission(sender)) {
+                val parsedArgs = Args(args, first, sender)
+                if (first.syntax.any { parameter -> !parameter.optional && parsedArgs.input(parameter) == null }) {
+                    first.sendUsage(sender)
+                } else {
+                    first.process(sender, command, label, parsedArgs)
+                    val everything = "${command.label} ${args.joinToString(" ")}"
+                    if (sender is Player)
+                        CommandHistory.addCommand(sender.name, everything)
+                    else
+                        CommandHistory.addConsoleCommand(everything)
 
-                GuiHandler.menus.values
-                    .filter { it is CommandHistorySubscriber }
-                    .forEach { it.update() }
+                    GuiHandler.menus.values
+                        .filter { it is CommandHistorySubscriber }
+                        .forEach { it.update() }
+                }
+            } else {
+                send(sender, Placeholders(language.noPermission))
             }
         } else {
-            send(sender, Placeholders("commandNotFound","%prefix% &cCommand not found"))
+            send(sender, Placeholders(language.commandNotFound))
         }
 
         return true
@@ -83,9 +91,12 @@ object CommandManager : CommandExecutor, TabCompleter {
 
     override fun onTabComplete(sender: CommandSender, command: Command, alias: String, args: Array<out String>): List<String> {
         if (args.size == 1)
-            return commands.map { it.info.name }.filter { it.startsWith(args.last(), true) }
+            return commands
+                .filter { it.hasPermission(sender) }
+                .map { it.info.name }
+                .filter { it.startsWith(args.last(), true) }
 
-        val command: BaseCommand? = getCommand(args[0])
+        val command: BaseCommand? = getAllowedCommand(args[0], sender)
         // the first argument after the name of the command is the first parameter
         val parameter = command?.syntax?.getOrNull(args.size - 2) ?: return emptyList()
         return parameter.argumentType.complete(args.last()) +

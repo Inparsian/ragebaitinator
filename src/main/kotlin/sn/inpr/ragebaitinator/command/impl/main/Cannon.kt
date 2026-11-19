@@ -8,7 +8,6 @@ import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 
 @CommandInfo(
@@ -22,12 +21,7 @@ class Cannon : BaseCommand() {
 
     override val syntax = listOf(power, speed, ticks)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val power = args[power]
         val speed = args[speed]
         val ticks = args[ticks]
@@ -38,9 +32,7 @@ class Cannon : BaseCommand() {
             tnt.yield = power
             tnt.fuseTicks = ticks
         } else {
-            send(sender, Placeholders(language.mustBeAPlayer))
+            send(sender, language.mustBeAPlayer.placeholders())
         }
-
-        return true
     }
 }
