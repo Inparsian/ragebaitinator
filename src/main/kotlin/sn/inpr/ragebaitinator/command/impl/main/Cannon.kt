@@ -27,7 +27,7 @@ class Cannon : BaseCommand() {
         val ticks = args[ticks]
 
         if (sender is Player) {
-            val tnt = sender.world.spawn(sender.location, TNTPrimed::class.java)
+            val tnt = sender.world.spawn(sender.location.apply { y += sender.eyeHeight }, TNTPrimed::class.java)
             tnt.velocity = sender.location.direction.multiply(speed)
             tnt.yield = power
             tnt.fuseTicks = ticks
