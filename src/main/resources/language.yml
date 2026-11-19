@@ -375,8 +375,11 @@ gui:
         - "&4None"
       # The choices of a parameter that has a list of them, with the one it has now in the second color.
       choices: "%c3%Choices:"
-      choice: "%c3%- %c2%%value%"
-      choiceCurrent: "&a- %value%"
+      choice: "%c3%- %row%"
+      choiceRow:
+        separator: "%c3%, "
+        choice: "%c2%%value%"
+        current: "&a%value%"
     # What can be done with a parameter, which depends on what kind it is. %step% is how much a click changes a number by.
     controls:
       boolean:

@@ -22,6 +22,7 @@ import sn.inpr.ragebaitinator.utility.ItemUtil
 
 private const val CONFIRM = "confirm"
 private const val RESET = "reset"
+private const val CHOICE_ROW = "gui.parameters.item.choiceRow"
 
 private enum class Kind { BOOLEAN, NUMBER, CHOICE, TEXT }
 
@@ -122,8 +123,15 @@ class TrollOptionsMenu(
 
         if (kind == Kind.CHOICE) {
             lore.add(GuiText.text("gui.parameters.item.choices"))
-            for (choice in parameter.possibleValues)
-                lore.add(GuiText.text(if (choice.equals(value, true)) "gui.parameters.item.choiceCurrent" else "gui.parameters.item.choice", "value" to choice))
+            val columns = (parameter.possibleValues.size + 15) / 16
+            val rows = parameter.possibleValues.chunked(columns)
+            for (row in rows) {
+                val string = mutableListOf<String>()
+                for (choice in row) {
+                    string.add(GuiText.text(if (choice.equals(value, true)) "$CHOICE_ROW.current" else "$CHOICE_ROW.choice", "value" to choice))
+                }
+                lore.add(GuiText.text("gui.parameters.item.choice", "row" to string.joinToString(GuiText.text("$CHOICE_ROW.separator"))))
+            }
         }
 
         lore.add("")
