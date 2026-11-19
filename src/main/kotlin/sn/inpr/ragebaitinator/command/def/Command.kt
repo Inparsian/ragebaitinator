@@ -64,8 +64,9 @@ abstract class BaseCommand {
         description: String = "",
         default: T,
         range: ClosedRange<T>,
+        step: Number? = null
     ): Param<T> where T : Comparable<T>, T : Any =
-        Param(T::class, purpose, description, true, emptyList(), false, emptyList(), default, range)
+        Param(T::class, purpose, description, true, emptyList(), false, emptyList(), default, range, step)
 
     /** An argument that is nothing when it isn't given */
     protected inline fun <reified T : Any> optional(

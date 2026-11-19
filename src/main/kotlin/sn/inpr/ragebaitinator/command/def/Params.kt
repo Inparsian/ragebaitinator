@@ -166,6 +166,7 @@ class Param<T : Any>(
     completionAliases: List<String>,
     val default: T?,
     val range: ClosedRange<*>? = null,
+    val step: Number? = null
 ) : Parameter<T>(type, purpose, description, optional, completions, strictCompletion, completionAliases) {
     override val defaultText: String get() = default?.let { argumentType.format(it) } ?: ""
 
