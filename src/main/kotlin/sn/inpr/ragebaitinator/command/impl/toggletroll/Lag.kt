@@ -1,13 +1,11 @@
 package sn.inpr.ragebaitinator.command.impl.toggletroll
 
-import com.github.retrooper.packetevents.PacketEvents
-import com.github.retrooper.packetevents.event.*
-import com.github.retrooper.packetevents.protocol.ConnectionState
-import com.github.retrooper.packetevents.protocol.PacketSide
-import com.github.retrooper.packetevents.wrapper.PacketWrapper
-import io.netty.buffer.ByteBuf
-import io.netty.buffer.ByteBufUtil
-import io.netty.buffer.Unpooled
+import io.netty.channel.Channel
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelHandlerContext
+import io.netty.channel.ChannelPromise
+import io.netty.util.ReferenceCountUtil
+import io.netty.util.concurrent.ScheduledFuture
 import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
@@ -16,8 +14,9 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
+import java.nio.channels.ClosedChannelException
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.TimeUnit
 
 /*
     This simulates actual network lag by delaying packets in transit instead of using
@@ -47,97 +46,136 @@ class Lag : BaseToggleTroll() {
 
     override val syntax = withTarget(rtt, jitter)
 
-    private var listener: PacketListenerAbstract? = LagPacketListener(this)
-    // Shared scheduler for each duplex
-    private val scheduler = Executors.newSingleThreadScheduledExecutor()
-
-    // After packets have gone past the main listener (w/ HIGH priority), this one decides the
-    // final state (i.e., whether it must be delayed)
-    private class LagPacketListener(val parent: Lag) : PacketListenerAbstract(PacketListenerPriority.HIGHEST) {
-        override fun onPacketSend(event: PacketSendEvent?) = parent.interceptEvent(event)
-        override fun onPacketReceive(event: PacketReceiveEvent?) = parent.interceptEvent(event)
+    private companion object {
+        const val HANDLER = "ragebaitinator_lag"
     }
 
-    private class OrderedPacketQueue(val scheduler: ScheduledExecutorService, val player: RbPlayer) {
-        private class Entry(val deadline: Long, val player: RbPlayer, val side: PacketSide, val bytes: ByteArray) {
-            fun send() = when (side) {
-                PacketSide.SERVER -> player.sendPacketSilently(Unpooled.wrappedBuffer(bytes))
-                PacketSide.CLIENT -> player.receivePacketSilently(Unpooled.wrappedBuffer(bytes))
+    private class Lane {
+        private class Held(val deadline: Long, val pass: () -> Unit, val discard: () -> Unit)
+
+        private val held = ArrayDeque<Held>()
+        private var timer: ScheduledFuture<*>? = null
+        private var last = 0L
+
+        fun hold(ctx: ChannelHandlerContext, delayNanos: Long, pass: () -> Unit, discard: () -> Unit) {
+            val now = System.nanoTime()
+            val deadline = maxOf(last, now + delayNanos)
+            last = deadline
+            if (held.isEmpty() && deadline <= now) {
+                pass()
+            } else {
+                held.addLast(Held(deadline, pass, discard))
+                if (timer == null)
+                    arm(ctx)
             }
         }
 
-        private val pending = ArrayDeque<Entry>()
-        private var scheduled: ScheduledFuture<*>? = null
-        private var closed = false
+        private fun arm(ctx: ChannelHandlerContext) {
+            val delay = (held.first.deadline - System.nanoTime()).coerceAtLeast(0)
+            timer = ctx.executor().schedule({ release(ctx) }, delay, TimeUnit.NANOSECONDS)
+        }
 
-        @Synchronized
-        fun enqueue(delayMs: Long, side: PacketSide, bytes: ByteArray): Boolean {
-            if (closed)
-                return false
-            val deadline = System.nanoTime() + TimeUnit.MILLISECONDS.toNanos(delayMs.coerceAtLeast(0))
-            pending.addLast(Entry(deadline, player, side, bytes))
-            if (scheduled == null) {
-                try {
-                    scheduleHead()
-                } catch (_: RejectedExecutionException) {
-                    pending.removeLast()
-                    return false
-                }
+        private fun release(ctx: ChannelHandlerContext) {
+            timer = null
+            val now = System.nanoTime()
+            while (held.isNotEmpty() && held.first.deadline <= now)
+                held.removeFirst().pass()
+            if (held.isNotEmpty())
+                arm(ctx)
+        }
+
+        fun flushAll() {
+            timer?.cancel(false)
+            timer = null
+            while (held.isNotEmpty()) held.removeFirst().pass()
+            last = 0L
+        }
+
+        fun discardAll() {
+            timer?.cancel(false)
+            timer = null
+            while (held.isNotEmpty()) held.removeFirst().discard()
+        }
+    }
+
+    // two lanes makes a road kekw
+    private class Road(val inbound: Lane, val outbound: Lane) {
+        fun flushAll() { outbound.flushAll(); inbound.flushAll() }
+        fun discardAll() { inbound.discardAll(); outbound.discardAll() }
+    }
+
+    private class LagHandler(@Volatile var rtt: Long, @Volatile var jitter: Long) : ChannelDuplexHandler() {
+        @Volatile var enabled = true
+        private val road = Road(Lane(), Lane())
+
+        // Add jitter for realism. Divide by 2 to represent one trip delay
+        private fun oneTripNanos(): Long = if (!enabled) 0 else {
+            val millis = (rtt + MathUtil.random(-jitter, jitter)) / 2
+            return TimeUnit.MILLISECONDS.toNanos(millis.coerceAtLeast(0))
+        }
+
+        fun disable(channel: Channel) {
+            enabled = false
+            channel.eventLoop().execute {
+                if (channel.pipeline().context(this) == null)
+                    return@execute
+                road.flushAll()
+                channel.pipeline().remove(this)
             }
-            return true
         }
 
-        private fun scheduleHead() {
-            val delay = (pending.first.deadline - System.nanoTime()).coerceAtLeast(0)
-            scheduled = scheduler.schedule(::deliverHead, delay, TimeUnit.NANOSECONDS)
+        override fun channelRead(ctx: ChannelHandlerContext, msg: Any) = road.inbound.hold(
+            ctx, oneTripNanos(),
+            pass = { ctx.fireChannelRead(msg) },
+            discard = { ReferenceCountUtil.release(msg) }
+        )
+
+        override fun write(ctx: ChannelHandlerContext, msg: Any, promise: ChannelPromise) = road.outbound.hold(
+            ctx, oneTripNanos(),
+            pass = { ctx.writeAndFlush(msg, promise) },
+            discard = {
+                ReferenceCountUtil.release(msg)
+                promise.tryFailure(ClosedChannelException())
+            }
+        )
+
+        override fun channelInactive(ctx: ChannelHandlerContext) {
+            road.discardAll()
+            ctx.fireChannelInactive()
         }
 
-        @Synchronized
-        private fun deliverHead() {
-            scheduled = null
-            if (!closed && pending.isNotEmpty())
-                try {
-                    pending.removeFirst().send()
-                } finally {
-                    if (pending.isNotEmpty()) {
-                        try {
-                            scheduleHead()
-                        } catch (_: RejectedExecutionException) {
-                            drain()
-                        }
-                    }
-                }
-        }
-
-        @Synchronized
-        fun close() {
-            closed = true
-            scheduled?.cancel(false)
-            scheduled = null
-            drain()
-        }
-
-        private fun drain() {
-            while (pending.isNotEmpty()) pending.removeFirst().send()
+        override fun handlerRemoved(ctx: ChannelHandlerContext) {
+            if (ctx.channel().isActive) {
+                road.flushAll()
+            } else {
+                road.discardAll()
+            }
         }
     }
 
-    private class Session(val rtt: Long, val jitter: Long, val queue: OrderedPacketQueue)
-
-    init {
-        PacketEvents.getAPI().eventManager.registerListener(listener)
-    }
+    private class Session(val channel: Channel, val handler: LagHandler)
 
     override fun onDisable() {
-        scheduler.shutdownNow()
-        PacketEvents.getAPI().eventManager.unregisterListener(listener)
+        fieldValues<Session>("session").toList().forEach { it.handler.disable(it.channel) }
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val rtt = args[rtt]
         val jitter = args[jitter]
-        val queue = OrderedPacketQueue(scheduler, target)
-        setField(target, "session", Session(rtt, jitter, queue))
+        val channel = target.packetEventsUser?.channel as? Channel ?: return errPlaceholdersOr(
+            "noConnection",
+            "%prefix% &cCould not find %player%'s connection",
+            target
+        ).toString()
+
+        val handler = LagHandler(rtt, jitter)
+        channel.eventLoop().execute {
+            val pipeline = channel.pipeline()
+            if (pipeline.get(HANDLER) != null)
+                pipeline.remove(HANDLER)
+            pipeline.addFirst(HANDLER, handler)
+        }
+        setField(target, "session", Session(channel, handler))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi", target)
             .toString()
     }
@@ -147,59 +185,6 @@ class Lag : BaseToggleTroll() {
             .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
-        getField<Session>(player, "session")?.queue?.close()
-    }
-
-    // Whatever a listener changes through a wrapper (Velocity, for one) isn't written back into the event's buffer until
-    // every listener has run, so at this point the buffer still holds the packet as it was before any of them touched
-    // it. When that has happened, the wrapper is written out the same way it will be once we're done
-    private fun snapshot(event: ProtocolPacketEvent): ByteArray {
-        val wrapper = event.lastUsedWrapper
-        return if (wrapper != null && event.needsReEncode())
-            serialize(event, wrapper)
-        else
-            snapshotBuffer(event)
-    }
-
-    private fun serialize(event: ProtocolPacketEvent, wrapper: PacketWrapper<*>): ByteArray {
-        val original = wrapper.getBuffer()
-        val buffer = Unpooled.buffer()
-        return try {
-            wrapper.setBuffer(buffer)
-            wrapper.writeVarInt(event.packetId)
-            wrapper.write()
-            ByteBufUtil.getBytes(buffer)
-        } finally {
-            // if this packet isn't delayed after all, it still has to be written where it was going to be
-            wrapper.setBuffer(original)
-            buffer.release()
-        }
-    }
-
-    private fun snapshotBuffer(event: ProtocolPacketEvent): ByteArray {
-        val buffer = event.fullBufferClone as ByteBuf
-        return try {
-            ByteBufUtil.getBytes(buffer)
-        } finally {
-            buffer.release()
-        }
-    }
-
-    // Add jitter for realism
-    fun jitteryOneTripDelay(uuid: UUID): Long {
-        val session = getField<Session>(uuid, "session") ?: return 0
-        // Divide by 2 to represent one trip delay
-        return (session.rtt + MathUtil.random(-session.jitter, session.jitter)) / 2
-    }
-
-    fun interceptEvent(event: ProtocolPacketEvent?) {
-        // We are only really interested in delaying the PLAY state
-        if (event == null || event.isCancelled || event.connectionState != ConnectionState.PLAY)
-            return
-        val uuid = event.user.uuid ?: return
-        val session = getField<Session>(uuid, "session") ?: return
-        val packet = snapshot(event)
-        if (session.queue.enqueue(jitteryOneTripDelay(uuid), event.packetType.side, packet))
-            event.isCancelled = true
+        getField<Session>(player, "session")?.let { it.handler.disable(it.channel) }
     }
 }

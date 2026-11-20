@@ -64,6 +64,14 @@ fun centeredSlots(count: Int, row: Int): List<Int> {
 private val wholeSteps = listOf(1.0, 2.0, 5.0, 10.0, 25.0, 50.0, 100.0, 250.0, 500.0, 1000.0, 2500.0, 5000.0, 10000.0)
 private val decimalSteps = listOf(0.01, 0.025, 0.05, 0.1, 0.25, 0.5) + wholeSteps
 
+fun Number.toBigDecimal(): BigDecimal = when (this) {
+    is Int -> BigDecimal(this)
+    is Long -> BigDecimal(this)
+    is Double -> BigDecimal(this)
+    is Float -> BigDecimal(this.toDouble()) // 32bit -> 64bit
+    else -> BigDecimal.ZERO
+}
+
 fun stepFor(whole: Boolean, min: Double?, max: Double?): BigDecimal {
     if (min == null || max == null) return BigDecimal.ONE
     val target = (max - min) / (if (whole) 50.0 else 20.0)
@@ -71,15 +79,14 @@ fun stepFor(whole: Boolean, min: Double?, max: Double?): BigDecimal {
     return BigDecimal.valueOf(steps.lastOrNull { it <= target } ?: steps.first())
 }
 
-fun stepNumber(type: KClass<*>, current: String, direction: Int, big: Boolean, min: Double? = null, max: Double? = null): String? {
+fun stepNumber(type: KClass<*>, current: String, direction: Int, big: Boolean, min: Double? = null, max: Double? = null, step: Number?): String? {
     val whole = type == Int::class || type == Long::class
-    if (!whole && type != Float::class && type != Double::class) return null
-
+    if (!whole && type != Float::class && type != Double::class)
+        return null
     val start = current.toBigDecimalOrNull() ?: BigDecimal.ZERO
-    var next = start + stepFor(whole, min, max) * BigDecimal(direction) * (if (big) BigDecimal.TEN else BigDecimal.ONE)
-    if (min != null) next = next.max(BigDecimal.valueOf(min))
-    if (max != null) next = next.min(BigDecimal.valueOf(max))
-
+    val step = step?.toBigDecimal() ?: stepFor(whole, min, max)
+    val next = (start + step * BigDecimal(direction) * (if (big) BigDecimal.TEN else BigDecimal.ONE))
+        .coerceIn(min?.let { BigDecimal.valueOf(it) }, max?.let { BigDecimal.valueOf(it) })
     val value: Any = when (type) {
         Int::class -> next.toInt()
         Long::class -> next.toLong()

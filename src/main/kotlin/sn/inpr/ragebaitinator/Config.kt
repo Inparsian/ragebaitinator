@@ -56,6 +56,8 @@ class LanguageConfig(fileName: String?) : Config(fileName) {
     val primaryColor: String get() = stringOr("primaryColor", "&c")
     val secondaryColor: String get() = stringOr("secondaryColor", "&f")
     val tertiaryColor: String get() = stringOr("tertiaryColor", "&7")
+    val commandNotFound: String get() = stringOr("commandNotFound","%prefix% &cCommand not found")
+    val noPermission: String get() = stringOr("noPermission", "%prefix% &cYou do not have permission to use this command")
     val mustBeAPlayer: String get() = stringOr("mustBeAPlayer", "%prefix% &cYou must be a player to use this command")
     val bothFalse: String get() = stringOr("bothFalse", "%prefix% &cBoth options cannot be false")
     val playerNotFound: String get() = stringOr("noPlayersFound", "%prefix% &cPlayer(s) not found")

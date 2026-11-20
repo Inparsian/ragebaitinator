@@ -19,46 +19,38 @@ class Random : BaseCommand() {
 
     override val syntax = listOf(target)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val allowed = CommandManager.trolls.filter { sender.hasPermission("ragebaitinator.commands.${it.info.name.lowercase()}") }
 
         if (args.input(target) == null) {
             val troll = allowed.randomOrNull()
             if (troll == null) {
                 send(sender, Placeholders("commands.random.none", "%prefix% &cThere are no trolls you can use"))
-                return true
+            } else {
+                val placeholders = placeholdersOr("suggestion", "%prefix% %c2%How about %c1%%troll%%c2%? %c3%%description%")
+                    .put("troll", troll.info.name)
+                    .put("description", troll.description)
+                send(sender, placeholders)
+                troll.sendUsage(sender)
+            }
+        } else {
+            val targets = args.getOrNull(target)
+            if (targets == null) {
+                send(sender, language.playerNotFound.placeholders())
+                return
             }
 
-            val placeholders = placeholdersOr("suggestion", "%prefix% %c2%How about %c1%%troll%%c2%? %c3%%description%")
+            val troll = allowed.filter { runnable(it, targets) }.randomOrNull()
+            if (troll == null) {
+                send(sender, Placeholders("commands.random.nothingToRun", "%prefix% &cThere is no troll that can be run on them without more arguments"))
+                return
+            }
+
+            val placeholders = placeholdersOr("running", "%prefix% %c2%Running %c1%%troll%")
                 .put("troll", troll.info.name)
-                .put("description", troll.description)
             send(sender, placeholders)
-            troll.sendUsage(sender)
-            return true
+            Bukkit.dispatchCommand(sender, "$label ${troll.info.name} ${args.input(target)}")
         }
-
-        val targets = args.getOrNull(target)
-        if (targets == null) {
-            send(sender, Placeholders(language.playerNotFound))
-            return true
-        }
-
-        val troll = allowed.filter { runnable(it, targets) }.randomOrNull()
-        if (troll == null) {
-            send(sender, Placeholders("commands.random.nothingToRun", "%prefix% &cThere is no troll that can be run on them without more arguments"))
-            return true
-        }
-
-        val placeholders = placeholdersOr("running", "%prefix% %c2%Running %c1%%troll%")
-            .put("troll", troll.info.name)
-        send(sender, placeholders)
-        Bukkit.dispatchCommand(sender, "$label ${troll.info.name} ${args.input(target)}")
-        return true
     }
 
     // everything but the target has to be optional, and it has to work on everyone

@@ -16,12 +16,7 @@ import sn.inpr.ragebaitinator.utility.TimeUtil
     description = "Reloads the configs"
 )
 class Reload : BaseCommand() {
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val reloadTime = TimeUtil.timeTask {
             configuration.reload()
             language.reload()
@@ -31,7 +26,5 @@ class Reload : BaseCommand() {
         val placeholders = placeholdersOr("success", "%prefix% %c2%Configs reloaded in %c1%%time%")
             .put("time", TimeUtil.formatNanoInSeconds(reloadTime))
         send(sender, placeholders)
-
-        return true
     }
 }

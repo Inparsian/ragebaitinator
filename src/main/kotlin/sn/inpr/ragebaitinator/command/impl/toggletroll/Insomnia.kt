@@ -10,6 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerBedEnterSubscriber
 import sn.inpr.ragebaitinator.type.RbPlayer
+import sn.inpr.ragebaitinator.type.rb
 
 @CommandInfo(
     name = "insomnia",
@@ -31,8 +32,7 @@ class Insomnia : BaseToggleTroll(), PlayerBedEnterSubscriber {
 
     override fun onPlayerBedEnter(event: PlayerBedEnterEvent) {
         event.cancelIfAndThen(hasPlayer(event.player)) {
-            val text = placeholdersOr("message", "No matter how hard you try, you can't seem to rest")
-                .put("player", event.player.name)
+            val text = placeholdersOr("message", "No matter how hard you try, you can't seem to rest", event.player.rb)
                 .toString()
             event.player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent(text))
         }

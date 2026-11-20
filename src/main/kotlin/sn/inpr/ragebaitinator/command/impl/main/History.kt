@@ -29,12 +29,7 @@ class History : BaseCommand() {
 
     private val pageSize: Int get() = configuration.intOr("commands.history.pageSize", 10)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         runTaskAsync {
             val who = args[player]?.value
             val history = if (who != null) {
@@ -72,15 +67,13 @@ class History : BaseCommand() {
                     "%items%"
                 ))
                     .put("items", items.joinToString("\n"))
-                    .put("page", page.toString())
-                    .put("pages", pages.toString())
+                    .put("page", page)
+                    .put("pages", pages)
 
                 send(sender, placeholders)
             } else {
                 send(sender, Placeholders("commands.history.no_history", "%prefix% &cNo command history found"))
             }
         }
-
-        return true
     }
 }

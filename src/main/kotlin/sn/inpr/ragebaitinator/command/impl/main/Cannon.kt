@@ -8,7 +8,6 @@ import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseCommand
 import sn.inpr.ragebaitinator.command.def.CommandInfo
-import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 
 @CommandInfo(
@@ -22,25 +21,18 @@ class Cannon : BaseCommand() {
 
     override val syntax = listOf(power, speed, ticks)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val power = args[power]
         val speed = args[speed]
         val ticks = args[ticks]
 
         if (sender is Player) {
-            val tnt = sender.world.spawn(sender.location, TNTPrimed::class.java)
+            val tnt = sender.world.spawn(sender.location.apply { y += sender.eyeHeight }, TNTPrimed::class.java)
             tnt.velocity = sender.location.direction.multiply(speed)
             tnt.yield = power
             tnt.fuseTicks = ticks
         } else {
-            send(sender, Placeholders(language.mustBeAPlayer))
+            send(sender, language.mustBeAPlayer.placeholders())
         }
-
-        return true
     }
 }

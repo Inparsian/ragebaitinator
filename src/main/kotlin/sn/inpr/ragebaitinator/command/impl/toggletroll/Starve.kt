@@ -35,15 +35,13 @@ class Starve : BaseToggleTroll() {
                 else
                     removePlayer(target, RemoveReason.DONE)
             }, 0, ticks)
-            placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hunger is now decreasing every %c1%%ticks% %c2%tick(s)")
-                .put("player", target.name)
-                .put("ticks", ticks.toString())
+            placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hunger is now decreasing every %c1%%ticks% %c2%tick(s)", target)
+                .put("ticks", ticks)
                 .toString()
         } else {
             target.foodLevel = 0
             target.saturation = 0f
-            placeholdersOr("initInstant", "%prefix% %c1%%player% %c2%is now starving to death")
-                .put("player", target.name)
+            placeholdersOr("initInstant", "%prefix% %c1%%player% %c2%is now starving to death", target)
                 .toString()
         }
     }

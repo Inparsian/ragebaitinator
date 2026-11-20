@@ -22,7 +22,7 @@ class Burn : BaseTroll() {
         val ticks: Int = args[ticks]
         target.fireTicks = ticks
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been set on fire for %c1%%ticks% %c2%tick(s)!", target)
-            .put("ticks", ticks.toString())
+            .put("ticks", ticks)
             .toString()
     }
 }

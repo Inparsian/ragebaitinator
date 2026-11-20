@@ -18,8 +18,8 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     ]
 )
 class Hurt : BaseToggleTroll() {
-    private val damage = param<Double>("Damage", "The amount of damage to deal to the player in half-hearts.", default = 2.0, range = 0.0..PlayerUtil.MAX_POSSIBLE_DAMAGE)
-    private val ticks = param<Long>("Ticks", "The amount of ticks between each damage.", default = 10, range = 1L..1200L)
+    private val damage = param<Double>("Damage", "The amount of damage to deal to the player in half-hearts.", default = 2.0, range = 0.0..PlayerUtil.MAX_POSSIBLE_DAMAGE, step = 1L)
+    private val ticks = param<Long>("Ticks", "The amount of ticks between each damage.", default = 10, range = 1L..1200L, step = 1L)
 
     override val syntax = withTarget(damage, ticks)
 

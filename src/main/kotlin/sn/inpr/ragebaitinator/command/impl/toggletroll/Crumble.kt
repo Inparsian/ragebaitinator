@@ -8,6 +8,7 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -27,39 +28,44 @@ class Crumble : BaseToggleTroll() {
 
     override val syntax = withTarget(local)
 
-    data class CrumbleState(val entityId: Int, val stage: Byte, val vector: Vector)
+    data class CrumbleState(val entityId: Int, var stage: Byte, val vector: Vector) {
+        private fun sendPacket(player: RbPlayer, local: Boolean, destroyStage: Byte = stage) {
+            val blockPosition = Vector3i(vector.x.toInt(), vector.y.toInt(), vector.z.toInt())
+            val packet = WrapperPlayServerBlockBreakAnimation(entityId, blockPosition, destroyStage)
+            if (local)
+                player.sendPacket(packet)
+            else
+                RbPlayer.online.sendPacket(packet)
+        }
+
+        fun revert(player: RbPlayer, local: Boolean) = sendPacket(player, local, -1)
+        fun send(player: RbPlayer, local: Boolean) = sendPacket(player, local)
+    }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         if (args[local]) addFlag(target, "local")
 
-        setField(target, "blocks", mutableSetOf<CrumbleState>())
+        setField(target, "blocks", mutableListOf<CrumbleState>())
 
         setTaskTimer(target, {
             val blockified = LocationUtil.blockify(target.location, false).toVector()
             val sphere = LocationUtil.sphere(blockified, 4.5)
             for (vector in sphere) {
-                val block = getField<MutableSet<CrumbleState>>(target, "blocks")?.firstOrNull { it.vector == vector }
-                var [entityId, stage] = if (block != null) {
-                    val delta = if (MathUtil.randomBool(0.2)) 1 else 0
-                    val newStage = (block.stage + delta).toByte()
-                    if (newStage < 9)
-                        getField<MutableSet<CrumbleState>>(target, "blocks")?.removeIf { it.vector == vector }
-                    else
-                        continue
-                    Pair(block.entityId, newStage)
+                if (!vector.toLocation(target.world).block.type.isSolid)
+                    continue
+                val blocks = getField<MutableList<CrumbleState>>(target, "blocks") ?: return@setTaskTimer
+                val block = blocks.firstOrNull { it.vector == vector }
+                if (block != null) {
+                    val delta = if (MathUtil.randomBool(0.1)) 1 else 0
+                    val newStage = (block.stage + delta).toByte().coerceAtMost(9)
+                    block.stage = newStage
+                    block.send(target, args[local])
                 } else {
-                    Pair(MathUtil.random(0, Integer.MAX_VALUE), 1.toByte())
+                    val [entityId, stage] = Pair(MathUtil.random(0, Integer.MAX_VALUE), 1.toByte())
+                    blocks.add(CrumbleState(entityId, stage, vector))
+                    if (blocks.size >= 256)
+                        blocks.removeFirst().revert(target, args[local])
                 }
-
-                val vector3i = Vector3i(vector.x.toInt(), vector.y.toInt(), vector.z.toInt())
-                val packet = WrapperPlayServerBlockBreakAnimation(entityId, vector3i, stage)
-                if (hasFlag(target, "local"))
-                    target.sendPacket(packet)
-                else
-                    RbPlayer.online.sendPacket(packet)
-
-                val state = CrumbleState(entityId, stage, vector)
-                getField<MutableSet<CrumbleState>>(target, "blocks")?.add(state)
             }
         }, 0, 1)
 
@@ -67,17 +73,13 @@ class Crumble : BaseToggleTroll() {
             .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        takeField<MutableSet<CrumbleState>>(target, "blocks")?.forEach { state ->
-            val vector3i = Vector3i(state.vector.x.toInt(), state.vector.y.toInt(), state.vector.z.toInt())
-            val packet = WrapperPlayServerBlockBreakAnimation(state.entityId, vector3i, -1)
-            if (hasFlag(target, "local"))
-                target.sendPacket(packet)
-            else
-                RbPlayer.online.sendPacket(packet)
-        }
-
-        return placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)
+    override fun deinit(sender: CommandSender, target: RbPlayer): String
+        = placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)
             .toString()
+
+    override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
+        val list = takeField<MutableList<CrumbleState>>(player, "blocks")
+        while (list?.isNotEmpty() ?: false)
+            list.removeFirst().revert(player, hasFlag(player, "local"))
     }
 }

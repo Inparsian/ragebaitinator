@@ -29,16 +29,8 @@ class Help : BaseCommand() {
 
     private val pageSize: Int get() = configuration.intOr("commands.help.pageSize", 10)
 
-    override fun process(
-        sender: CommandSender,
-        command: Command,
-        label: String,
-        args: Args
-    ): Boolean {
-        val allowed = CommandManager.commands.filter {
-            sender.hasPermission("ragebaitinator.commands.${it.info.name.lowercase()}")
-        }
-
+    override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
+        val allowed = CommandManager.commands.filter { it.hasPermission(sender) }
         val first = args[category]
         val legacyPage = first?.toIntOrNull()
         when {
@@ -56,8 +48,6 @@ class Help : BaseCommand() {
                 }
             }
         }
-
-        return true
     }
 
     private fun item(command: BaseCommand): String = Placeholders("commands.help.item", listOf(
@@ -83,7 +73,7 @@ class Help : BaseCommand() {
                 "%c3%- %c1%/rb help %key% %c3%(%c2%%count% trolls%c3%): %c2%%description%"
             ))
                 .put("key", category.key)
-                .put("count", count.toString())
+                .put("count", count)
                 .put("description", category.localDescription)
                 .toString()
         }
@@ -120,18 +110,17 @@ class Help : BaseCommand() {
     private fun list(sender: CommandSender, key: String, default: List<String>, commands: List<BaseCommand>, page: Int, category: String?) {
         if (commands.isEmpty()) {
             send(sender, Placeholders("commands.help.no_help", "%prefix% &cNo commands are available"))
-            return
+        } else {
+            val pages = MathUtil.pages(commands.size, pageSize)
+            val current = page.coerceIn(1, pages)
+            val items = commands.chunked(pageSize)[current - 1].map { item(it) }
+
+            val placeholders = Placeholders(key, default)
+                .put("category", category ?: "")
+                .put("items", items.joinToString("\n"))
+                .put("page", current)
+                .put("pages", pages)
+            send(sender, placeholders)
         }
-
-        val pages = MathUtil.pages(commands.size, pageSize)
-        val current = page.coerceIn(1, pages)
-        val items = commands.chunked(pageSize)[current - 1].map { item(it) }
-
-        val placeholders = Placeholders(key, default)
-            .put("category", category ?: "")
-            .put("items", items.joinToString("\n"))
-            .put("page", current.toString())
-            .put("pages", pages.toString())
-        send(sender, placeholders)
     }
 }

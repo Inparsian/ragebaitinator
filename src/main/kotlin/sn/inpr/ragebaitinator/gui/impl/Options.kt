@@ -19,9 +19,11 @@ import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
 import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.utility.ChatUtil.send
 import sn.inpr.ragebaitinator.utility.ItemUtil
+import java.math.BigDecimal
 
 private const val CONFIRM = "confirm"
 private const val RESET = "reset"
+private const val CHOICE_ROW = "gui.parameters.item.choiceRow"
 
 private enum class Kind { BOOLEAN, NUMBER, CHOICE, TEXT }
 
@@ -49,6 +51,7 @@ class TrollOptionsMenu(
     private fun complete() = parameters.indices.all { parameters[it].optional || values[it].isNotEmpty() }
 
     private fun range(parameter: Parameter<*>) = (parameter as? Param<*>)?.range
+    private fun step(parameter: Parameter<*>) = (parameter as? Param<*>)?.step
 
     override fun title() = GuiText.text("gui.parameters.title", "troll" to troll.info.name, "target" to selection.label)
 
@@ -122,8 +125,15 @@ class TrollOptionsMenu(
 
         if (kind == Kind.CHOICE) {
             lore.add(GuiText.text("gui.parameters.item.choices"))
-            for (choice in parameter.possibleValues)
-                lore.add(GuiText.text(if (choice.equals(value, true)) "gui.parameters.item.choiceCurrent" else "gui.parameters.item.choice", "value" to choice))
+            val columns = (parameter.possibleValues.size + 15) / 16
+            val rows = parameter.possibleValues.chunked(columns)
+            for (row in rows) {
+                val string = mutableListOf<String>()
+                for (choice in row) {
+                    string.add(GuiText.text(if (choice.equals(value, true)) "$CHOICE_ROW.current" else "$CHOICE_ROW.choice", "value" to choice))
+                }
+                lore.add(GuiText.text("gui.parameters.item.choice", "row" to string.joinToString(GuiText.text("$CHOICE_ROW.separator"))))
+            }
         }
 
         lore.add("")
@@ -135,11 +145,14 @@ class TrollOptionsMenu(
     }
 
     private fun stepText(parameter: Parameter<*>): String? {
-        if (parameter.type !in numbers) return null
-        val range = range(parameter)
-        val whole = parameter.type == Int::class || parameter.type == Long::class
-        return stepFor(whole, (range?.start as? Number)?.toDouble(), (range?.endInclusive as? Number)?.toDouble())
-            .stripTrailingZeros().toPlainString()
+        val step: BigDecimal? = step(parameter)?.let { BigDecimal(it.toString()) }
+        return (if (step != null) step else {
+            if (parameter.type !in numbers)
+                return null
+            val range = range(parameter)
+            val whole = parameter.type == Int::class || parameter.type == Long::class
+            stepFor(whole, (range?.start as? Number)?.toDouble(), (range?.endInclusive as? Number)?.toDouble())
+        }).stripTrailingZeros().toPlainString()
     }
 
     override fun getInventory(): Inventory {
@@ -222,11 +235,10 @@ class TrollOptionsMenu(
         when (kindOf(parameter)) {
             Kind.BOOLEAN -> change(index, (!values[index].toBoolean()).toString())
             Kind.NUMBER -> if (drop) typeIn(index) else {
-                val range = range(parameter)
-                stepNumber(
-                    parameter.type, values[index], direction, event.isShiftClick,
-                    (range?.start as? Number)?.toDouble(), (range?.endInclusive as? Number)?.toDouble()
-                )?.let { change(index, it) }
+                val [range, step] = Pair(range(parameter), step(parameter))
+                val [min, max] = Pair((range?.start as? Number)?.toDouble(), (range?.endInclusive as? Number)?.toDouble())
+                stepNumber(parameter.type, values[index], direction, event.isShiftClick, min, max, step)
+                    ?.let { change(index, it) }
             }
             Kind.CHOICE -> if (!drop) change(index, cycle(parameter.possibleValues, values[index], direction))
             Kind.TEXT -> typeIn(index)

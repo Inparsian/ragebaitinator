@@ -25,12 +25,6 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
             addFlag(target, "persistent")
     }
 
-    /**
-     * Turns [block] into lava once the event that's being handled is over, so that the block it replaces is the one
-     * that's actually there by then.
-     */
-    fun lavafy(player: Player, block: Block): Unit = lavafy(player.rb, block)
-
     fun lavafy(player: RbPlayer, block: Block) {
         if (!hasPlayer(player))
             return
@@ -44,6 +38,8 @@ abstract class BaseLavaTroll : BaseToggleTroll() {
             runTaskLater({ Blocks.release(owner, listOf(block)) }, LAVA_LIFETIME_TICKS)
         }
     }
+
+    fun lavafy(player: Player, block: Block): Unit = lavafy(player.rb, block)
 
     // anything still lava when they leave or the plugin stops goes back right away. the rest has its own timer, which
     // is why turning this off doesn't touch it

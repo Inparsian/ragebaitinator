@@ -62,9 +62,6 @@ value class RbPlayer(val uuid: UUID) {
     fun sendPacketSilently(packet: PacketWrapper<*>) = packetEventsUser?.sendPacketSilently(packet)
     /** Sends every packet silently in the specified list in the order they are specified */
     fun sendPacketSilently(vararg packets: PacketWrapper<*>) = packets.forEach { sendPacketSilently(it) }
-    // bytes
-    fun sendPacketSilently(buffer: Any?) = packetEventsUser?.sendPacketSilently(buffer)
-    fun receivePacketSilently(buffer: Any?) = packetEventsUser?.receivePacketSilently(buffer)
 
     /**
      * The underlying Bukkit player. Fall back to this if there is no equivalent
@@ -235,7 +232,7 @@ value class RbPlayer(val uuid: UUID) {
     fun isInVoid(offset: Double = 0.0): Boolean = location.y <= LocationUtil.downHeightLimit + offset
 
     fun hasPermission(permission: String) = bukkit?.hasPermission(permission) == true
-    fun isImmune(troll: BaseTroll) = hasPermission("ragebaitinator.immune.${troll.info.name}")
+    fun isImmune(troll: BaseTroll) = hasPermission("ragebaitinator.immune.${troll.info.name.lowercase()}")
 
     override fun toString() = "RbPlayer(${name})"
 }

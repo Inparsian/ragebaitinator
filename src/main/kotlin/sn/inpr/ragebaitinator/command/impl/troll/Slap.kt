@@ -40,7 +40,7 @@ class Slap : BaseTroll() {
     override val syntax = withTarget(power, direction)
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        val power: Double = args[power]
+        val power = args[power]
         val direction = args[direction]
         val slapVector: Vector = when (direction) {
             Direction.NORTH -> Vector(0.0, 0.0, -power)
