@@ -129,6 +129,7 @@ abstract class BaseCommand {
 
     fun placeholdersOr(key: String, default: String) = Placeholders(languageOr(key, default))
     fun placeholdersOr(key: String, default: String, player: RbPlayer) = placeholdersOr(key, default).put("player", player.name)
+    fun placeholdersOr(key: String, default: List<String>, player: RbPlayer) = placeholdersOr(key, default.joinToString("\n"), player)
 
     // what a command and its parameters are described as can be changed in the language file, and are described by what
     // they were declared with otherwise

@@ -37,18 +37,17 @@ class Info : BaseCommand() {
         val immune = CommandManager.trolls.count { player.isImmune(it) }
 
         val trolls = if (active.isEmpty())
-            Placeholders("commands.info.noTrolls", "%c2%None").toString()
+            placeholdersOr("noTrolls", "%c2%None").toString()
         else
             Placeholders(active.joinToString("%c3%, ") { "%c1%$it" })
 
-        return Placeholders("commands.info.message", listOf(
+        return placeholdersOr("commands.info.message", listOf(
             "%c3%Info on %c1%%player%%c3%:",
             "%c3%- Health: %c1%%health%%c3%, Food: %c1%%food%%c3%, Gamemode: %c1%%gamemode%",
             "%c3%- World: %c1%%world% %c3%at %c1%%x% %y% %z%%c3%, Ping: %c1%%ping%ms",
             "%c3%- Immune to: %c1%%immune% %c3%troll(s)",
             "%c3%- Active trolls (%c1%%count%%c3%): %trolls%"
-        ))
-            .put("player", player.name)
+        ), player)
             .put("health", "%.1f".format(player.health))
             .put("food", player.foodLevel)
             .put("gamemode", player.gameMode.name.lowercase())

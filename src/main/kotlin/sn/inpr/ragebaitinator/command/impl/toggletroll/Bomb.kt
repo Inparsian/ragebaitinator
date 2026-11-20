@@ -68,11 +68,11 @@ class Bomb : BaseToggleTroll() {
             projectile.velocity = velocity
         }, 0, 1)
 
-        return placeholdersOr(ammo.initKey, ammo.initText).put("player", target.name).toString()
+        return placeholdersOr(ammo.initKey, ammo.initText, target).toString()
     }
 
     override fun deinit(sender: CommandSender, target: RbPlayer): String {
         val ammo = takeField<Ammo>(target, "ammo") ?: Ammo.FIREBALL
-        return placeholdersOr(ammo.deinitKey, ammo.deinitText).put("player", target.name).toString()
+        return placeholdersOr(ammo.deinitKey, ammo.deinitText, target).toString()
     }
 }
