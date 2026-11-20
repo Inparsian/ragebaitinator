@@ -73,7 +73,7 @@ class Help : BaseCommand() {
                 "%c3%- %c1%/rb help %key% %c3%(%c2%%count% trolls%c3%): %c2%%description%"
             ))
                 .put("key", category.key)
-                .put("count", count.toString())
+                .put("count", count)
                 .put("description", category.localDescription)
                 .toString()
         }
@@ -118,8 +118,8 @@ class Help : BaseCommand() {
             val placeholders = Placeholders(key, default)
                 .put("category", category ?: "")
                 .put("items", items.joinToString("\n"))
-                .put("page", current.toString())
-                .put("pages", pages.toString())
+                .put("page", current)
+                .put("pages", pages)
             send(sender, placeholders)
         }
     }

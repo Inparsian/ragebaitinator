@@ -67,8 +67,8 @@ class History : BaseCommand() {
                     "%items%"
                 ))
                     .put("items", items.joinToString("\n"))
-                    .put("page", page.toString())
-                    .put("pages", pages.toString())
+                    .put("page", page)
+                    .put("pages", pages)
 
                 send(sender, placeholders)
             } else {

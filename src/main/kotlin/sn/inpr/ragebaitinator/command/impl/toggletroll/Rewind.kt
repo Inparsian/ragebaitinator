@@ -47,7 +47,7 @@ class Rewind : BaseToggleTroll() {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now going %direction% in time at %c1%%speedSign%%speed% %c2%ticks/tick", target)
-            .put("speed", speed.absoluteValue.toString())
+            .put("speed", speed.absoluteValue)
             .put("speedSign", if (speed < 0) "+" else "-")
             .put("direction", if (speed < 0) "forward" else "back")
             .toString()

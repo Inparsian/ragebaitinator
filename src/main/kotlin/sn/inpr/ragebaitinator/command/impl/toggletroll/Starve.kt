@@ -37,7 +37,7 @@ class Starve : BaseToggleTroll() {
             }, 0, ticks)
             placeholdersOr("init", "%prefix% %c1%%player%%c2%'s hunger is now decreasing every %c1%%ticks% %c2%tick(s)")
                 .put("player", target.name)
-                .put("ticks", ticks.toString())
+                .put("ticks", ticks)
                 .toString()
         } else {
             target.foodLevel = 0

@@ -28,6 +28,8 @@ class Placeholders(val original: String) {
         return this
     }
 
+    fun put(key: String, value: Any): Placeholders = put(key, value.toString())
+
     override fun toString(): String = placeholdersRegex.replace(original) { match ->
         placeholders[match.groupValues[1]] ?: match.value
     }

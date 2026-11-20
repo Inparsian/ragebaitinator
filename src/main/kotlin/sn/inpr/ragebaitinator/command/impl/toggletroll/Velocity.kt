@@ -31,7 +31,7 @@ class Velocity : BaseToggleTroll(), PacketEventSendSubscriber {
         val multiplier = args[multiplier]
         setField(target, "multiplier", multiplier)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has built-in %c1%%multiplier%x %c2%velocity hacks", target)
-            .put("multiplier", multiplier.toString())
+            .put("multiplier", multiplier)
             .toString()
     }
 
