@@ -47,7 +47,7 @@ Here are just some of them:
 
 ## 📥 Download
 
-The only official download source for Ragebaitinator is on [Spigot](https://www.spigotmc.org/resources/ragebaitinator.140517/) (and soon Modrinth).
+The only official download sources for Ragebaitinator are [Spigot](https://www.spigotmc.org/resources/ragebaitinator.140517/) and [Hangar](https://hangar.papermc.io/Inparsian/Ragebaitinator) (and soon Modrinth).
 
 ## ⚙️ Building & Running
 
