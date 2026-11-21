@@ -42,11 +42,11 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         return false
     }
 
-    override fun getConditions(target: RbPlayer) = Conditions()
-        .notDead(target)
-        .notInVoid(target)
-        .put("An anvil must not already be falling on this player.", "anvilExists", anvils.containsValue(target))
-        .put("The anvil's path must not be obstructed.", "pathObstructed", pathObstructed(target))
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .notInVoid()
+        .condition("An anvil must not already be falling on this player.", "anvilExists", !anvils.containsValue(target))
+        .condition("The anvil's path must not be obstructed.", "pathObstructed", !pathObstructed(target))
 
     fun thwomp(anvil: FallingBlock) {
         val target = anvils.remove(anvil) ?: return

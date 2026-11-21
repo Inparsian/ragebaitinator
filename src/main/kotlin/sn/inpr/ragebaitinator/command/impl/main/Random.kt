@@ -58,7 +58,7 @@ class Random : BaseCommand() {
         return !troll.syntax.any { !it.optional && it.type != Targets::class } && targets.none { player ->
             player.isImmune(troll)
                     || (troll is BaseToggleTroll && troll.hasPlayer(player))
-                    || troll.getConditions(player)?.list?.any { it.predicate } == true
+                    || troll.conditions(player)?.list?.any { !it.predicate } == true
         }
     }
 }

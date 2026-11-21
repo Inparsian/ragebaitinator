@@ -37,8 +37,9 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
     fun getMark(entity: Entity): Boolean?
         = entity.persistentDataContainer.get(markKey, PersistentDataType.BOOLEAN)
 
-    override fun getConditions(target: RbPlayer)
-        = Conditions().notDead(target).notInVoid(target)
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .notInVoid()
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         for (i in 1..4) {

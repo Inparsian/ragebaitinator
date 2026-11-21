@@ -149,8 +149,8 @@ abstract class BaseTroll : BaseCommand() {
     /** The syntax of a troll that takes more than its target */
     protected fun withTarget(vararg parameters: Parameter<*>): List<Parameter<*>> = listOf(targetParam) + parameters
 
-    open fun getConditions(target: RbPlayer): Conditions? = null
-    fun getConditions(target: Player): Conditions? = getConditions(target.rb)
+    open fun conditions(target: RbPlayer): Conditions? = null
+    fun conditions(target: Player): Conditions? = conditions(target.rb)
 
     open fun init(sender: CommandSender, target: RbPlayer, args: Args): String? = null
 
@@ -166,10 +166,10 @@ abstract class BaseTroll : BaseCommand() {
                     return
                 }
 
-                val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
-                if (firstHitCondition != null) {
+                val firstFailure = conditions(target)?.list?.firstOrNull { !it.predicate }
+                if (firstFailure != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
-                        .put("message", firstHitCondition.humanReadable)
+                        .put("message", firstFailure.text)
                     send(sender, target, placeholders)
                     return
                 }
@@ -226,10 +226,10 @@ abstract class BaseToggleTroll : BaseTroll() {
                     return
                 }
 
-                val firstHitCondition = getConditions(target)?.list?.firstOrNull { it.predicate }
-                if (firstHitCondition != null) {
+                val firstFailure = conditions(target)?.list?.firstOrNull { !it.predicate }
+                if (firstFailure != null) {
                     val placeholders = placeholdersOr("conditionsFail", "%prefix% &c%message%")
-                        .put("message", firstHitCondition.humanReadable)
+                        .put("message", firstFailure.text)
                     send(sender, target, placeholders)
                     return
                 }

@@ -54,14 +54,13 @@ fun blockedReasons(troll: BaseTroll, selection: Selection): List<String> {
         val reason = if (target.rb.isImmune(troll))
             GuiText.text("gui.troll.blocked.immune")
         else
-            troll.getConditions(target)?.list?.firstOrNull { it.predicate }?.humanReadable
-        if (reason == null)
-            continue
+            troll.conditions(target)?.list?.firstOrNull { !it.predicate }?.text
 
-        lines.add(
-            if (selection.isMany) GuiText.text("gui.troll.blocked.many", "player" to target.name, "reason" to reason)
-            else GuiText.text("gui.troll.blocked.line", "reason" to reason)
-        )
+        if (reason != null)
+            lines.add(
+                if (selection.isMany) GuiText.text("gui.troll.blocked.many", "player" to target.name, "reason" to reason)
+                else GuiText.text("gui.troll.blocked.line", "reason" to reason)
+            )
     }
     return lines
 }

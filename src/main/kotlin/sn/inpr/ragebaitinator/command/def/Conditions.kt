@@ -1,23 +1,19 @@
 package sn.inpr.ragebaitinator.command.def
 
+import sn.inpr.ragebaitinator.Main.Companion.language
 import sn.inpr.ragebaitinator.type.RbPlayer
 
-data class Condition(
-    val humanReadable: String,
-    val key: String,
-    val predicate: Boolean,
-)
+class Conditions(val player: RbPlayer) {
+    data class Condition(private val defaultText: String, val key: String, val predicate: Boolean) {
+        val text: String get() = language.stringOr("condition.$key", defaultText)
+    }
 
-class Conditions {
-    private val _list = mutableListOf<Condition>()
-    val list: MutableList<Condition> get() = _list
+    val list: List<Condition> field = mutableListOf<Condition>()
 
-    fun put(humanReadable: String, key: String, predicate: Boolean): Conditions =
-        this.apply { _list.add(Condition(humanReadable, key, predicate)) }
+    fun condition(defaultText: String, key: String, predicate: Boolean): Conditions
+        = this.apply { list.add(Condition(defaultText, key, predicate)) }
 
     // boilerplate for common conditions
-    fun notDead(player: RbPlayer): Conditions
-        = this.put("This player must not be dead.", "dead", player.health <= 0)
-    fun notInVoid(player: RbPlayer, threshold: Double = -2.0)
-        = this.put("This player must not be in void.", "inVoid", player.isInVoid(threshold))
+    fun notDead() = condition("This player must not be dead.", "dead", player.health > 0)
+    fun notInVoid(threshold: Double = -2.0) = condition("This player must not be in void.", "inVoid", !player.isInVoid(threshold))
 }

@@ -19,9 +19,9 @@ class Starve : BaseToggleTroll() {
 
     override val syntax = withTarget(ticks)
 
-    override fun getConditions(target: RbPlayer) = Conditions()
-        .notDead(target)
-        .put("This player must not already being starving.", "hunger", target.foodLevel <= 0)
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .condition("This player must not already be starving.", "hunger", target.foodLevel > 0)
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val ticks = args[ticks]

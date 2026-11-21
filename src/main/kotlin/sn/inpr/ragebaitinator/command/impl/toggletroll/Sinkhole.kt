@@ -51,10 +51,10 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         return false
     }
 
-    override fun getConditions(target: RbPlayer) = Conditions()
-        .notDead(target)
-        .notInVoid(target)
-        .put("There must be a floor below the player.", "noFloor", !floorBelowPlayer(target))
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .notInVoid()
+        .condition("There must be a floor below the player.", "noFloor", floorBelowPlayer(target))
 
     fun sink(cylinder: Set<Vector>, player: RbPlayer) {
         player.isFlying = false

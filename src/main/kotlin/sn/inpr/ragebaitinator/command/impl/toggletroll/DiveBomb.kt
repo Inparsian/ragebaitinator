@@ -16,9 +16,8 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     ]
 )
 class DiveBomb : BaseToggleTroll() {
-    override fun getConditions(target: RbPlayer): Conditions? {
-        return Conditions().put("This player must be gliding.", "gliding", !target.isGliding)
-    }
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .condition("This player must be gliding.", "gliding", target.isGliding)
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         setTaskTimer(target, {

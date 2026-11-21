@@ -38,8 +38,9 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
             Material.LAVA
     }
 
-    override fun getConditions(target: RbPlayer)
-        = Conditions().notDead(target).notInVoid(target)
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .notInVoid()
 
     fun getBowl(location: Location): List<Block> {
         val center = location.block.location

@@ -92,10 +92,11 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         return null
     }
 
-    override fun getConditions(target: RbPlayer): Conditions {
+    override fun conditions(target: RbPlayer): Conditions {
         val intersection = !hasField(target, "cage") && getViableLocation(target) == null
-        return Conditions().notInVoid(target)
-            .put("The cage shouldn't be in the way of anything.", "intersection", intersection)
+        return Conditions(target)
+            .notInVoid()
+            .condition("The cage shouldn't be in the way of anything.", "intersection", !intersection)
     }
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {

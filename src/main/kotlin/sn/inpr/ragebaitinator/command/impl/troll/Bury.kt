@@ -44,10 +44,10 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return solidsInRow == 4
     }
 
-    override fun getConditions(target: RbPlayer)
-            = Conditions().notDead(target)
-                .notInVoid(target)
-                .put("This player must not already be buried.", "alreadyBuried", alreadyBuried(target))
+    override fun conditions(target: RbPlayer) = Conditions(target)
+        .notDead()
+        .notInVoid()
+        .condition("This player must not already be buried.", "alreadyBuried", !alreadyBuried(target))
 
     override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
         val location = target.location.clone()
