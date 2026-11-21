@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.sendPacket
 import java.util.concurrent.ConcurrentHashMap
@@ -42,7 +43,7 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
     private data class Stuck(val arrows: Int, val stingers: Int)
     private val stuck = ConcurrentHashMap<Int, Stuck>()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val type = args[type]
         val count = args[count]
         stuck[target.entityId] = Stuck(
@@ -51,12 +52,10 @@ class Pincushion : BaseToggleTroll(), PacketEventSendSubscriber {
         )
         broadcast(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now full of holes", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been patched up", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         stuck.remove(player.entityId)

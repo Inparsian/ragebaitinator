@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
 import sn.inpr.ragebaitinator.listeners.ProjectileLaunchSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.shooterRb
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -25,13 +26,11 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Erroneous : BaseToggleTroll(), EntityShootBowSubscriber, ProjectileLaunchSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an absolutely terrible shot", target)
-            .toString()
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can now mysteriously hit their targets... fluke?", target)
-            .toString()
 
     fun drunkenVelocity(entity: Entity) {
         val multiplier = (entity.velocity.lengthSquared() * 0.1).coerceAtLeast(0.12)

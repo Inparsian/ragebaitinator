@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerItemConsumeSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -25,7 +26,7 @@ class Spoiled : BaseToggleTroll(), PlayerItemConsumeSubscriber {
 
     override val syntax = withTarget(persistent)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val persistent = args[persistent]
         if (persistent)
             addFlag(target, "persistent")
@@ -33,12 +34,10 @@ class Spoiled : BaseToggleTroll(), PlayerItemConsumeSubscriber {
         return placeholdersOr("init", "%prefix% %c2%%^next% food %c1%%player% %c2%eats will now be spoiled", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The next food %c1%%player% %c2%eats will no longer be spoiled", target)
-            .toString()
 
     override fun onPlayerItemConsume(event: PlayerItemConsumeEvent) {
         val player = event.player

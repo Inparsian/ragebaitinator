@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
 
@@ -20,13 +21,11 @@ import sn.inpr.ragebaitinator.utility.TextTransform
     incompatible = [ "stutter", "pirate", "uwu", "oink", "garble", "mock", "leet", "clap", "backwards", "yell", "censor" ]
 )
 class Haxorman : BaseChatTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in salted MD5 hashes", target)
-            .toString()
-
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+            
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has stopped hashing their messages", target)
-            .toString()
-
+            
     override fun transform(player: Player, message: String): String = TextTransform.md5(message)
 }

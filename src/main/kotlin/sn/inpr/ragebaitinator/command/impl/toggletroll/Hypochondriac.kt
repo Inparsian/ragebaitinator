@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -20,16 +21,14 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Hypochondriac : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         scheduleScare(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now think they're dying every once in a while", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a clean bill of health", target)
-            .toString()
-
+            
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (removeFlag(player, "scared") && reason != RemoveReason.LOGOUT)
             showRealHealth(player)

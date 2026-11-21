@@ -6,6 +6,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -15,9 +16,8 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     description = "Plays the elder guardian mob appearance.",
 )
 class Spook : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         target.sendPacket(WrapperPlayServerChangeGameState(WrapperPlayServerChangeGameState.Reason.PLAY_ELDER_GUARDIAN_MOB_APPEARANCE, 0f))
         return placeholdersOr("init", "%prefix% %c2%Spooked %c1%%player%", target)
-            .toString()
     }
 }

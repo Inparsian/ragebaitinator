@@ -15,6 +15,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.EntityExplodeSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -41,7 +42,7 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
         .notDead()
         .notInVoid()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         for (i in 1..4) {
             val creeper = target.world.spawn(target.location, Creeper::class.java)
             mark(creeper, args[harmless])
@@ -54,7 +55,6 @@ class Creep : BaseTroll(), EntityDamageSubscriber, EntityExplodeSubscriber {
             creeper.ignite()
         }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now playing with explosives", target)
-            .toString()
     }
 
     // make em invincible

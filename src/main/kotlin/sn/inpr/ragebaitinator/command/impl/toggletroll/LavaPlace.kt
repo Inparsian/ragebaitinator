@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseLavaTroll
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -23,18 +24,16 @@ class LavaPlace : BaseLavaTroll(), BlockPlaceSubscriber {
 
     override val syntax = withTarget(persistent)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         addPersistentFlag(target, args[persistent])
         val persistent = hasFlag(target, "persistent")
         return placeholdersOr("init", "%prefix% %c2%%^next% block %c1%%player% %c2%places will now turn into lava", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The blocks %c1%%player% %c2%places will no longer turn into lava", target)
-            .toString()
 
     override fun onBlockPlace(event: BlockPlaceEvent) {
         if (!event.isCancelled)

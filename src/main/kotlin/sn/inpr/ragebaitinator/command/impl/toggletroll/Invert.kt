@@ -6,6 +6,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -18,18 +19,16 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     ]
 )
 class Invert : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, {
             if (target.flySpeed >= 0) target.flySpeed *= -1
         }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s fly controls are now inverted", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted", target)
-            .toString()
-
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fly controls are no longer inverted", target)
+            
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (player.flySpeed < 0) player.flySpeed *= -1
     }

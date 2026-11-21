@@ -8,6 +8,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.Main.Companion.runTask
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.Param
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 
@@ -38,11 +39,10 @@ abstract class BaseMobTroll : BaseToggleTroll() {
 
 /** A toggle troll that spawns a mob targeting the player whenever something happens. There's a flag for persistence. */
 abstract class BaseSpawnMobTroll : BaseMobTroll() {
-    fun addFields(target: RbPlayer, type: String, persistent: Boolean): String? {
+    fun addFields(target: RbPlayer, type: String, persistent: Boolean): Placeholders? {
         val entityType = resolve(type)
             ?: return errPlaceholdersOr("invalidMob", "%prefix% &c'%type%' is not a valid mob.", target)
                 .put("type", type)
-                .toString()
         setField(target, "type", entityType)
         if (persistent) addFlag(target, "persistent")
         return null

@@ -13,6 +13,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
@@ -77,24 +78,22 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String =
-        placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition", target)
-            .toString()
-
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can no longer manifest words into reality", target)
-            .toString()
-
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
+        = placeholdersOr("init", "%prefix% %c2%Anything %c1%%player% %c2%says shall now come to fruition", target)
+            
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can no longer manifest words into reality", target)
+            
     override fun onAsyncPlayerChat(event: AsyncPlayerChatEvent) {
         if (!event.isAsynchronous || !hasPlayer(event.player))
             return
         val message = ChatColor.stripColor(event.message).lowercase()
-        runTask({
+        runTask {
             fun m(match: String) = Regex("\\b$match\\b", RegexOption.IGNORE_CASE).containsMatchIn(message)
 
             // mob pass
             val mobs: MutableList<LivingEntity> = mutableListOf()
-            for ([_, plural, type] in genieMobs.filter { m(it.plural) || m(it.singular) }) {
+            for ([_, plural, type] in genieMobs.filter { [singular, plural] -> m(plural) || m(singular) }) {
                 val amount = if (m(plural)) 5 else 1
                 repeat(amount) {
                     val entity = event.player.world.spawnEntity(LocationUtil.locationRelativeYaw(event.player, 180, 6.0), type)
@@ -130,6 +129,6 @@ class Genie : BaseToggleTroll(), AsyncPlayerChatSubscriber {
                     event.player.teleport(newLocation)
                 }
             }
-        })
+        }
     }
 }

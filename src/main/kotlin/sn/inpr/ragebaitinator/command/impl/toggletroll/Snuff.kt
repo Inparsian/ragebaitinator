@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -29,15 +30,13 @@ class Snuff : BaseToggleTroll(), BlockPlaceSubscriber {
 
     override val syntax = withTarget(seconds)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "seconds", args[seconds])
         return placeholdersOr("init", "%prefix% %c1%%player%'s %c2%lights will now go out", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%'s %c2%lights will stay on again", target)
-            .toString()
 
     private fun isTorch(type: Material) = type == Material.TORCH || type.name.endsWith("_TORCH")
     private fun isCandle(type: Material) = type.name.endsWith("CANDLE")

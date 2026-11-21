@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rbPlayers
 import sn.inpr.ragebaitinator.type.sendPacket
@@ -49,7 +50,7 @@ class AlienHand : BaseToggleTroll() {
         target.world.rbPlayers.sendPacket(packet)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val minPeriod = (args[frequency].toFloat() / 1.25).toLong()
         val maxPeriod = (args[frequency].toFloat() * 1.25).toLong()
             setTaskRandomTimer(target, {
@@ -57,11 +58,8 @@ class AlienHand : BaseToggleTroll() {
         }, MathUtil.random(minPeriod, maxPeriod), minPeriod, maxPeriod)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has Alien Hand Syndrome", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of Alien Hand Syndrome", target)
-            .toString()
-    }
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been cured of Alien Hand Syndrome", target)
 }

@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerItemHeldSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerSwapHandItemsSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -21,13 +22,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     ]
 )
 class LockHotbar : BaseToggleTroll(), PlayerItemHeldSubscriber, PlayerSwapHandItemsSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now stuck with the item they're holding", target)
-            .toString()
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can change their held item again", target)
-            .toString()
 
     override fun onPlayerItemHeld(event: PlayerItemHeldEvent) = event.cancelIf(hasPlayer(event.player))
     override fun onPlayerSwapHandItems(event: PlayerSwapHandItemsEvent) = event.cancelIf(hasPlayer(event.player))

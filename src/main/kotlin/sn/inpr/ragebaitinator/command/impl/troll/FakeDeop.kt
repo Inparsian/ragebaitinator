@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -18,10 +19,9 @@ class FakeDeop : BaseTroll() {
 
     override val syntax = withTarget(executor)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val executor = args[executor]
         target.send(placeholdersOr("message", "&7&o[%executor%: Made %player% no longer a server operator]", target).put("executor", executor))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been \"de-opped\".", target)
-            .toString()
     }
 }

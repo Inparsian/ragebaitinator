@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -74,17 +75,15 @@ class FromTheFog : BaseToggleTroll() {
         val team = "rb_fog_${name}"
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "interval", args[interval])
         scheduleAppearance(target)
         return placeholdersOr("init", "%prefix% %c2%Something has started watching %c1%%player% %c2%from the fog", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%Whatever was watching %c1%%player% %c2%has gone", target)
-            .toString()
-
+            
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         despawn(player, reason != RemoveReason.LOGOUT)
     }

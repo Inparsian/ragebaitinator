@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 import sn.inpr.ragebaitinator.utility.PlayerUtil
@@ -21,13 +22,11 @@ import sn.inpr.ragebaitinator.utility.PlayerUtil
     ]
 )
 class Brittle : BaseToggleTroll(), EntityDamageSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%will now die next time they take damage", target)
-            .toString()
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer die next time they take damage", target)
-            .toString()
 
     override fun onEntityDamage(event: EntityDamageEvent) {
         if (removePlayer(event.entity.asRb ?: return))

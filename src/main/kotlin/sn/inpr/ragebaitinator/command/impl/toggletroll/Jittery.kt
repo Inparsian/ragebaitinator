@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerToggleSneakSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -32,16 +33,14 @@ class Jittery : BaseToggleTroll(), PlayerToggleSneakSubscriber {
         const val HOLE_DEPTH = 3
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "power", args[power])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%can no longer keep still while sneaking", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has calmed down", target)
-            .toString()
-
+            
     // finds the closest column nearby that's lava, or a drop of at least HOLE_DEPTH blocks, and returns the direction to it
     private fun findHazard(player: Player): Vector? {
         val world = player.world

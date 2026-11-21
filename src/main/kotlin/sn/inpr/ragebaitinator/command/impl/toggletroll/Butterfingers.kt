@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -35,15 +36,13 @@ class Butterfingers : BaseToggleTroll(), PlayerInteractSubscriber, BlockBreakSub
         const val COOLDOWN_MILLIS = 250L
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has butterfingers", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has a firm grip again", target)
-            .toString()
 
     private fun roll(player: Player) {
         val chance = getField<Double>(player, "chance") ?: return

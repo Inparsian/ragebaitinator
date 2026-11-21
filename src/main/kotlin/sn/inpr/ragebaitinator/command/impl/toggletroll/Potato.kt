@@ -99,7 +99,7 @@ class Potato : BaseToggleTroll(),
             WrapperPlayServerChangeGameState.Reason.CHANGE_GAME_MODE, mode.id.toFloat()))
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         // once the potato is registered, target.entity (and everything derived from it) is the potato, so anything
         // meant for the player itself has to go through the Bukkit player
         val player = target.bukkit ?: error("${target.name} is not online")
@@ -137,13 +137,10 @@ class Potato : BaseToggleTroll(),
         }, 0, 2)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living in a potato battery", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer living in a potato battery", target)
-            .toString()
-    }
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer living in a potato battery", target)
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         // taking the potato is what turns them back into a player, so this has to come before anything uses their entity

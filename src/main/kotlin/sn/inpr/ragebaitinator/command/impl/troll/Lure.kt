@@ -6,6 +6,7 @@ import org.bukkit.entity.Creature
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -15,9 +16,8 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     description = "Lures every creature within a 100 block radius to a player.",
 )
 class Lure : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         target.nearbyEntities(100.0).filterIsInstance<Creature>().forEach { it.target = target.bukkit }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now universally hated", target)
-            .toString()
     }
 }

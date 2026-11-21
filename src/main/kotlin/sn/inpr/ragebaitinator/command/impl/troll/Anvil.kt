@@ -15,6 +15,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.listeners.EntityChangeBlockSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -55,7 +56,7 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         anvil.remove()
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val anvilLocation = LocationUtil.blockify(target.location.clone().add(0.0, 12.0, 0.0), true)
         @Suppress("DEPRECATION")
         val anvil: FallingBlock = target.world.getBlockAt(anvilLocation).world.spawnFallingBlock(anvilLocation, MaterialData(Material.ANVIL))
@@ -63,7 +64,6 @@ class Anvil : BaseTroll(), PlayerMoveSubscriber, EntityChangeBlockSubscriber {
         anvils[anvil] = target
         runTaskLater({ thwomp(anvil) }, 25)
         return placeholdersOr("init", "%prefix% %c2%Dropped an anvil on %c1%%player%", target)
-            .toString()
     }
 
     override fun onPlayerMove(event: PlayerMoveEvent) {

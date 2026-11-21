@@ -10,6 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 import sn.inpr.ragebaitinator.type.shooterRb
@@ -29,7 +30,7 @@ class GlassCannon : BaseToggleTroll(), EntityDamageByEntitySubscriber, EntityDam
 
     override val syntax = withTarget(dealt, taken)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val dealt = args[dealt]
         val taken = args[taken]
         setField(target, "dealt", dealt)
@@ -37,12 +38,10 @@ class GlassCannon : BaseToggleTroll(), EntityDamageByEntitySubscriber, EntityDam
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now deals %c1%%dealt%x %c2%damage and takes %c1%%taken%x", target)
             .put("dealt", dealt.toString().removeSuffix(".0"))
             .put("taken", taken.toString().removeSuffix(".0"))
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer a glass cannon", target)
-            .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val attacker = event.damager.asRb ?: (event.damager as? Projectile)?.shooterRb ?: return

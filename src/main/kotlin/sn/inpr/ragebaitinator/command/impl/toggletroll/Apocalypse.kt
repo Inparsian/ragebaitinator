@@ -7,6 +7,7 @@ import org.bukkit.entity.EntityType
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -60,19 +61,17 @@ class Apocalypse : BaseToggleTroll() {
                 block.type == Material.CAMPFIRE || block.type == Material.SOUL_CAMPFIRE
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "rate", args[rate])
         setField(target, "cap", args[cap])
         setField(target, "budget", 0.0)
         setField(target, "mobs", ConcurrentHashMap.newKeySet<UUID>())
         setTaskTimer(target, { tick(target) }, 20, PERIOD)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now living through the apocalypse", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is safe from the apocalypse for now", target)
-            .toString()
 
     private fun tick(player: RbPlayer) {
         val body = player.bukkit ?: return

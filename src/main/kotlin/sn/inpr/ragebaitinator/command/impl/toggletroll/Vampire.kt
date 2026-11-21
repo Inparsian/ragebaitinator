@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -26,15 +27,13 @@ class Vampire : BaseToggleTroll(), PlayerMoveSubscriber {
             player.fireTicks = player.fireTicks.coerceAtLeast(100)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, { vampireTick(target) }, 0, 10)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now combust under sunlight", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer combust under sunlight", target)
-            .toString()
 
     override fun onPlayerMove(event: PlayerMoveEvent) = vampireTick(event.player.rb)
 }

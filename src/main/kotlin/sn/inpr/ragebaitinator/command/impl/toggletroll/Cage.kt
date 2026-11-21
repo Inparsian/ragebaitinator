@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerRespawnSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.Structure
 import sn.inpr.ragebaitinator.type.rb
@@ -99,7 +100,7 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             .condition("The cage shouldn't be in the way of anything.", "intersection", !intersection)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val atSender = args[atSender]
         val cageLocation = if (atSender && sender is Player) {
             val blockified = LocationUtil.blockify(sender.location, true)
@@ -110,9 +111,9 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
             else if (!cage.intersects(head))
                 head
             else
-                return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target).toString()
+                return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target)
         } else {
-            getViableLocation(target) ?: return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target).toString()
+            getViableLocation(target) ?: return errPlaceholdersOr("intersectError", "%prefix% &cThe cage would hit something!", target)
         }
 
         cage.build(rollbackOwner(target), cageLocation)
@@ -120,12 +121,10 @@ class Cage : BaseToggleTroll(), PlayerMoveSubscriber, PlayerRespawnSubscriber, B
         target.teleport(cageLocation.clone().add(0.0, 1.0, 0.0))
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in a cage", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now free", target)
-            .toString()
 
     fun isOutsideCage(player: RbPlayer, to: Location): Boolean {
         val cageLocation = getField<Location>(player, "cage") ?: return false

@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -29,8 +30,8 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
         return location.clone().apply { y = highestY.toDouble() }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        val highest = getHighestLocation(target.location) ?: return "&cCould not find a location to fall from"
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
+        val highest = getHighestLocation(target.location) ?: return placeholdersOr("noLocation", "&cCould not find a location")
         setField(target, "location", highest.add(0.0, 20.0, 0.0))
         setTaskTimer(target, {
             val newLocation = getField<Location>(target, "location") ?: return@setTaskTimer
@@ -43,12 +44,10 @@ class Fall : BaseToggleTroll(), EntityDamageSubscriber {
             }
         }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now falling forever", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been freed from the falling curse", target)
-            .toString()
 
     // prevent premature fall damage despite our best efforts to prevent it proactively
     override fun onEntityDamage(event: EntityDamageEvent) {

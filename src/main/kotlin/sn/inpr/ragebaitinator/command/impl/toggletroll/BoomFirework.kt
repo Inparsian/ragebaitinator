@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.PlayerUtil.isFireworkBoost
 
@@ -25,19 +26,17 @@ class BoomFirework : BaseBoomTroll(), PlayerInteractSubscriber {
 
     override val syntax = withTarget(persistent, destructive)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now explode %next% time they firework boost", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%will no longer explode next time they firework boost", target)
-            .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
         if (isFireworkBoost(event))

@@ -10,6 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerBucketEmptySubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerBucketFillSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -27,23 +28,21 @@ class NoBucket : BaseToggleTroll(), PlayerBucketEmptySubscriber, PlayerBucketFil
 
     override val syntax = withTarget(empty, fill)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val empty = args[empty]
         val fill = args[fill]
 
         return if (!empty && !fill) {
-            errPlaceholders(language.bothFalse, target).toString()
+            errPlaceholders(language.bothFalse, target)
         } else {
             if (empty) addFlag(target, "empty")
             if (fill) addFlag(target, "fill")
             placeholdersOr("init", "%prefix% %c1%%player% %c2%is no longer able to use buckets", target)
-                .toString()
         }
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now able to use buckets", target)
-            .toString()
 
     override fun onPlayerBucketEmpty(event: PlayerBucketEmptyEvent) = event.cancelIfHasFlag("empty")
     override fun onPlayerBucketFill(event: PlayerBucketFillEvent) = event.cancelIfHasFlag("fill")

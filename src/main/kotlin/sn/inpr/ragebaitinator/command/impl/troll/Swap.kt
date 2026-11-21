@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.Targets
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -21,9 +22,8 @@ class Swap : BaseTroll() {
 
     override val syntax = withTarget(other, swapInventories)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
-        val target2: RbPlayer = args.getOrNull(other)?.first()
-            ?: return language.playerNotFound.placeholders().toString()
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
+        val target2: RbPlayer = args.getOrNull(other)?.first() ?: return language.playerNotFound.placeholders()
         val swapInventories: Boolean = args[swapInventories]
         val targetLocation = target.location
         target.teleport(target2.location)
@@ -36,6 +36,5 @@ class Swap : BaseTroll() {
         return placeholdersOr("init", "%prefix% %c1%%playerA% %c2%and %c1%%playerB% %c2%have swapped places")
             .put("playerA", target.name)
             .put("playerB", target2.name)
-            .toString()
     }
 }

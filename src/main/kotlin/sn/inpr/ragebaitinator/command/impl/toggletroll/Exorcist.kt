@@ -13,6 +13,7 @@ import org.bukkit.entity.LivingEntity
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -31,7 +32,7 @@ class Exorcist : BaseToggleTroll() {
 
     override val syntax = withTarget(local)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         if (args[local]) addFlag(target, "local")
 
         setTaskRandomTimer(target, {
@@ -63,11 +64,8 @@ class Exorcist : BaseToggleTroll() {
         }, 0, 1, 3)
 
         return placeholdersOr("init", "%prefix% %c2%Entities around %c1%%player% %c2%are now spazzing out", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
-        return placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out", target)
-            .toString()
-    }
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c2%Entities around %c1%%player% %c2%are no longer spazzing out", target)
 }

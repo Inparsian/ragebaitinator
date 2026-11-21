@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -14,9 +15,8 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     description = "Rotates a player 180 degrees.",
 )
 class Flip : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         target.teleportRetainVelocity(target.location.clone().apply { yaw += 180.0f })
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been flipped", target)
-            .toString()
     }
 }

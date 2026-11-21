@@ -6,6 +6,7 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -20,7 +21,7 @@ class Trip : BaseTroll() {
 
     override val syntax = withTarget(clone)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val clone = args[clone]
         for (item in target.storageContents.filterNotNull()) {
             val drop = target.world.dropItemNaturally(target.location.add(0.0, 1.0, 0.0), item)
@@ -29,6 +30,5 @@ class Trip : BaseTroll() {
             if (!clone) target.removeFromInventory(item)
         }
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has inexplicably dropped all their stuff", target)
-            .toString()
     }
 }

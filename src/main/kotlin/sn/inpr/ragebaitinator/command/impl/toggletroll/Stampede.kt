@@ -16,6 +16,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.lang.reflect.Method
 
@@ -62,7 +63,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val fromShooter = args[fromShooter]
         val herdLocation = if (sender is Player && fromShooter && sender.world == target.world)
             sender.location.clone()
@@ -71,7 +72,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
 
         val positions = safePositions(herdLocation, target.location)
         if (positions.size < 6)
-            return errPlaceholdersOr("noSafeLocation", "%prefix% &cCould not find enough safe ground for the herd.", target).toString()
+            return errPlaceholdersOr("noSafeLocation", "%prefix% &cCould not find enough safe ground for the herd.", target)
 
         val herd = mutableSetOf<Creature>()
         val navigators = mutableMapOf<Creature, CowNavigation>()
@@ -83,7 +84,7 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
                 navigators[cow] = CowNavigation(cow)
             }
         } catch (_: Exception) {
-            return errPlaceholdersOr("spawnFailed", "%prefix% &cCould not spawn the herd or initialize cow navigation on this server.", target).toString()
+            return errPlaceholdersOr("spawnFailed", "%prefix% &cCould not spawn the herd or initialize cow navigation on this server.", target)
         }
 
         var ticks = 0
@@ -134,12 +135,10 @@ class Stampede : BaseToggleTroll(), EntityDamageSubscriber {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%just made some cows really angry", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows", target)
-            .toString()
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by cows", target)
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<MutableSet<Creature>>(player, "herd")?.forEach { it.remove() }

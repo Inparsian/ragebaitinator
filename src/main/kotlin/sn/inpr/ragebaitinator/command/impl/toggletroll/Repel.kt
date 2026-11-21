@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -21,7 +22,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     ]
 )
 class Repel : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, {
             for (entity in target.nearbyEntities(10.0)) {
                 if (entity is Player || entity is Animals) {
@@ -44,10 +45,8 @@ class Repel : BaseToggleTroll() {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c2%Creatures & players are now being repelled away from %c1%%player%", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%Creatures & players are no longer repelled away from %c1%%player%", target)
-            .toString()
 }

@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 import sn.inpr.ragebaitinator.type.shooterRb
@@ -27,19 +28,17 @@ class BoomHit : BaseBoomTroll(), EntityDamageByEntitySubscriber {
 
     override val syntax = withTarget(persistent, destructive)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
         return placeholdersOr("init", "%prefix% %c2%%^next% entity %c1%%player% %c2%hits will now explode", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The next entity %c1%%player% %c2%hits will no longer explode", target)
-            .toString()
 
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         val player = event.damager.asRb ?: (event.damager as? Projectile)?.shooterRb ?: return

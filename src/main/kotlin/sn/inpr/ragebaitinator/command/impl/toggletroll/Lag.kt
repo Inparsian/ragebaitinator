@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import java.nio.channels.ClosedChannelException
@@ -159,14 +160,14 @@ class Lag : BaseToggleTroll() {
         fieldValues<Session>("session").toList().forEach { it.handler.disable(it.channel) }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val rtt = args[rtt]
         val jitter = args[jitter]
         val channel = target.packetEventsUser?.channel as? Channel ?: return errPlaceholdersOr(
             "noConnection",
             "%prefix% &cCould not find %player%'s connection",
             target
-        ).toString()
+        )
 
         val handler = LagHandler(rtt, jitter)
         channel.eventLoop().execute {
@@ -177,12 +178,10 @@ class Lag : BaseToggleTroll() {
         }
         setField(target, "session", Session(channel, handler))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now on Wi-Fi", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer lagging", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<Session>(player, "session")?.let { it.handler.disable(it.channel) }

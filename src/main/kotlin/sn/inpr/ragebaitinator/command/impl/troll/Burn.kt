@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -18,11 +19,10 @@ class Burn : BaseTroll() {
 
     override val syntax = withTarget(ticks)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val ticks: Int = args[ticks]
         target.fireTicks = ticks
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been set on fire for %c1%%ticks% %c2%tick(s)!", target)
             .put("ticks", ticks)
-            .toString()
     }
 }

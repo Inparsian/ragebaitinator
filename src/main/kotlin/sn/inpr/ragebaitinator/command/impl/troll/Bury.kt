@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
@@ -49,7 +50,7 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         .notInVoid()
         .condition("This player must not already be buried.", "alreadyBuried", !alreadyBuried(target))
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val location = target.location.clone()
         var buryLocation: Location? = null
         var solidsInRow = 0
@@ -80,7 +81,6 @@ class Bury : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
 
         target.teleport(buryLocation.clone().add(0.0, 1.0, 0.0))
         return placeholdersOr("init", "%prefix% %c2%Buried %c1%%player% %c2%ALIVE MUAHAHAHAHAAHYAHAHAHA", target)
-            .toString()
     }
 
     override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))

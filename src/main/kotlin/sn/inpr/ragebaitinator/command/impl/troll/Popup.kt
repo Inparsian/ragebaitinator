@@ -7,6 +7,7 @@ import org.bukkit.event.inventory.InventoryType
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -27,9 +28,8 @@ class Popup : BaseTroll() {
         )
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         target.openInventory(Bukkit.createInventory(null, inventoryTypes.random()))
         return placeholdersOr("init", "%prefix% %c2%Opened a random inventory menu for %c1%%player%", target)
-            .toString()
     }
 }

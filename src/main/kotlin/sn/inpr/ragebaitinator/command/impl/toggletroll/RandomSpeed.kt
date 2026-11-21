@@ -6,6 +6,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -28,17 +29,15 @@ class RandomSpeed : BaseToggleTroll() {
     }
 
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         // the walking and flying speeds they had before
         setField(target, "originalSpeeds", target.walkSpeed to target.flySpeed)
         setTaskRandomTimer(target, { randomize(target) }, 0, 40, 160)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s speed will now change at random", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s speed is back to normal", target)
-            .toString()
 
     // the speeds are saved with the player, so they have to be put back even when they're leaving
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {

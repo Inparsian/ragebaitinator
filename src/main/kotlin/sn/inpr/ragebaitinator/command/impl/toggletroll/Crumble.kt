@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.sendPacket
 import sn.inpr.ragebaitinator.utility.LocationUtil
@@ -42,7 +43,7 @@ class Crumble : BaseToggleTroll() {
         fun send(player: RbPlayer, local: Boolean) = sendPacket(player, local)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         if (args[local]) addFlag(target, "local")
 
         setField(target, "blocks", mutableListOf<CrumbleState>())
@@ -70,12 +71,10 @@ class Crumble : BaseToggleTroll() {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c2%The world is now \"crumbling\" around %c1%%player%", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The world is no longer crumbling around %c1%%player%", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         val list = takeField<MutableList<CrumbleState>>(player, "blocks")

@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -27,7 +28,7 @@ class Levitate : BaseToggleTroll(), PacketEventSendSubscriber {
 
     override val syntax = withTarget(velocity)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, { target.velocity = Vector(target.velocity.x, args[velocity], target.velocity.z) }, 0, 1)
 
         // vanilla dumbpidity
@@ -40,12 +41,10 @@ class Levitate : BaseToggleTroll(), PacketEventSendSubscriber {
         }, 10, 10)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now ascending to the heavens", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is now falling back towards the earth", target)
-            .toString()
 
     override fun onPacketSend(event: PacketSendEvent) {
         val uuid = event.user.uuid ?: return

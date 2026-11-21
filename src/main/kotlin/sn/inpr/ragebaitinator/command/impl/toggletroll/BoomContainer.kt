@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseBoomTroll
 import sn.inpr.ragebaitinator.listeners.PlayerInteractSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -26,19 +27,17 @@ class BoomContainer : BaseBoomTroll(), PlayerInteractSubscriber {
 
     override val syntax = withTarget(persistent, destructive)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val persistent = args[persistent]
         addBoomFlags(target, persistent, args[destructive])
 
         return placeholdersOr("init", "%prefix% %c2%%^next% container %c1%%player% %c2%opens will now explode", target)
             .put("next", if (persistent) "every" else "the next")
             .put("^next", if (persistent) "Every" else "The next")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The next container %c1%%player% %c2%opens will no longer explode", target)
-            .toString()
 
     override fun onPlayerInteract(event: PlayerInteractEvent) {
         if (event.action == Action.RIGHT_CLICK_BLOCK) {

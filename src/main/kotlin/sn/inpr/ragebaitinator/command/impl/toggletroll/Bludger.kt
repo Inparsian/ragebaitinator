@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.ProjectileHitSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
@@ -28,7 +29,7 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
 
     override val syntax = withTarget(fromShooter)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val fromShooter = args[fromShooter]
         val bludgerLocation = if (sender is Player && fromShooter)
             sender.eyeLocation.clone().add(sender.eyeLocation.direction.multiply(2))
@@ -69,12 +70,10 @@ class Bludger : BaseToggleTroll(), ProjectileHitSubscriber {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being chased by a flying fire ball thing", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer being chased by a flying fire ball thing", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         getField<Projectile>(player, "bludger")?.remove()

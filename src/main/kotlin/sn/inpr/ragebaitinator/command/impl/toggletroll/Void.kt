@@ -13,6 +13,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 import sn.inpr.ragebaitinator.utility.PlayerUtil.inVoid
@@ -34,16 +35,14 @@ class Void : BaseToggleTroll(), EntityDamageSubscriber, PlayerMoveSubscriber {
         return location
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "location", target.location)
         target.teleport(get65536(target))
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been banished into the void", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders {
         return placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned from the void", target)
-            .toString()
     }
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {

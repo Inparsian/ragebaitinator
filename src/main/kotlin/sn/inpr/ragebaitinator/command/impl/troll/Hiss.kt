@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 
@@ -19,7 +20,7 @@ import sn.inpr.ragebaitinator.utility.LocationUtil
     description = "Plays a creeper hiss sound from directly behind the player.",
 )
 class Hiss : BaseTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val behind = target.location.toVector()
             .add(LocationUtil.vectorRelativeYaw(target, 180, 2.0))
         val position = Vector3d(behind.x, behind.y, behind.z)
@@ -31,6 +32,5 @@ class Hiss : BaseTroll() {
             0.5f
         ))
         return placeholdersOr("init", "%prefix% %c2%Gave %c1%%player% %c2%the scare of their life", target)
-            .toString()
     }
 }

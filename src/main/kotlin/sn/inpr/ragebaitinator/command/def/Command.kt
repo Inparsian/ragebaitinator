@@ -152,7 +152,7 @@ abstract class BaseTroll : BaseCommand() {
     open fun conditions(target: RbPlayer): Conditions? = null
     fun conditions(target: Player): Conditions? = conditions(target.rb)
 
-    open fun init(sender: CommandSender, target: RbPlayer, args: Args): String? = null
+    open fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders? = null
 
     override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val allTargets = syntax.filter { !it.optional }.filterIsInstance<Param<Targets>>().map { args.getOrNull(it) }
@@ -212,7 +212,7 @@ abstract class BaseToggleTroll : BaseTroll() {
             .forEach { it.update() }
     }
 
-    open fun deinit(sender: CommandSender, target: RbPlayer): String? = null
+    open fun deinit(sender: CommandSender, target: RbPlayer): Placeholders? = null
 
     override fun process(sender: CommandSender, command: Command, label: String, args: Args) {
         val targets = args.getOrNull(targetParam)

@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.InventoryCloseSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryOpenSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 
@@ -28,15 +29,13 @@ class Scalper : BaseToggleTroll(), InventoryOpenSubscriber, InventoryCloseSubscr
 
     override val syntax = withTarget(markup)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "markup", args[markup])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being ripped off by every villager", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%gets the regular prices again", target)
-            .toString()
 
     override fun onInventoryOpen(event: InventoryOpenEvent) {
         val player = event.player.asRb ?: return

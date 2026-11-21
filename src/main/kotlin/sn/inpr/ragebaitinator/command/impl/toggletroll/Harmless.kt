@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageByEntitySubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -20,14 +21,12 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     incompatible = [ "thorns" ]
 )
 class Harmless : BaseToggleTroll(), EntityDamageByEntitySubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now totally harmless :)", target)
-            .toString()
-
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+            
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer harmless", target)
-            .toString()
-
+            
     override fun onEntityDamageByEntity(event: EntityDamageByEntityEvent) {
         if (hasPlayer(event.damager))
             event.setDamage(0.0)

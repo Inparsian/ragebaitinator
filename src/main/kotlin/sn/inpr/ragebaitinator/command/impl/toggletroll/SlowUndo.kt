@@ -17,6 +17,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.BlockBreakSubscriber
 import sn.inpr.ragebaitinator.listeners.BlockPlaceSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 
@@ -47,18 +48,16 @@ class SlowUndo : BaseToggleTroll(), BlockBreakSubscriber, BlockPlaceSubscriber {
         val exp: Int = 0
     )
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val interval = args[interval].toLong()
         val queue = ArrayDeque<Change>()
         setField(target, "pending", queue)
         setTaskTimer(target, { queue.pollFirst()?.let(::undo) }, interval, interval)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s block changes will now be slowly undone", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s block changes are no longer being undone", target)
-            .toString()
 
     // whatever is still queued stays as the player left it. the blocks they broke were never given back, so they
     // get what those blocks would have dropped instead

@@ -8,6 +8,7 @@ import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -32,7 +33,7 @@ class Tornado : BaseToggleTroll() {
         val pickupPoint: Location get() = location.clone().add(0.0, strength.toDouble() * 2, 0.0)
 
         fun intersects(otherLocation: Location): Boolean
-                = otherLocation.distanceSquared(pickupPoint) <= ((strength * 1.5).pow(2) + (strength + 2.0).pow(3)) / 2.0
+            = otherLocation.distanceSquared(pickupPoint) <= ((strength * 1.5).pow(2) + (strength + 2.0).pow(3)) / 2.0
 
         fun rotate() {
             axis = (axis + 20 - (strength / 1.2).toInt()).mod(360)
@@ -97,7 +98,7 @@ class Tornado : BaseToggleTroll() {
         }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val strength = args[strength]
         val yaw = MathUtil.random(0.0, 360.0)
         setField(target, "twister", Twister(target, target.location.clone().add(
@@ -109,10 +110,8 @@ class Tornado : BaseToggleTroll() {
         setTaskTimer(target, { getField<Twister>(target, "twister")?.tick() }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in Texas", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The tornado chasing %c1%%player% %c2%has dissipated", target)
-            .toString()
 }

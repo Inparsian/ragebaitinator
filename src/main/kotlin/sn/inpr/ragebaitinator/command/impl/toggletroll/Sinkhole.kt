@@ -11,6 +11,7 @@ import sn.inpr.ragebaitinator.Main.Companion.runTaskLater
 import sn.inpr.ragebaitinator.command.def.*
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import java.util.*
@@ -67,7 +68,7 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         runTaskLater({ Blocks.release(owner, blocks) }, 60L)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "sinkhole", SinkholeState(target.location, target.location))
 
         val initCylinder = LocationUtil.cylinder(target.location.toVector().add(Vector(0.0, -2.0, 0.0)), 2.0, 3)
@@ -103,12 +104,10 @@ class Sinkhole : BaseToggleTroll(), EntityDamageSubscriber {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been sent on a journey to the center of the earth", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has been returned back to the surface", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (reason != RemoveReason.DONE && reason != RemoveReason.DEATH) {

@@ -10,6 +10,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import kotlin.math.floor
 
@@ -34,17 +35,14 @@ class Midas : BaseToggleTroll(), PlayerMoveSubscriber {
 
     private val gold = Material.GOLD_BLOCK.createBlockData()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         if (args[local]) addFlag(target, "local")
-
         setField(target, "trail", linkedSetOf<Block>())
         return placeholdersOr("init", "%prefix% %c2%The ground beneath %c1%%player% %c2%now turns to gold", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The ground beneath %c1%%player% %c2%is no longer turning to gold", target)
-            .toString()
 
     // whoever might have been shown the gold gets the real block back. it's harmless to resend it to everyone else
     private fun restore(block: Block) {

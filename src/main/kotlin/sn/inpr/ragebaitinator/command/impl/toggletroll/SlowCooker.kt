@@ -13,6 +13,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.FurnaceStartSmeltSubscriber
 import sn.inpr.ragebaitinator.listeners.InventoryClickSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -37,13 +38,11 @@ class SlowCooker : BaseToggleTroll(), InventoryClickSubscriber, FurnaceStartSmel
     // how long each furnace that's been slowed down was supposed to take, for when it's let go
     private val originals = ConcurrentHashMap<Block, Int>()
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c2%The furnaces %c1%%player% %c2%uses will now take forever to cook", target)
-            .toString()
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%The furnaces %c1%%player% %c2%uses cook normally again", target)
-            .toString()
 
     // whatever they were cooking carries on from where it got to
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {

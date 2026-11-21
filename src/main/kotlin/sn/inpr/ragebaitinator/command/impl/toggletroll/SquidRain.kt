@@ -12,6 +12,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -32,7 +33,7 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
     fun mark(entity: Entity) = entity.persistentDataContainer.set( markKey, PersistentDataType.BYTE, 1)
     fun isMarked(entity: Entity) = entity.persistentDataContainer.has(markKey, PersistentDataType.BYTE)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, {
             val distance = MathUtil.random(3.0, 5.0)
             val yaw = MathUtil.random(0.0, 360.0)
@@ -43,12 +44,10 @@ class SquidRain : BaseToggleTroll(), EntityDamageSubscriber {
         }, 0, 2)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now in an area with a 100% chance of squid rain", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders =
         placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer in squid rain", target)
-            .toString()
 
     // Prevent our squids from receiving damage, UNLESS they were alive for more than
     // 100 ticks, in which case this is an anomaly caused by a server restart

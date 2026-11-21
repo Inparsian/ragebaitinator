@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.command.def.common.BaseMobTroll
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import java.util.concurrent.ConcurrentHashMap
 
@@ -31,25 +32,22 @@ class MobMask : BaseMobTroll(), PacketEventSendSubscriber {
 
     override val syntax = withTarget(type)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val name = sanitize(args[type].lowercase())
         val mask = resolve(name)?.takeIf { isMob(it) }
         if (mask == null)
             return errPlaceholdersOr("invalidMob", "%prefix% &c'%name%' is not a valid mob.", target)
                 .put("name", name)
-                .toString()
 
         setField(target, "mask", mask)
         setField(target, "masked", ConcurrentHashMap.newKeySet<Int>())
         resend(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now sees every mob as a %c1%%mask%", target)
             .put("mask", name)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can tell the mobs apart again", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (player.isOnline && reason != RemoveReason.LOGOUT)

@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerBedEnterSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 
@@ -22,14 +23,12 @@ import sn.inpr.ragebaitinator.type.rb
     ]
 )
 class Insomnia : BaseToggleTroll(), PlayerBedEnterSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String =
-        placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an insomniac", target)
-            .toString()
-
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer an insomniac", target)
-            .toString()
-
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
+        = placeholdersOr("init", "%prefix% %c1%%player% %c2%is now an insomniac", target)
+            
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer an insomniac", target)
+            
     override fun onPlayerBedEnter(event: PlayerBedEnterEvent) {
         event.cancelIfAndThen(hasPlayer(event.player)) {
             val text = placeholdersOr("message", "No matter how hard you try, you can't seem to rest", event.player.rb)

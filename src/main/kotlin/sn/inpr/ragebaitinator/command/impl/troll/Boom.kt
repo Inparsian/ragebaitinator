@@ -5,6 +5,7 @@ import org.bukkit.command.CommandSender
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -18,12 +19,10 @@ class Boom : BaseTroll() {
 
     override val syntax = withTarget(power)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val power = args[power]
         target.world.createExplosion(target.location, power, power >= 0f)
         target.health = 0.0
-
         return placeholdersOr("init","%prefix% %c1%%player% %c2%has now inexplicably exploded", target)
-            .toString()
     }
 }

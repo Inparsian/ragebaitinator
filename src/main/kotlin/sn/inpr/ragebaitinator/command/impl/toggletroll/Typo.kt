@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerCommandPreprocessSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 import sn.inpr.ragebaitinator.utility.TextTransform
@@ -26,15 +27,13 @@ class Typo : BaseToggleTroll(), PlayerCommandPreprocessSubscriber {
 
     override val syntax = withTarget(chance)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now has very clumsy fingers", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s fingers are no longer clumsy", target)
-            .toString()
 
     // never mangle our own command, or there'd be no way to turn this off
     private fun isOwnCommand(label: String): Boolean {

@@ -14,6 +14,7 @@ import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.listeners.AsyncPlayerChatSubscriber
 import sn.inpr.ragebaitinator.listeners.PacketEventSendSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.refreshFor
 
@@ -27,7 +28,7 @@ import sn.inpr.ragebaitinator.type.refreshFor
     ]
 )
 class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val others = target.others
         if (others.isNotEmpty()) {
             target.sendPacket(WrapperPlayServerDestroyEntities(*others.map { it.bodyEntityId }.toIntArray()))
@@ -35,12 +36,10 @@ class Deserted : BaseToggleTroll(), PacketEventSendSubscriber, AsyncPlayerChatSu
         }
 
         return placeholdersOr("init", "%prefix% %c2%Everyone has vanished from %c1%%player%%c2%'s world", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c2%Everyone is back in %c1%%player%%c2%'s world", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         if (reason == RemoveReason.LOGOUT || !player.isOnline)

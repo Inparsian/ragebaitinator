@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerItemDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -28,18 +29,16 @@ class Fragile : BaseToggleTroll(), PlayerItemDamageSubscriber {
         const val BREAKS_ANYTHING = 1_000_000
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val multiplier = args[multiplier]
         setField(target, "multiplier", multiplier)
         return placeholdersOr("init", "%prefix% %c1%%player%%c2%'s items will now %effect%", target)
             .put("effect", if (multiplier == 0) "break instantly" else "wear out ${multiplier}x faster")
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s items now wear out normally", target)
-            .toString()
-
+            
     override fun onPlayerItemDamage(event: PlayerItemDamageEvent) {
         val multiplier = getField<Int>(event.player, "multiplier") ?: return
         if (event.isCancelled || !hasPlayer(event.player))

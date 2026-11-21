@@ -9,6 +9,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -22,19 +23,17 @@ import sn.inpr.ragebaitinator.utility.MathUtil
     ]
 )
 class Lost : BaseToggleTroll() {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, {
             val x = (target.location.x + MathUtil.random(-10.0, 10.0)).toInt()
             val z = (target.location.z + MathUtil.random(-10.0, 10.0)).toInt()
             target.sendPacket(WrapperPlayServerSpawnPosition(Vector3i(x, 0, z)))
         }, 0, 1)
         return placeholdersOr("init", "%prefix% %c2%An unknown force is now interfering with %c1%%player%%c2%'s compass", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders =
         placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s compass is now back to normal", target)
-            .toString()
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) {
         runTaskLater({

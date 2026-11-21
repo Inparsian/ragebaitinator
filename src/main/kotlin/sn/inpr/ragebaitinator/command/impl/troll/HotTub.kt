@@ -15,6 +15,7 @@ import sn.inpr.ragebaitinator.command.def.Conditions
 import sn.inpr.ragebaitinator.database.Blocks
 import sn.inpr.ragebaitinator.listeners.PlayerDeathSubscriber
 import sn.inpr.ragebaitinator.listeners.PlayerQuitSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.Reflection
 import kotlin.math.absoluteValue
@@ -64,7 +65,7 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         return by3
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val feet = target.location.add(0.0, -1.0, 0.0)
         val bowl = getBowl(feet)
         val lava = get3x3(feet)
@@ -76,7 +77,6 @@ class HotTub : BaseTroll(), PlayerQuitSubscriber, PlayerDeathSubscriber {
         )
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been dropped into a nice and warm hot tub", target)
-            .toString()
     }
 
     override fun onPlayerQuit(event: PlayerQuitEvent) = Blocks.release(rollbackOwner(event.player))

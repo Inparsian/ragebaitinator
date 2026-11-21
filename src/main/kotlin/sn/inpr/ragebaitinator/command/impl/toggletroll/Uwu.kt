@@ -6,6 +6,7 @@ import org.bukkit.entity.Player
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.common.BaseChatTroll
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.TextTransform
 
@@ -24,15 +25,13 @@ class Uwu : BaseChatTroll() {
 
     override val syntax = withTarget(chance)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "chance", args[chance])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now speaking in UwUspeak", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can speak like a normal person again", target)
-            .toString()
 
     override fun transform(player: Player, message: String): String
         = TextTransform.uwu(message, getField<Double>(player, "chance") ?: 0.5)

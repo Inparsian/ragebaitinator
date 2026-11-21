@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Aliased
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil.vectorRelativeYaw
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -39,7 +40,7 @@ class Slap : BaseTroll() {
 
     override val syntax = withTarget(power, direction)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val power = args[power]
         val direction = args[direction]
         val slapVector: Vector = when (direction) {
@@ -77,6 +78,5 @@ class Slap : BaseTroll() {
         target.velocity = slapVector.setY(power * 0.4)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%has been slapped by some vengeful spirit", target)
-            .toString()
     }
 }

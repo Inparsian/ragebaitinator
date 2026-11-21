@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.PlayerMoveSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.rb
 
@@ -35,17 +36,15 @@ class Grue : BaseToggleTroll(), PlayerMoveSubscriber {
         removeTask(player)
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         if (target.location.block.lightLevel <= 2)
             mark(target)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now being stalked by a grue", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c2%The grue has left %c1%%player%", target)
-            .toString()
-
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c2%The grue has left %c1%%player%", target)
+            
     override fun onPlayerMove(event: PlayerMoveEvent) {
         if (!hasPlayer(event.player)) return
         if (event.player.location.block.lightLevel <= 2)

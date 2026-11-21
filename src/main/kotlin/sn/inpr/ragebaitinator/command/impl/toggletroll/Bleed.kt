@@ -8,6 +8,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityDamageSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 
@@ -35,18 +36,16 @@ class Bleed : BaseToggleTroll(), EntityDamageSubscriber {
         )
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "duration", args[duration])
         setField(target, "damage", args[damage])
         setField(target, "remaining", 0)
         setTaskTimer(target, { tick(target) }, 20, 20)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%will now bleed after getting hurt", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%has stopped bleeding", target)
-            .toString()
 
     private fun tick(player: RbPlayer) {
         val remaining = getField<Int>(player, "remaining") ?: 0

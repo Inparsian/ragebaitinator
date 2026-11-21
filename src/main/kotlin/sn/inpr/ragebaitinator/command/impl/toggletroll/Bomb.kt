@@ -6,6 +6,7 @@ import org.bukkit.entity.*
 import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.MathUtil
 
@@ -52,7 +53,7 @@ class Bomb : BaseToggleTroll() {
 
     override val syntax = withTarget(projectile)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         val ammo = args[projectile]
         setField(target, "ammo", ammo)
 
@@ -68,11 +69,11 @@ class Bomb : BaseToggleTroll() {
             projectile.velocity = velocity
         }, 0, 1)
 
-        return placeholdersOr(ammo.initKey, ammo.initText, target).toString()
+        return placeholdersOr(ammo.initKey, ammo.initText, target)
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String {
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders {
         val ammo = takeField<Ammo>(target, "ammo") ?: Ammo.FIREBALL
-        return placeholdersOr(ammo.deinitKey, ammo.deinitText, target).toString()
+        return placeholdersOr(ammo.deinitKey, ammo.deinitText, target)
     }
 }

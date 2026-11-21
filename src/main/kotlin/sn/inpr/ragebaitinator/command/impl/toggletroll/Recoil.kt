@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityShootBowSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.type.asRb
 
@@ -24,15 +25,13 @@ class Recoil : BaseToggleTroll(), EntityShootBowSubscriber {
 
     override val syntax = withTarget(strength)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setField(target, "strength", args[strength])
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%now gets kicked back by every shot they take", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%can shoot without being knocked over again", target)
-            .toString()
 
     override fun onEntityShootBow(event: EntityShootBowEvent) {
         val player = event.entity.asRb ?: return

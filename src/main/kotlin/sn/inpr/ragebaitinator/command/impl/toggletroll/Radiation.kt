@@ -13,6 +13,7 @@ import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.command.def.RemoveReason
 import sn.inpr.ragebaitinator.database.Blocks
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 import sn.inpr.ragebaitinator.utility.LocationUtil
 import sn.inpr.ragebaitinator.utility.MathUtil
@@ -65,7 +66,7 @@ class Radiation : BaseToggleTroll() {
         val leaves = Material.entries.filter { it.name.endsWith("LEAVES") }
     }
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         if (args[playersParam]) addFlag(target, "players")
         if (args[animals]) addFlag(target, "animals")
         if (args[plants]) addFlag(target, "plants")
@@ -104,12 +105,10 @@ class Radiation : BaseToggleTroll() {
         }, 0, 1)
 
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now emitting a gajillion sieverts of radiation", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String =
-        placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive", target)
-            .toString()
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
+        = placeholdersOr("deinit", "%prefix% %c1%%player% %c2%is no longer immensely radioactive", target)
 
     override fun onRemovePlayer(player: RbPlayer, reason: RemoveReason) = Blocks.release(rollbackOwner(player))
 }

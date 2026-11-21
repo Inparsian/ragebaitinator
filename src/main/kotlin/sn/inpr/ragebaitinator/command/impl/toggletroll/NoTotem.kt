@@ -7,6 +7,7 @@ import sn.inpr.ragebaitinator.command.def.Args
 import sn.inpr.ragebaitinator.command.def.BaseToggleTroll
 import sn.inpr.ragebaitinator.command.def.CommandInfo
 import sn.inpr.ragebaitinator.listeners.EntityResurrectSubscriber
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -19,13 +20,11 @@ import sn.inpr.ragebaitinator.type.RbPlayer
     ]
 )
 class NoTotem : BaseToggleTroll(), EntityResurrectSubscriber {
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders
         = placeholdersOr("init", "%prefix% %c1%%player%%c2%'s totems are now chinese counterfeits", target)
-            .toString()
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s totems will now work as advertised", target)
-            .toString()
 
     override fun onEntityResurrect(event: EntityResurrectEvent) = event.cancelIf(hasPlayer(event.entity))
 }

@@ -4,6 +4,7 @@ import org.bukkit.Material
 import org.bukkit.command.CommandSender
 import org.bukkit.util.Vector
 import sn.inpr.ragebaitinator.command.def.*
+import sn.inpr.ragebaitinator.type.Placeholders
 import sn.inpr.ragebaitinator.type.RbPlayer
 
 @CommandInfo(
@@ -19,7 +20,7 @@ class DiveBomb : BaseToggleTroll() {
     override fun conditions(target: RbPlayer) = Conditions(target)
         .condition("This player must be gliding.", "gliding", target.isGliding)
 
-    override fun init(sender: CommandSender, target: RbPlayer, args: Args): String {
+    override fun init(sender: CommandSender, target: RbPlayer, args: Args): Placeholders {
         setTaskTimer(target, {
             if (target.isGliding)
                 target.velocity = Vector(0.0, -5.0, 0.0)
@@ -27,10 +28,8 @@ class DiveBomb : BaseToggleTroll() {
                 removePlayer(target, RemoveReason.DONE)
         }, 0, 1)
         return placeholdersOr("init", "%prefix% %c1%%player% %c2%is now dive-bombing", target)
-            .toString()
     }
 
-    override fun deinit(sender: CommandSender, target: RbPlayer): String
+    override fun deinit(sender: CommandSender, target: RbPlayer): Placeholders
         = placeholdersOr("deinit", "%prefix% %c1%%player%%c2%'s flight path has been stabilized", target)
-            .toString()
 }
